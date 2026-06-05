@@ -1,0 +1,93 @@
+// Settings hub: store config, integration keys (DB-backed, editable), and a
+// read-only status of core infrastructure keys (managed in the deployment env).
+import { supabaseServer } from "@/lib/supabase/server";
+import { saveStore, saveIntegration, addIntegration } from "./actions";
+import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
+
+export const dynamic = "force-dynamic";
+
+const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 5, display: "block" };
+const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "10px 12px", width: "100%" };
+const card: React.CSSProperties = { border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "22px 22px", marginBottom: 20 };
+const saveBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "11px 20px", cursor: "pointer" };
+
+export default async function SettingsPage() {
+  const sb = await supabaseServer();
+  const [storeRes, intRes] = await Promise.all([
+    sb.from("app_settings").select("value").eq("key", "store").maybeSingle(),
+    sb.from("integrations").select("provider, label, secret, enabled, updated_at").order("label", { ascending: true }),
+  ]);
+  const s = (storeRes.data?.value ?? {}) as Record<string, string | number>;
+  const integrations = intRes.data ?? [];
+
+  // core infra (env) — show only configured/not, never values
+  const infra = [
+    ["Supabase", !!process.env.NEXT_PUBLIC_SUPABASE_URL],
+    ["Supabase service role", !!process.env.SUPABASE_SERVICE_ROLE_KEY],
+    ["Printful", !!process.env.PRINTFUL_API_KEY],
+  ] as const;
+
+  return (
+    <div>
+      <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ CONTROL ]</div>
+      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 24px" }}>Settings</h1>
+
+      {/* store settings */}
+      <form action={saveStore} style={card}>
+        <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#E8E2D5", marginBottom: 16 }}>Store</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div><label style={lbl}>Store name</label><input name="name" defaultValue={String(s.name ?? "TABOR")} style={inp} /></div>
+          <div><label style={lbl}>Support email</label><input name="support_email" defaultValue={String(s.support_email ?? "")} style={inp} /></div>
+          <div><label style={lbl}>Instagram URL</label><input name="instagram" defaultValue={String(s.instagram ?? "")} style={inp} /></div>
+          <div><label style={lbl}>TikTok URL</label><input name="tiktok" defaultValue={String(s.tiktok ?? "")} style={inp} /></div>
+          <div><label style={lbl}>X / Twitter URL</label><input name="x" defaultValue={String(s.x ?? "")} style={inp} /></div>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 8 }}>
+            <div><label style={lbl}>Promo code</label><input name="promo_code" defaultValue={String(s.promo_code ?? "FIRE10")} style={inp} /></div>
+            <div><label style={lbl}>Percent</label><input name="promo_percent" type="number" defaultValue={Number(s.promo_percent ?? 10)} style={inp} /></div>
+          </div>
+        </div>
+        <div style={{ marginTop: 16 }}><button type="submit" style={saveBtn}>Save store</button></div>
+      </form>
+
+      {/* integrations */}
+      <div style={card}>
+        <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#E8E2D5", marginBottom: 4 }}>Integrations</div>
+        <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#9A948A", margin: "0 0 16px" }}>Third-party API keys (e.g. your email platform). Stored securely and admin-only. Leave a key blank to keep the current one.</p>
+
+        {integrations.map((it) => (
+          <form key={it.provider} action={saveIntegration} style={{ display: "grid", gridTemplateColumns: "1.4fr 2fr auto auto", gap: 10, alignItems: "end", padding: "12px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <input type="hidden" name="provider" value={it.provider} />
+            <div>
+              <label style={lbl}>{it.label ?? it.provider}</label>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: it.enabled ? "#7BBF7B" : "#8A847A", letterSpacing: "0.08em" }}>{it.secret ? (it.enabled ? "● ACTIVE" : "○ KEY SET, DISABLED") : "○ NO KEY"}</div>
+            </div>
+            <input name="secret" type="password" placeholder={it.secret ? "******** (saved)" : "paste API key"} style={inp} />
+            <label style={{ fontFamily: MONO, fontSize: 10, color: "#C3BDB1", display: "flex", gap: 6, alignItems: "center", paddingBottom: 10 }}>
+              <input type="checkbox" name="enabled" defaultChecked={it.enabled} /> On
+            </label>
+            <button type="submit" style={{ ...saveBtn, padding: "10px 14px", fontSize: 10 }}>Save</button>
+          </form>
+        ))}
+
+        {/* add new */}
+        <form action={addIntegration} style={{ display: "grid", gridTemplateColumns: "1.4fr 2fr auto", gap: 10, alignItems: "end", marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(201,169,97,0.14)" }}>
+          <div><label style={lbl}>Add integration (name)</label><input name="label" placeholder="e.g. PostHog" style={inp} /></div>
+          <div><label style={lbl}>API key (optional)</label><input name="secret" type="password" placeholder="paste key" style={inp} /></div>
+          <button type="submit" style={{ ...saveBtn, padding: "10px 14px", fontSize: 10 }}>Add</button>
+        </form>
+      </div>
+
+      {/* infra status (read-only) */}
+      <div style={card}>
+        <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#E8E2D5", marginBottom: 4 }}>Core infrastructure</div>
+        <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#9A948A", margin: "0 0 14px" }}>Managed securely in the deployment environment (not web-editable, by design). Status only.</p>
+        {infra.map(([name, ok]) => (
+          <div key={name} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1" }}>{name}</span>
+            <span style={{ fontFamily: MONO, fontSize: 9.5, color: ok ? "#7BBF7B" : "#C03A3A", letterSpacing: "0.08em" }}>{ok ? "● CONFIGURED" : "○ MISSING"}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
