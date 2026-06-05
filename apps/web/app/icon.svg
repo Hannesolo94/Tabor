@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="12" fill="#0A0A0A"/>
+  <circle cx="32" cy="32" r="25" fill="none" stroke="#C9A961" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#C9A961" stroke-width="1" opacity="0.5"/>
+  <!-- gothic cross -->
+  <g stroke="#E8D08C" stroke-width="2.4" stroke-linecap="round">
+    <path d="M32 12 L32 20 M27 15 L37 15"/>
+  </g>
+  <!-- three lights -->
+  <circle cx="25" cy="27" r="1.8" fill="#F6EAC2"/>
+  <circle cx="32" cy="24.5" r="2.2" fill="#F6EAC2"/>
+  <circle cx="39" cy="27" r="1.8" fill="#F6EAC2"/>
+  <!-- mountain -->
+  <path d="M17 48 L26 33 L32 41 L38 31 L47 48 Z" fill="#C9A961"/>
+</svg>
