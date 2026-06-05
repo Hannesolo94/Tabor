@@ -11,8 +11,8 @@ const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Products", href: "/admin/products" },
   { label: "Reviews", href: "/admin/reviews" },
   { label: "Content", href: "/admin/content" },
-  { label: "Discounts", href: "/admin/discounts", soon: true },
-  { label: "Orders", href: "/admin/orders", soon: true },
+  { label: "Discounts", href: "/admin/discounts" },
+  { label: "Orders", href: "/admin/orders" },
   { label: "Suppliers", href: "/admin/suppliers" },
   { label: "Settings", href: "/admin/settings" },
 ];
