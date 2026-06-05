@@ -13,7 +13,7 @@ export function LineChart({ labels, values, height = 140, format = (n: number) =
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 9, color: "#6E6A60", marginBottom: 4 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 9, color: "#8A847A", marginBottom: 4 }}>
         <span>{format(max)}</span>
       </div>
       <svg viewBox={`0 0 ${w} ${height}`} width="100%" height={height} preserveAspectRatio="none" style={{ display: "block" }}>
@@ -23,7 +23,7 @@ export function LineChart({ labels, values, height = 140, format = (n: number) =
           <circle key={i} cx={x(i)} cy={y(v)} r="2.5" fill={GOLD} />
         ))}
       </svg>
-      <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 8, color: "#6E6A60", marginTop: 4 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 8, color: "#8A847A", marginTop: 4 }}>
         <span>{labels[0]?.slice(5)}</span>
         <span>{labels[labels.length - 1]?.slice(5)}</span>
       </div>
@@ -40,7 +40,7 @@ export function BarList({ items, format = (n: number) => String(n) }: { items: {
         <div key={i}>
           <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 10.5, color: "#C3BDB1", marginBottom: 3 }}>
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "70%" }}>{it.label}</span>
-            <span style={{ color: GOLD }}>{format(it.value)}{it.sub ? <span style={{ color: "#6E6A60" }}> · {it.sub}</span> : null}</span>
+            <span style={{ color: GOLD }}>{format(it.value)}{it.sub ? <span style={{ color: "#8A847A" }}> · {it.sub}</span> : null}</span>
           </div>
           <div style={{ height: 6, background: "#15151A", overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${(it.value / max) * 100}%`, background: `linear-gradient(90deg, #A8843E, ${GOLD})` }} />
@@ -62,7 +62,7 @@ export function Funnel({ steps }: { steps: { label: string; value: number }[] })
           <div key={i}>
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 10.5, color: "#C3BDB1", marginBottom: 3 }}>
               <span>{s.label}</span>
-              <span style={{ color: GOLD }}>{s.value}{i > 0 && <span style={{ color: "#6E6A60" }}> · {conv.toFixed(0)}%</span>}</span>
+              <span style={{ color: GOLD }}>{s.value}{i > 0 && <span style={{ color: "#8A847A" }}> · {conv.toFixed(0)}%</span>}</span>
             </div>
             <div style={{ height: 14, background: "#15151A" }}>
               <div style={{ height: "100%", width: `${Math.max(2, pctOfTop)}%`, background: `linear-gradient(90deg, #A8843E, ${GOLD})` }} />

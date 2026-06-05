@@ -88,12 +88,12 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
             <div key={n.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "10px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
               <div>
                 <div style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1" }}>{n.body}</div>
-                <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#6E6A60", letterSpacing: "0.08em", marginTop: 3 }}>{n.author} · {new Date(n.created_at).toISOString().slice(0, 10)}</div>
+                <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.08em", marginTop: 3 }}>{n.author} · {new Date(n.created_at).toISOString().slice(0, 10)}</div>
               </div>
               <form action={deleteNote}>
                 <input type="hidden" name="id" value={n.id} />
                 <input type="hidden" name="email" value={email} />
-                <button type="submit" style={{ fontFamily: MONO, fontSize: 8.5, color: "#6E6A60", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.08em" }}>REMOVE</button>
+                <button type="submit" style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.08em" }}>REMOVE</button>
               </form>
             </div>
           ))

@@ -24,7 +24,7 @@ export function RegionSwitcher() {
   const opt = (r: "ZA" | "INTL", label: string) => (
     <button
       onClick={() => r !== region && set(r)}
-      style={{ background: "none", border: "none", cursor: "pointer", fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", color: region === r ? GOLD : "#6E6A60", padding: "0 2px" }}
+      style={{ background: "none", border: "none", cursor: "pointer", fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", color: region === r ? GOLD : "#8A847A", padding: "0 2px" }}
     >
       {label}
     </button>

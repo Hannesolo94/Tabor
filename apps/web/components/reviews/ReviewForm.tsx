@@ -82,13 +82,13 @@ export function ReviewForm({ sku }: { sku: string }) {
 
       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
         {[1, 2, 3, 4, 5].map((i) => (
-          <button key={i} type="button" onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)} onClick={() => setRating(i)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 24, color: GOLD, opacity: i <= (hover || rating) ? 1 : 0.25, padding: 0 }}>★</button>
+          <button key={i} type="button" aria-label={`Rate ${i} ${i === 1 ? "star" : "stars"}`} aria-pressed={rating === i} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)} onClick={() => setRating(i)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 24, color: GOLD, opacity: i <= (hover || rating) ? 1 : 0.25, padding: 0 }}>★</button>
         ))}
       </div>
 
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required style={inp} />
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Headline (optional)" style={inp} />
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Tell the brotherhood what you think..." required rows={4} style={{ ...inp, resize: "vertical" }} />
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" aria-label="Your name" required style={inp} />
+      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Headline (optional)" aria-label="Review headline" style={inp} />
+      <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Tell the brotherhood what you think..." aria-label="Your review" required rows={4} style={{ ...inp, resize: "vertical" }} />
 
       {/* media + consent */}
       <div>

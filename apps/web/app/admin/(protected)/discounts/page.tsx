@@ -44,7 +44,7 @@ export default async function AdminDiscounts() {
             <div style={{ gridColumn: "1 / -1", display: "flex", gap: 10, alignItems: "center" }}>
               <button type="submit" style={btn}>Save</button>
               <button type="submit" formAction={deleteDiscount} style={{ ...btn, color: "#C03A3A", background: "none", border: "1px solid rgba(192,58,58,0.4)" }}>Delete</button>
-              <span style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.08em" }}>USED {d.used_count}{d.usage_limit ? ` / ${d.usage_limit}` : ""}</span>
+              <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em" }}>USED {d.used_count}{d.usage_limit ? ` / ${d.usage_limit}` : ""}</span>
             </div>
           </form>
         ))}

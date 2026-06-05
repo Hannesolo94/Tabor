@@ -17,7 +17,7 @@ export function CartDrawer() {
           <span style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 20, color: "#E8E2D5", letterSpacing: "0.08em" }}>
             YOUR BAG{count ? ` · ${count}` : ""}
           </span>
-          <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", color: "#9A948A", fontSize: 22, cursor: "pointer" }}>✕</button>
+          <button onClick={() => setOpen(false)} aria-label="Close cart" style={{ background: "none", border: "none", color: "#9A948A", fontSize: 22, cursor: "pointer" }}>✕</button>
         </div>
 
         {lines.length === 0 ? (
@@ -37,7 +37,7 @@ export function CartDrawer() {
                       <span style={{ fontFamily: MONO, fontSize: 12, color: "#E8E2D5", minWidth: 18, textAlign: "center" }}>{it.qty}</span>
                       <button onClick={() => setQty(it.sku, it.size, it.qty + 1)} style={{ background: "none", border: "none", color: GOLD, width: 26, height: 26, cursor: "pointer", fontSize: 14 }}>+</button>
                     </div>
-                    <button onClick={() => remove(it.sku, it.size)} style={{ background: "none", border: "none", color: "#6E6A60", fontSize: 10, cursor: "pointer", fontFamily: MONO, letterSpacing: "0.1em" }}>REMOVE</button>
+                    <button onClick={() => remove(it.sku, it.size)} style={{ background: "none", border: "none", color: "#8A847A", fontSize: 10, cursor: "pointer", fontFamily: MONO, letterSpacing: "0.1em" }}>REMOVE</button>
                   </div>
                 </div>
                 <div style={{ fontFamily: MONO, fontSize: 13, color: GOLD, marginLeft: 12 }}>{it.symbol ?? "$"}{it.price * it.qty}</div>
@@ -48,11 +48,11 @@ export function CartDrawer() {
               <span>SUBTOTAL</span>
               <span style={{ color: GOLD }}>{sym}{total}</span>
             </div>
-            <div style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.08em", marginBottom: 14 }}>SHIPPING + TAX CALCULATED AT CHECKOUT</div>
+            <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginBottom: 14 }}>SHIPPING + TAX CALCULATED AT CHECKOUT</div>
             <Link href="/checkout" onClick={() => setOpen(false)} style={{ display: "block", textAlign: "center", textDecoration: "none", fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "15px" }}>
               Checkout
             </Link>
-            <div style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>
+            <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>
               SECURE PAYMENT · SHIPS WORLDWIDE
               <br />
               PRINTED ON DEMAND

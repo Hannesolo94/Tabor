@@ -7,7 +7,7 @@ export function LegalPage({ title, updated, children }: { title: string; updated
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 8 }}>[ TABOR ]</div>
         <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(36px,7vw,60px)", color: "#E8E2D5", margin: "0 0 8px", lineHeight: 0.95 }}>{title}</h1>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: "#6E6A60", letterSpacing: "0.12em", marginBottom: 36 }}>LAST UPDATED {updated.toUpperCase()}</div>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.12em", marginBottom: 36 }}>LAST UPDATED {updated.toUpperCase()}</div>
         {children}
       </div>
     </div>

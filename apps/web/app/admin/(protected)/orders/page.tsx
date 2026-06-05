@@ -31,7 +31,7 @@ export default async function AdminOrders() {
               <span style={{ fontFamily: MONO, fontSize: 12, color: GOLD }}>{o.currency === "ZAR" ? "R" : "$"}{o.total ?? 0}</span>
               <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.06em", color: STATUS_COLOR[o.status] ?? "#9A948A", textTransform: "uppercase" }}>{o.status}</span>
               <span style={{ fontFamily: MONO, fontSize: 10, color: "#9A948A" }}>{o.supplier ?? "—"} · {o.region ?? "—"}</span>
-              <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#6E6A60" }}>{new Date(o.created_at).toISOString().slice(0, 10)}</span>
+              <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#8A847A" }}>{new Date(o.created_at).toISOString().slice(0, 10)}</span>
             </Link>
           ))
         )}

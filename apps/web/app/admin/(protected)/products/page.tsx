@@ -26,7 +26,7 @@ export default async function AdminProducts() {
         <Link href="/admin/products/new" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "11px 18px", textDecoration: "none" }}>+ New Product</Link>
       </div>
 
-      <p style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.08em", marginBottom: 10 }}>TIP: TICK PRODUCTS TO BULK-ASSIGN COLLECTION/TYPE OR PUBLISH AT ONCE.</p>
+      <p style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginBottom: 10 }}>TIP: TICK PRODUCTS TO BULK-ASSIGN COLLECTION/TYPE OR PUBLISH AT ONCE.</p>
       <ProductsTable rows={rows} />
     </div>
   );

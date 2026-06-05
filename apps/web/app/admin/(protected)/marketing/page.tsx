@@ -52,7 +52,7 @@ export default async function MarketingPage() {
           <StatusRow name="Google Analytics (GA4)" on={!!px.ga4} />
           <StatusRow name="Google Ads" on={!!px.gads} />
           <StatusRow name="Google Tag Manager" on={!!px.gtm} />
-          <p style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.06em", marginTop: 10 }}>SET IDS IN <Link href="/admin/settings" style={{ color: GOLD, textDecoration: "none" }}>SETTINGS</Link>. AD SPEND + ROAS PULL-IN: NEEDS API CONNECT (LATER).</p>
+          <p style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.06em", marginTop: 10 }}>SET IDS IN <Link href="/admin/settings" style={{ color: GOLD, textDecoration: "none" }}>SETTINGS</Link>. AD SPEND + ROAS PULL-IN: NEEDS API CONNECT (LATER).</p>
         </Card>
         <Card title="On-site performance">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -76,7 +76,7 @@ export default async function MarketingPage() {
           <BarList items={Object.entries(bySource).map(([k, v]) => ({ label: k, value: v }))} />
           <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
             <StatusRow name="Omnisend" on={omniConnected} detail={omniConnected ? "syncing" : "add key in settings"} />
-            <p style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.06em", marginTop: 8 }}>CAMPAIGN OPEN/CLICK STATS LIVE IN OMNISEND. CONTACTS SYNC ON SIGNUP WHEN CONNECTED.</p>
+            <p style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.06em", marginTop: 8 }}>CAMPAIGN OPEN/CLICK STATS LIVE IN OMNISEND. CONTACTS SYNC ON SIGNUP WHEN CONNECTED.</p>
           </div>
         </Card>
       </div>

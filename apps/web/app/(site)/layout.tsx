@@ -17,9 +17,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <CartProvider>
       <Pixels ids={pixels} />
+      <a href="#main" className="skip-link">Skip to content</a>
       <AnnouncementBar items={announcements} />
       <SiteHeader />
-      <main>{children}</main>
+      <main id="main">{children}</main>
       <SiteFooter />
       <CartDrawer />
       <PromoPopup />

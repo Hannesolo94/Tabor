@@ -60,7 +60,7 @@ export default async function CustomersPage() {
             <Link key={r.email + i} href={`/admin/customers/${encodeURIComponent(r.email)}`} style={{ textDecoration: "none", display: "grid", gridTemplateColumns: "1fr 120px 110px", alignItems: "center", padding: "11px 18px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
               <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1", wordBreak: "break-all" }}>{r.email}</span>
               <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.08em", textTransform: "uppercase" }}>{r.source || "web"}</span>
-              <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#6E6A60" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
+              <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#8A847A" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
             </Link>
           ))
         )}

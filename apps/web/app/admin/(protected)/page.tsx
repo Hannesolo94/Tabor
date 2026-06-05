@@ -21,7 +21,7 @@ function Stat({ label, value, sub, accent }: { label: string; value: string; sub
     <div style={{ border: "1px solid rgba(201,169,97,0.18)", background: "#0E0E12", padding: "16px 18px" }}>
       <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase" }}>{label}</div>
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: accent ? GOLD : "#E8E2D5", lineHeight: 1.1, marginTop: 6 }}>{value}</div>
-      {sub && <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#6E6A60", letterSpacing: "0.08em", marginTop: 2 }}>{sub}</div>}
+      {sub && <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.08em", marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
@@ -107,7 +107,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
       )}
 
       {d.orderCount === 0 && (
-        <p style={{ fontFamily: MONO, fontSize: 10, color: "#6E6A60", letterSpacing: "0.06em", marginTop: 18, lineHeight: 1.6 }}>
+        <p style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.06em", marginTop: 18, lineHeight: 1.6 }}>
           SALES METRICS POPULATE ONCE CHECKOUT IS LIVE. TRAFFIC + CONVERSION ARE COLLECTING NOW.
         </p>
       )}

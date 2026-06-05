@@ -60,7 +60,7 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
                   <Stars rating={r.rating} />
                   <span style={{ fontFamily: MONO, fontSize: 10, color: "#9A948A" }}>{r.name} · {r.sku ?? "—"}</span>
                 </span>
-                <span style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60" }}>{new Date(r.created_at).toISOString().slice(0, 10)}{r.consent ? " · CONSENT ✓" : ""}</span>
+                <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A" }}>{new Date(r.created_at).toISOString().slice(0, 10)}{r.consent ? " · CONSENT ✓" : ""}</span>
               </div>
               {r.title && <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", marginTop: 8 }}>{r.title}</div>}
               <p style={{ fontFamily: BODY, fontSize: 13.5, color: "#C3BDB1", lineHeight: 1.6, margin: "6px 0 0" }}>{r.body}</p>

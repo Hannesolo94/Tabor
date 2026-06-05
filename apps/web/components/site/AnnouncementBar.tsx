@@ -11,6 +11,8 @@ export function AnnouncementBar({ items }: { items: Announcement[] }) {
   const [i, setI] = useState(0);
   useEffect(() => {
     if (items.length <= 1) return;
+    // respect reduced-motion: don't auto-rotate
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(() => setI((n) => (n + 1) % items.length), 4500);
     return () => clearInterval(t);
   }, [items.length]);

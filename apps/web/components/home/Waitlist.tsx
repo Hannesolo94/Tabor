@@ -28,7 +28,7 @@ export function Waitlist() {
           <p style={{ fontFamily: MONO, fontSize: 13, color: GOLD, letterSpacing: "0.1em" }}>[ YOU ARE ON THE WALL. WE WILL CALL YOU UPWARD. ]</p>
         ) : (
           <form onSubmit={submit} style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginTop: 8 }}>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" style={{ fontFamily: MONO, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}55`, padding: "13px 16px", minWidth: 240 }} />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" aria-label="Email address" style={{ fontFamily: MONO, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}55`, padding: "13px 16px", minWidth: 240 }} />
             <button type="submit" disabled={state === "saving"} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "13px 26px", cursor: "pointer" }}>
               {state === "saving" ? "..." : "Join"}
             </button>

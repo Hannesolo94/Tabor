@@ -50,7 +50,7 @@ export default function AdminLogin() {
         </form>
         {err && <p style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", marginTop: 12, textAlign: "center" }}>{err}</p>}
         <div style={{ textAlign: "center", marginTop: 18 }}>
-          <Link href="/admin/setup" style={{ fontFamily: MONO, fontSize: 10, color: "#6E6A60", letterSpacing: "0.12em", textDecoration: "none" }}>FIRST TIME? SET YOUR PASSWORD →</Link>
+          <Link href="/admin/setup" style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.12em", textDecoration: "none" }}>FIRST TIME? SET YOUR PASSWORD →</Link>
         </div>
       </div>
     </div>

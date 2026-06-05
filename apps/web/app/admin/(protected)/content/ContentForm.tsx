@@ -78,7 +78,7 @@ export function ContentForm({ hero }: { hero: HeroContent }) {
         <div><label style={lbl}>Button 2 text</label><input name="cta2_label" defaultValue={hero.cta2_label} style={inp} /></div>
         <div><label style={lbl}>Button 2 link</label><input name="cta2_href" defaultValue={hero.cta2_href} style={inp} /></div>
       </div>
-      <p style={{ fontFamily: MONO, fontSize: 8.5, color: "#6E6A60", letterSpacing: "0.06em" }}>BUTTON POSITIONS ARE FIXED BY THE LAYOUT. ONLY TEXT + LINKS ARE EDITABLE, SO THE DESIGN NEVER BREAKS.</p>
+      <p style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.06em" }}>BUTTON POSITIONS ARE FIXED BY THE LAYOUT. ONLY TEXT + LINKS ARE EDITABLE, SO THE DESIGN NEVER BREAKS.</p>
 
       <div><button type="submit" disabled={busy} style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "13px 26px", cursor: "pointer" }}>Save hero</button></div>
     </form>

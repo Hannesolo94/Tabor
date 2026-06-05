@@ -92,13 +92,13 @@ export function PromoPopup() {
                 Take 10% off your first order. Join the wall for drops, scripture, and the brotherhood.
               </p>
               <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required style={{ fontFamily: MONO, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}55`, padding: "14px 16px", textAlign: "center" }} />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required aria-label="Email address" style={{ fontFamily: MONO, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}55`, padding: "14px 16px", textAlign: "center" }} />
                 <button type="submit" disabled={state === "saving"} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "14px", cursor: "pointer" }}>
                   {state === "saving" ? "..." : "Claim 10% off"}
                 </button>
               </form>
               {state === "error" && <p style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", marginTop: 10 }}>Something broke. Try again.</p>}
-              <button onClick={dismiss} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#6E6A60", background: "none", border: "none", cursor: "pointer", marginTop: 14, textTransform: "uppercase" }}>No thanks, I pay full price</button>
+              <button onClick={dismiss} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#8A847A", background: "none", border: "none", cursor: "pointer", marginTop: 14, textTransform: "uppercase" }}>No thanks, I pay full price</button>
             </>
           )}
         </div>

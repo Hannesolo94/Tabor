@@ -50,7 +50,7 @@ export default function CheckoutPage() {
                 <span>SUBTOTAL</span>
                 <span style={{ color: GOLD }}>{sym}{total}</span>
               </div>
-              <div style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.08em", marginTop: 6 }}>SHIPPING + TAX CALCULATED BY REGION AT PAYMENT</div>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginTop: 6 }}>SHIPPING + TAX CALCULATED BY REGION AT PAYMENT</div>
             </div>
 
             {/* payment placeholder */}
@@ -62,7 +62,7 @@ export default function CheckoutPage() {
               <button disabled style={{ width: "100%", marginTop: 16, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "15px", opacity: 0.5, cursor: "not-allowed" }}>
                 Pay {sym}{total}
               </button>
-              <div style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>SECURE PAYMENT · SHIPS WORLDWIDE<br />PRINTED ON DEMAND</div>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>SECURE PAYMENT · SHIPS WORLDWIDE<br />PRINTED ON DEMAND</div>
             </div>
           </div>
         )}

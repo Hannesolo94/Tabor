@@ -29,7 +29,7 @@ export function ProductReviews({ sku, reviews, summary }: { sku: string; reviews
               <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "#0E0E12", padding: "18px 20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                   <Stars rating={r.rating} />
-                  <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#6E6A60", letterSpacing: "0.08em" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#8A847A", letterSpacing: "0.08em" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
                 </div>
                 {r.title && <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginTop: 8 }}>{r.title}</div>}
                 <p style={{ fontFamily: BODY, fontSize: 14, color: "#C3BDB1", lineHeight: 1.6, margin: "6px 0 0" }}>{r.body}</p>
