@@ -134,7 +134,7 @@ export default async function Home() {
           </div>
           <div style={{ display: "grid", placeItems: "center" }}>
             <div style={{ width: 220, border: `1px solid ${GOLD}44`, background: "radial-gradient(ellipse 90% 70% at 50% 0%, #16140e, #0A0A0A 72%)", padding: "40px 24px", textAlign: "center" }}>
-              <TaborSeal id="app-seal" size={110} />
+              <div style={{ display: "grid", placeItems: "center" }}><TaborSeal id="app-seal" size={110} /></div>
               <div style={{ fontFamily: PIRATA, fontSize: 34, color: GOLD, marginTop: 12 }}>Tabor</div>
               <div style={{ fontFamily: MONO, fontSize: 8, color: "#9A948A", letterSpacing: "0.2em", marginTop: 6 }}>SONS OF FIRE</div>
               <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.14em", marginTop: 18, border: `1px solid ${GOLD}44`, padding: "8px" }}>FREE FOR LIFE</div>

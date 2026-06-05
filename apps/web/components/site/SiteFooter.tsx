@@ -33,8 +33,14 @@ export function SiteFooter() {
         </div>
       </div>
       <div style={{ maxWidth: 1240, margin: "28px auto 0", paddingTop: 18, borderTop: "1px solid rgba(201,169,97,0.1)", fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.14em", textAlign: "center", lineHeight: 1.9 }}>
-        FULFILLED BY PRINTFUL · SHIPS WORLDWIDE<br />
-        SHIPPING · RETURNS · PRIVACY · TERMS · © 2026 TABOR BROTHERHOOD
+        FULFILLED LOCALLY + WORLDWIDE · PRINTED ON DEMAND
+        <br />
+        <span style={{ display: "inline-flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
+          {[["Shipping", "/shipping"], ["Returns", "/returns"], ["Privacy", "/privacy"], ["Terms", "/terms"]].map(([l, h]) => (
+            <Link key={h} href={h} style={{ color: "#8A847A", textDecoration: "none" }}>{l.toUpperCase()}</Link>
+          ))}
+        </span>
+        <br />© 2026 TABOR BROTHERHOOD
       </div>
     </footer>
   );
