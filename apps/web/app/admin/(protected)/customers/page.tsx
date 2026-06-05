@@ -2,6 +2,7 @@
 // app/site accounts get richer profiles here once auth signups exist.)
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
+import { syncAllToEmailPlatform } from "./actions";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,12 @@ export default async function CustomersPage() {
           <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 6px" }}>Customers</h1>
           <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: 0 }}>{count ?? 0} email signups collected. Click any customer to view, note, or erase their data.</p>
         </div>
-        <a href="/admin/customers/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
+        <div style={{ display: "flex", gap: 10 }}>
+          <form action={syncAllToEmailPlatform}>
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", cursor: "pointer", background: "none" }}>Sync to Email Platform</button>
+          </form>
+          <a href="/admin/customers/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
+        </div>
       </div>
 
       {/* source breakdown */}

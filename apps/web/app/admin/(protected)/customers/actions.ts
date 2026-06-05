@@ -8,6 +8,17 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { omnisendAddContact } from "@/lib/omnisend";
+
+/** Push all existing waitlist contacts to the email platform (if enabled). */
+export async function syncAllToEmailPlatform(): Promise<void> {
+  const admin = supabaseAdmin();
+  const { data } = await admin.from("waitlist").select("email, source");
+  for (const r of data ?? []) {
+    await omnisendAddContact(r.email, [r.source || "web"]);
+  }
+  revalidatePath("/admin/customers");
+}
 
 export async function addNote(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "");

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase/client";
 import { GOLD, MONO, CINZEL } from "@/lib/ui";
 
 export function Waitlist() {
@@ -12,15 +11,12 @@ export function Waitlist() {
     e.preventDefault();
     if (!email.includes("@")) return;
     setState("saving");
-    if (!supabase) {
-      // Misconfiguration; never fake success.
-      console.error("Supabase env not configured; waitlist cannot save.");
+    try {
+      const res = await fetch("/api/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, source: "web" }) });
+      setState(res.ok ? "done" : "error");
+    } catch {
       setState("error");
-      return;
     }
-    const { error } = await supabase.from("waitlist").insert({ email, source: "web" });
-    if (error) console.error("waitlist insert failed:", error.message);
-    setState(error ? "error" : "done");
   }
 
   return (

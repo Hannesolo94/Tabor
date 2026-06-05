@@ -10,7 +10,6 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
 import { TaborSeal } from "@/components/TaborSeal";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
@@ -48,15 +47,13 @@ export function PromoPopup() {
     e.preventDefault();
     if (!email.includes("@")) return;
     setState("saving");
-    if (!supabase) {
-      console.error("Supabase not configured; promo signup cannot save.");
-      setState("error");
-      return;
-    }
-    const { error } = await supabase.from("waitlist").insert({ email, source: "promo-10" });
-    // Duplicate email = already on the list; still reward them with the code.
-    if (error && error.code !== "23505") {
-      console.error("promo signup failed:", error.message);
+    try {
+      const res = await fetch("/api/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, source: "promo-10" }) });
+      if (!res.ok) {
+        setState("error");
+        return;
+      }
+    } catch {
       setState("error");
       return;
     }
