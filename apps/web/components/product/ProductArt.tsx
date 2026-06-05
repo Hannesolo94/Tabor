@@ -6,6 +6,15 @@ import { PIRATA, MONO } from "@/lib/ui";
 import type { Product } from "@/lib/catalog";
 
 export function ProductArt({ p, size = 84, square = false }: { p: Product; size?: number; square?: boolean }) {
+  // Real uploaded image takes precedence over the generated seal/wordmark art.
+  if (p.imageUrl) {
+    return (
+      <div style={{ position: "relative", width: "100%", aspectRatio: square ? "1 / 1" : "4 / 5", background: p.tone, overflow: "hidden" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={p.imageUrl} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      </div>
+    );
+  }
   return (
     <div
       style={{

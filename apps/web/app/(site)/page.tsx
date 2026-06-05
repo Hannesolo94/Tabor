@@ -4,8 +4,11 @@ import Link from "next/link";
 import { TaborSeal } from "@/components/TaborSeal";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Waitlist } from "@/components/home/Waitlist";
-import { CATEGORIES, PERSONAS, featuredProducts } from "@/lib/catalog";
+import { CATEGORIES, PERSONAS } from "@/lib/catalog";
+import { getFeatured } from "@/lib/products-db";
 import { GOLD, MONO, PIRATA, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
+
+export const dynamic = "force-dynamic";
 
 function SectionHead({ kicker, title, sub }: { kicker: string; title: string; sub?: string }) {
   return (
@@ -20,8 +23,8 @@ function SectionHead({ kicker, title, sub }: { kicker: string; title: string; su
 const btnGold: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "16px 34px", textDecoration: "none" };
 const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, background: "transparent", border: `1px solid ${GOLD}`, padding: "16px 34px", textDecoration: "none" };
 
-export default function Home() {
-  const featured = featuredProducts();
+export default async function Home() {
+  const featured = await getFeatured();
   return (
     <div style={{ background: "#0A0A0A" }}>
       {/* hero */}

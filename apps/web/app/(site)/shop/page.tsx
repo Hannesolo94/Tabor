@@ -3,10 +3,12 @@
 // component and the filtered state is shareable/bookmarkable.
 import Link from "next/link";
 import { ProductCard } from "@/components/product/ProductCard";
-import { CATEGORIES, PERSONAS, PRODUCTS, categoryById, personaById } from "@/lib/catalog";
+import { CATEGORIES, PERSONAS, categoryById, personaById } from "@/lib/catalog";
+import { getProducts } from "@/lib/products-db";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const metadata = { title: "Shop · TABOR" };
+export const dynamic = "force-dynamic";
 
 function pill(active: boolean, accent = GOLD): React.CSSProperties {
   return { fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", color: active ? "#0A0A0A" : "#9A948A", background: active ? `linear-gradient(180deg,#E8D08C,${accent})` : "transparent", border: `1px solid ${accent}66`, padding: "9px 14px", display: "inline-block" };
@@ -17,9 +19,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const type = sp.type && categoryById(sp.type) ? sp.type : undefined;
   const persona = sp.persona && personaById(sp.persona) ? sp.persona : undefined;
 
-  let items = PRODUCTS;
-  if (type) items = items.filter((p) => p.category === type);
-  if (persona) items = items.filter((p) => p.persona === persona);
+  const items = await getProducts({ category: type, persona });
 
   const cat = type ? categoryById(type) : undefined;
   const per = persona ? personaById(persona) : undefined;

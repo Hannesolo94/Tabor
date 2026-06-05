@@ -29,12 +29,16 @@ export function ProductCard({ p }: { p: Product }) {
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.1em", marginTop: 3 }}>{p.note.toUpperCase()}</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
             <span style={{ fontFamily: MONO, fontSize: 15, color: GOLD }}>${p.price}</span>
-            <button
-              onClick={onAdd}
-              style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "8px 13px", cursor: "pointer", textTransform: "uppercase" }}
-            >
-              Add to Bag
-            </button>
+            {p.inStock ? (
+              <button
+                onClick={onAdd}
+                style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "8px 13px", cursor: "pointer", textTransform: "uppercase" }}
+              >
+                Add to Bag
+              </button>
+            ) : (
+              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#7A746A", border: "1px solid #3A3A40", padding: "8px 13px", textTransform: "uppercase" }}>Sold Out</span>
+            )}
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { GOLD, MONO, PIRATA } from "@/lib/ui";
 const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Dashboard", href: "/admin" },
   { label: "Customers", href: "/admin/customers" },
-  { label: "Products", href: "/admin/products", soon: true },
+  { label: "Products", href: "/admin/products" },
   { label: "Content", href: "/admin/content", soon: true },
   { label: "Discounts", href: "/admin/discounts", soon: true },
   { label: "Orders", href: "/admin/orders", soon: true },

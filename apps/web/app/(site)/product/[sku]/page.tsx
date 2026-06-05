@@ -5,26 +5,25 @@ import Link from "next/link";
 import { ProductArt } from "@/components/product/ProductArt";
 import { ProductCard } from "@/components/product/ProductCard";
 import { AddToCart } from "@/components/product/AddToCart";
-import { PRODUCTS, categoryById, personaById, productBySku, suggestions } from "@/lib/catalog";
+import { categoryById, personaById } from "@/lib/catalog";
+import { getProductBySku, getSuggestions } from "@/lib/products-db";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
-export function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ sku: p.sku }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  const p = productBySku(sku);
+  const p = await getProductBySku(sku);
   return { title: p ? `${p.name} · TABOR` : "TABOR" };
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  const p = productBySku(sku);
+  const p = await getProductBySku(sku);
   if (!p) notFound();
   const persona = personaById(p.persona);
   const cat = categoryById(p.category);
-  const also = suggestions(p.sku, 4);
+  const also = await getSuggestions(p, 4);
 
   return (
     <div style={{ background: "#0A0A0A" }}>

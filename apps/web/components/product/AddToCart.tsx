@@ -20,6 +20,14 @@ export function AddToCart({ p }: { p: Product }) {
     setTimeout(() => setAdded(false), 1600);
   };
 
+  if (!p.inStock) {
+    return (
+      <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7A746A", border: "1px solid #3A3A40", padding: "15px 24px", textAlign: "center" }}>
+        Sold Out
+      </div>
+    );
+  }
+
   return (
     <div>
       {hasSizes && (

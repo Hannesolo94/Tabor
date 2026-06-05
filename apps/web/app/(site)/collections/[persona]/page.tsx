@@ -4,12 +4,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { TaborSeal } from "@/components/TaborSeal";
 import { ProductCard } from "@/components/product/ProductCard";
-import { PERSONAS, categoriesInPersona, personaById, productsByPersona } from "@/lib/catalog";
+import { PERSONAS, categoriesPresent, personaById } from "@/lib/catalog";
+import { getProducts } from "@/lib/products-db";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
-export function generateStaticParams() {
-  return PERSONAS.map((p) => ({ persona: p.id }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ persona: string }> }) {
   const { persona } = await params;
@@ -21,8 +20,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ per
   const { persona: personaId } = await params;
   const persona = personaById(personaId);
   if (!persona) notFound();
-  const products = productsByPersona(persona.id);
-  const cats = categoriesInPersona(persona.id);
+  const products = await getProducts({ persona: persona.id });
+  const cats = categoriesPresent(products);
 
   return (
     <div style={{ background: "#0A0A0A" }}>
