@@ -27,8 +27,8 @@ export function ProductForm({ product, isNew }: { product?: Partial<Product> & {
   return (
     <form action={action} style={{ display: "grid", gap: 18, maxWidth: 760 }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        <Field label="SKU (unique id)">
-          <input name="sku" defaultValue={p.sku ?? ""} readOnly={!isNew} placeholder="snt-tee-new" style={{ ...inp, opacity: isNew ? 1 : 0.6 }} />
+        <Field label={isNew ? "SKU (blank = auto from name)" : "SKU (unique id)"}>
+          <input name="sku" defaultValue={p.sku ?? ""} readOnly={!isNew} placeholder={isNew ? "auto-generated" : ""} style={{ ...inp, opacity: isNew ? 1 : 0.6 }} />
         </Field>
         <Field label="Name">
           <input name="name" defaultValue={p.name ?? ""} placeholder="Sons of Fire Tee" style={inp} />

@@ -55,11 +55,12 @@ function map(r: Row): Product {
 const COLS =
   "sku,name,base_price,collection,category,tagline,note,blurb,description,tone,ink,mark,sizes,featured,image_url,inventory,track_inventory";
 
-export async function getProducts(filter?: { persona?: string; category?: string }): Promise<Product[]> {
-  let q = client().from("products").select(COLS).eq("status", "live").order("sort", { ascending: true });
-  if (filter?.persona) q = q.eq("collection", filter.persona);
-  if (filter?.category) q = q.eq("category", filter.category);
-  const { data, error } = await q;
+export async function getProducts(filter?: { persona?: string; category?: string; q?: string }): Promise<Product[]> {
+  let query = client().from("products").select(COLS).eq("status", "live").order("sort", { ascending: true });
+  if (filter?.persona) query = query.eq("collection", filter.persona);
+  if (filter?.category) query = query.eq("category", filter.category);
+  if (filter?.q) query = query.ilike("name", `%${filter.q}%`);
+  const { data, error } = await query;
   if (error || !data) return [];
   return (data as Row[]).map(map);
 }

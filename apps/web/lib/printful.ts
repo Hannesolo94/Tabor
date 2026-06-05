@@ -43,6 +43,8 @@ interface DetailVariant {
   retail_price: string | null;
   size?: string | null;
   color?: string | null;
+  files?: { type: string; preview_url?: string | null }[];
+  product?: { image?: string | null };
 }
 
 async function pf<T>(path: string): Promise<T> {
@@ -81,11 +83,19 @@ export async function getStoreProduct(id: number): Promise<PrintfulProduct> {
     price: Number(v.retail_price ?? 0) || 0,
   }));
   const prices = variants.map((v) => v.price).filter((p) => p > 0);
+
+  // Best available image: the product thumbnail (mockup) first, then a variant's
+  // generated "preview" file, then the blank garment image. Printful generates
+  // these asynchronously, so a freshly uploaded product may have none yet.
+  const v0 = (detail.sync_variants ?? [])[0];
+  const previewFile = v0?.files?.find((f) => f.type === "preview")?.preview_url;
+  const image = detail.sync_product.thumbnail_url || previewFile || v0?.product?.image || null;
+
   return {
     printfulId: detail.sync_product.id,
     externalId: detail.sync_product.external_id,
     name: detail.sync_product.name,
-    thumbnail: detail.sync_product.thumbnail_url,
+    thumbnail: image,
     variants,
     price: prices.length ? Math.min(...prices) : 0,
   };

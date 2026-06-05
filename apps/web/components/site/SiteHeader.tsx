@@ -33,6 +33,9 @@ export function SiteHeader() {
           <button style={linkStyle} onClick={() => setMenu(menu === "collections" ? null : "collections")}>Collections ▾</button>
           <button style={linkStyle} onClick={() => setMenu(menu === "gear" ? null : "gear")}>Gear ▾</button>
           <Link href="/#creed" style={linkStyle} onClick={close}>The Creed</Link>
+          <form action="/shop" method="get" style={{ display: "flex" }}>
+            <input name="q" placeholder="Search..." aria-label="Search products" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "7px 10px", width: 120 }} />
+          </form>
           <button onClick={() => setOpen(true)} style={{ ...linkStyle, color: GOLD, border: `1px solid ${GOLD}88`, padding: "8px 14px" }}>
             Bag{count ? ` · ${count}` : ""}
           </button>
@@ -69,6 +72,10 @@ export function SiteHeader() {
       {/* mobile stacked menu */}
       {mobile && (
         <div className="tabor-mobile-menu" style={{ borderTop: "1px solid rgba(201,169,97,0.18)", padding: "10px 24px 18px" }}>
+          <form action="/shop" method="get" style={{ display: "flex", gap: 6, margin: "8px 0 12px" }}>
+            <input name="q" placeholder="Search products..." style={{ flex: 1, fontFamily: MONO, fontSize: 12, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "10px 12px" }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "0 14px", cursor: "pointer", textTransform: "uppercase" }}>Go</button>
+          </form>
           <Link href="/shop" onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "12px 0", fontSize: 13 }}>Shop All</Link>
           <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.16em", margin: "8px 0 4px" }}>COLLECTIONS</div>
           {PERSONAS.map((p) => <Link key={p.id} href={`/collections/${p.id}`} onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "8px 0", fontSize: 12, color: "#E8E2D5" }}>{p.name}</Link>)}

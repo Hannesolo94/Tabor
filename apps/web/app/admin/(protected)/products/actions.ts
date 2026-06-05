@@ -6,9 +6,22 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { slugify } from "@/lib/slug";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface SaveState {
   error?: string;
+}
+
+async function uniqueSku(sb: SupabaseClient, base: string): Promise<string> {
+  let sku = base;
+  let n = 2;
+  for (let i = 0; i < 100; i++) {
+    const { data } = await sb.from("products").select("sku").eq("sku", sku).maybeSingle();
+    if (!data) return sku;
+    sku = `${base}-${n++}`;
+  }
+  return `${base}-${Date.now()}`;
 }
 
 function parseSizes(raw: string): string[] {
@@ -19,11 +32,18 @@ function parseSizes(raw: string): string[] {
 }
 
 export async function saveProduct(_prev: SaveState, formData: FormData): Promise<SaveState> {
-  const sku = String(formData.get("sku") ?? "").trim();
+  let sku = String(formData.get("sku") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
-  if (!sku) return { error: "SKU is required." };
   if (!name) return { error: "Name is required." };
-  if (!/^[a-z0-9-]+$/.test(sku)) return { error: "SKU may use only lowercase letters, numbers, and dashes." };
+
+  const sb = await supabaseServer();
+
+  // Auto-generate a clean SKU from the name when left blank.
+  if (!sku) {
+    sku = await uniqueSku(sb, slugify(name));
+  } else if (!/^[a-z0-9-]+$/.test(sku)) {
+    return { error: "SKU may use only lowercase letters, numbers, and dashes (or leave blank to auto-generate)." };
+  }
 
   const row = {
     sku,
@@ -47,7 +67,6 @@ export async function saveProduct(_prev: SaveState, formData: FormData): Promise
     sort: Number(formData.get("sort") ?? 0) || 0,
   };
 
-  const sb = await supabaseServer();
   const { error } = await sb.from("products").upsert(row, { onConflict: "sku" });
   if (error) return { error: error.message };
 

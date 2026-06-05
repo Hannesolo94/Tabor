@@ -14,17 +14,18 @@ function pill(active: boolean, accent = GOLD): React.CSSProperties {
   return { fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", color: active ? "#0A0A0A" : "#9A948A", background: active ? `linear-gradient(180deg,#E8D08C,${accent})` : "transparent", border: `1px solid ${accent}66`, padding: "9px 14px", display: "inline-block" };
 }
 
-export default async function ShopPage({ searchParams }: { searchParams: Promise<{ type?: string; persona?: string }> }) {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ type?: string; persona?: string; q?: string }> }) {
   const sp = await searchParams;
   const type = sp.type && categoryById(sp.type) ? sp.type : undefined;
   const persona = sp.persona && personaById(sp.persona) ? sp.persona : undefined;
+  const q = (sp.q ?? "").trim() || undefined;
 
-  const items = await getProducts({ category: type, persona });
+  const items = await getProducts({ category: type, persona, q });
 
   const cat = type ? categoryById(type) : undefined;
   const per = persona ? personaById(persona) : undefined;
-  const heading = cat ? cat.name : per ? per.name : "Shop All";
-  const sub = cat ? cat.blurb : per ? per.blurb : "Every piece across every collection. Heavyweight, muted, premium.";
+  const heading = q ? `Search: "${q}"` : cat ? cat.name : per ? per.name : "Shop All";
+  const sub = q ? `${items.length} ${items.length === 1 ? "result" : "results"} for "${q}".` : cat ? cat.blurb : per ? per.blurb : "Every piece across every collection. Heavyweight, muted, premium.";
 
   const qp = (next: { type?: string; persona?: string }) => {
     const params = new URLSearchParams();
@@ -47,6 +48,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       {/* filters */}
       <section style={{ padding: "24px 24px 8px" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
+          <form action="/shop" method="get" style={{ display: "flex", gap: 8, marginBottom: 22, maxWidth: 420 }}>
+            <input name="q" defaultValue={q ?? ""} placeholder="Search products..." style={{ flex: 1, fontFamily: MONO, fontSize: 12, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "11px 14px" }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "11px 18px", cursor: "pointer" }}>Search</button>
+          </form>
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.18em", marginBottom: 8 }}>COLLECTION</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
             <Link href={qp({ type })} style={pill(!persona)}>All</Link>
