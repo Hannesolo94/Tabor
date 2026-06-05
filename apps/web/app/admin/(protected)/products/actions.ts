@@ -63,6 +63,25 @@ export async function deleteProduct(formData: FormData): Promise<void> {
   redirect("/admin/products");
 }
 
+// Bulk edit: apply one field change to many selected products at once.
+export async function bulkUpdate(formData: FormData): Promise<void> {
+  const skus = formData.getAll("skus").map(String).filter(Boolean);
+  const field = String(formData.get("field") ?? "");
+  const value = String(formData.get("value") ?? "");
+  if (!skus.length) return;
+
+  let patch: Record<string, unknown> | null = null;
+  if (field === "collection") patch = { collection: value };
+  else if (field === "category") patch = { category: value };
+  else if (field === "status") patch = { status: value === "live" ? "live" : "draft" };
+  else if (field === "featured") patch = { featured: value === "true" };
+  if (!patch) return;
+
+  const sb = await supabaseServer();
+  await sb.from("products").update(patch).in("sku", skus);
+  revalidatePath("/admin/products");
+}
+
 // Quick toggles from the list (live/draft, featured).
 export async function toggleField(formData: FormData): Promise<void> {
   const sku = String(formData.get("sku") ?? "");

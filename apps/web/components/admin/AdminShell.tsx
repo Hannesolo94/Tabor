@@ -12,7 +12,7 @@ const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Content", href: "/admin/content", soon: true },
   { label: "Discounts", href: "/admin/discounts", soon: true },
   { label: "Orders", href: "/admin/orders", soon: true },
-  { label: "Suppliers", href: "/admin/suppliers", soon: true },
+  { label: "Suppliers", href: "/admin/suppliers" },
 ];
 
 export function AdminShell({ email, name, children }: { email?: string; name?: string | null; children: React.ReactNode }) {
