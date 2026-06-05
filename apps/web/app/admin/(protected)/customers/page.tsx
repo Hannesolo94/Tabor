@@ -1,5 +1,6 @@
 // Customers / email list. The full waitlist with source breakdown. (Registered
 // app/site accounts get richer profiles here once auth signups exist.)
+import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
@@ -22,9 +23,14 @@ export default async function CustomersPage() {
 
   return (
     <div>
-      <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ AUDIENCE ]</div>
-      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 8px" }}>Customers</h1>
-      <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "0 0 24px" }}>{count ?? 0} email signups collected.</p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
+        <div>
+          <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ AUDIENCE ]</div>
+          <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 6px" }}>Customers</h1>
+          <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: 0 }}>{count ?? 0} email signups collected. Click any customer to view, note, or erase their data.</p>
+        </div>
+        <a href="/admin/customers/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
+      </div>
 
       {/* source breakdown */}
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22 }}>
@@ -45,11 +51,11 @@ export default async function CustomersPage() {
           <div style={{ padding: "22px 18px", fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No signups yet.</div>
         ) : (
           rows.map((r, i) => (
-            <div key={r.email + i} style={{ display: "grid", gridTemplateColumns: "1fr 120px 110px", alignItems: "center", padding: "11px 18px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+            <Link key={r.email + i} href={`/admin/customers/${encodeURIComponent(r.email)}`} style={{ textDecoration: "none", display: "grid", gridTemplateColumns: "1fr 120px 110px", alignItems: "center", padding: "11px 18px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
               <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1", wordBreak: "break-all" }}>{r.email}</span>
               <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.08em", textTransform: "uppercase" }}>{r.source || "web"}</span>
               <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#6E6A60" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
-            </div>
+            </Link>
           ))
         )}
       </div>
