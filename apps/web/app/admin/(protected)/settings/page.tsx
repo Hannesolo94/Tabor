@@ -1,7 +1,7 @@
 // Settings hub: store config, integration keys (DB-backed, editable), and a
 // read-only status of core infrastructure keys (managed in the deployment env).
 import { supabaseServer } from "@/lib/supabase/server";
-import { saveStore, saveIntegration, addIntegration } from "./actions";
+import { saveStore, saveIntegration, addIntegration, savePixels } from "./actions";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -13,12 +13,14 @@ const saveBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 11, letterSpa
 
 export default async function SettingsPage() {
   const sb = await supabaseServer();
-  const [storeRes, intRes] = await Promise.all([
+  const [storeRes, intRes, pxRes] = await Promise.all([
     sb.from("app_settings").select("value").eq("key", "store").maybeSingle(),
     sb.from("integrations").select("provider, label, secret, enabled, updated_at").order("label", { ascending: true }),
+    sb.from("app_settings").select("value").eq("key", "pixels").maybeSingle(),
   ]);
   const s = (storeRes.data?.value ?? {}) as Record<string, string | number>;
   const integrations = intRes.data ?? [];
+  const px = (pxRes.data?.value ?? {}) as Record<string, string>;
 
   // core infra (env) — show only configured/not, never values
   const infra = [
@@ -76,6 +78,19 @@ export default async function SettingsPage() {
           <button type="submit" style={{ ...saveBtn, padding: "10px 14px", fontSize: 10 }}>Add</button>
         </form>
       </div>
+
+      {/* marketing pixels */}
+      <form action={savePixels} style={card}>
+        <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#E8E2D5", marginBottom: 4 }}>Marketing pixels</div>
+        <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#9A948A", margin: "0 0 16px" }}>Paste your tracking IDs. They are injected on the storefront so Meta and Google can measure conversions for ads. Leave blank to disable.</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div><label style={lbl}>Meta Pixel ID</label><input name="meta" defaultValue={px.meta ?? ""} placeholder="e.g. 123456789012345" style={inp} /></div>
+          <div><label style={lbl}>Google Analytics (GA4) ID</label><input name="ga4" defaultValue={px.ga4 ?? ""} placeholder="G-XXXXXXX" style={inp} /></div>
+          <div><label style={lbl}>Google Ads ID</label><input name="gads" defaultValue={px.gads ?? ""} placeholder="AW-XXXXXXXXX" style={inp} /></div>
+          <div><label style={lbl}>Google Tag Manager ID</label><input name="gtm" defaultValue={px.gtm ?? ""} placeholder="GTM-XXXXXXX" style={inp} /></div>
+        </div>
+        <div style={{ marginTop: 16 }}><button type="submit" style={saveBtn}>Save pixels</button></div>
+      </form>
 
       {/* infra status (read-only) */}
       <div style={card}>

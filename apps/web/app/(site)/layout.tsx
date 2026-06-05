@@ -7,13 +7,16 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { AnnouncementBar } from "@/components/site/AnnouncementBar";
 import { VersesPopup } from "@/components/site/VersesPopup";
 import { Tracker } from "@/components/site/Tracker";
+import { Pixels } from "@/components/site/Pixels";
 import { PromoPopup } from "@/components/promo/PromoPopup";
 import { getAnnouncements } from "@/lib/announcements-db";
+import { getPixels } from "@/lib/pixels-db";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const announcements = await getAnnouncements();
+  const [announcements, pixels] = await Promise.all([getAnnouncements(), getPixels()]);
   return (
     <CartProvider>
+      <Pixels ids={pixels} />
       <AnnouncementBar items={announcements} />
       <SiteHeader />
       <main>{children}</main>

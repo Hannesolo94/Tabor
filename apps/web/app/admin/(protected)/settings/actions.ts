@@ -22,6 +22,19 @@ export async function saveStore(formData: FormData): Promise<void> {
   revalidatePath("/admin/settings");
 }
 
+export async function savePixels(formData: FormData): Promise<void> {
+  const value = {
+    meta: String(formData.get("meta") ?? "").trim(),
+    ga4: String(formData.get("ga4") ?? "").trim(),
+    gads: String(formData.get("gads") ?? "").trim(),
+    gtm: String(formData.get("gtm") ?? "").trim(),
+  };
+  const sb = await supabaseServer();
+  await sb.from("app_settings").upsert({ key: "pixels", value, updated_at: new Date().toISOString() });
+  revalidatePath("/admin/settings");
+  revalidatePath("/");
+}
+
 export async function saveIntegration(formData: FormData): Promise<void> {
   const provider = String(formData.get("provider") ?? "");
   if (!provider) return;
