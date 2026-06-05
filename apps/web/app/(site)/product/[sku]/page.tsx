@@ -2,11 +2,12 @@
 // suggestions (same persona, then same type).
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ProductArt } from "@/components/product/ProductArt";
+import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductCard } from "@/components/product/ProductCard";
 import { AddToCart } from "@/components/product/AddToCart";
 import { categoryById, personaById } from "@/lib/catalog";
 import { getProductBySku, getSuggestions } from "@/lib/products-db";
+import { getMedia } from "@/lib/media-db";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
   if (!p) notFound();
   const persona = personaById(p.persona);
   const cat = categoryById(p.category);
-  const also = await getSuggestions(p, 4);
+  const [also, media] = await Promise.all([getSuggestions(p, 4), getMedia(p.sku)]);
 
   return (
     <div style={{ background: "#0A0A0A" }}>
@@ -39,9 +40,7 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
       {/* main */}
       <section style={{ padding: "30px 24px 70px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 44, alignItems: "start" }}>
-          <div style={{ border: "1px solid rgba(201,169,97,0.2)" }}>
-            <ProductArt p={p} size={150} square />
-          </div>
+          <ProductGallery product={p} media={media} />
 
           <div>
             <Link href={`/collections/${p.persona}`} style={{ fontFamily: MONO, fontSize: 10, color: persona?.accent ?? GOLD, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>

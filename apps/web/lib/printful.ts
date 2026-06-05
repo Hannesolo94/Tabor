@@ -27,6 +27,7 @@ export interface PrintfulProduct {
   externalId: string | null;
   name: string;
   thumbnail: string | null;
+  images: string[]; // unique mockup/preview images across variants
   variants: PrintfulVariant[];
   price: number; // min retail across variants
 }
@@ -91,11 +92,21 @@ export async function getStoreProduct(id: number): Promise<PrintfulProduct> {
   const previewFile = v0?.files?.find((f) => f.type === "preview")?.preview_url;
   const image = detail.sync_product.thumbnail_url || previewFile || v0?.product?.image || null;
 
+  // Unique preview images across all variants (different colours = different mockups).
+  const imgSet = new Set<string>();
+  if (detail.sync_product.thumbnail_url) imgSet.add(detail.sync_product.thumbnail_url);
+  for (const v of detail.sync_variants ?? []) {
+    for (const f of v.files ?? []) {
+      if (f.type === "preview" && f.preview_url) imgSet.add(f.preview_url);
+    }
+  }
+
   return {
     printfulId: detail.sync_product.id,
     externalId: detail.sync_product.external_id,
     name: detail.sync_product.name,
     thumbnail: image,
+    images: [...imgSet],
     variants,
     price: prices.length ? Math.min(...prices) : 0,
   };

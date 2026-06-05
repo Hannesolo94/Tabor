@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { ProductForm } from "../ProductForm";
+import { MediaManager, type MediaItem } from "../MediaManager";
 import { deleteProduct } from "../actions";
 import { GOLD, MONO, CINZEL } from "@/lib/ui";
 
@@ -12,6 +13,9 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
   const sb = await supabaseServer();
   const { data } = await sb.from("products").select("*").eq("sku", sku).maybeSingle();
   if (!data) notFound();
+
+  const { data: mediaRows } = await sb.from("product_media").select("id,type,url,visible,source").eq("sku", sku).order("sort", { ascending: true });
+  const media = (mediaRows ?? []) as MediaItem[];
 
   const product = {
     sku: data.sku,
@@ -45,6 +49,8 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
       <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 28, color: "#E8E2D5", margin: "0 0 24px" }}>{data.name}</h1>
 
       <ProductForm product={product} />
+
+      <MediaManager sku={data.sku} printfulId={data.printful_id} media={media} />
 
       {/* delete */}
       <form action={deleteProduct} style={{ marginTop: 36, paddingTop: 18, borderTop: "1px solid rgba(192,58,58,0.25)" }}>
