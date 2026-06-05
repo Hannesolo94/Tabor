@@ -29,6 +29,7 @@ export interface Dashboard {
   sessions: number;
   visitors: number;
   conversion: number;
+  appClicks: number;
   // funnel
   funnel: { pageviews: number; addToCart: number; checkout: number; purchase: number };
   cartAbandon: number;
@@ -107,7 +108,7 @@ export async function getDashboard(rangeKey: RangeKey): Promise<Dashboard> {
   // traffic / funnel
   const sessions = new Set<string>();
   const visitors = new Set<string>();
-  let pageviews = 0, addToCart = 0, checkout = 0;
+  let pageviews = 0, addToCart = 0, checkout = 0, appClicks = 0;
   const sourceCount = new Map<string, number>();
   for (const e of events) {
     if (e.session_id) sessions.add(e.session_id);
@@ -120,6 +121,7 @@ export async function getDashboard(rangeKey: RangeKey): Promise<Dashboard> {
       sourceCount.set(src, (sourceCount.get(src) ?? 0) + 1);
     } else if (e.type === "add_to_cart") addToCart++;
     else if (e.type === "begin_checkout") checkout++;
+    else if (e.type === "app_click") appClicks++;
   }
 
   const orderCount = orders.length;
@@ -152,7 +154,7 @@ export async function getDashboard(rangeKey: RangeKey): Promise<Dashboard> {
     fromLabel: labels[0]!,
     toLabel: labels[labels.length - 1]!,
     revenue, orderCount, aov, cogs, margin, marginPct, ltv, repeatRate,
-    pageviews, sessions: sessions.size, visitors: visitors.size, conversion,
+    pageviews, sessions: sessions.size, visitors: visitors.size, conversion, appClicks,
     funnel: { pageviews, addToCart, checkout, purchase: orderCount },
     cartAbandon,
     series: {

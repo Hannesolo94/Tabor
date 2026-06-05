@@ -9,6 +9,7 @@ import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 export function CartDrawer() {
   const { open, setOpen, lines, total, count, setQty, remove } = useCart();
   if (!open) return null;
+  const sym = lines[0]?.symbol ?? "$";
   return (
     <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "flex-end" }}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: "min(400px, 94vw)", height: "100%", background: "#0E0E12", borderLeft: `1px solid ${GOLD}55`, padding: "28px 22px", overflowY: "auto" }}>
@@ -39,13 +40,13 @@ export function CartDrawer() {
                     <button onClick={() => remove(it.sku, it.size)} style={{ background: "none", border: "none", color: "#6E6A60", fontSize: 10, cursor: "pointer", fontFamily: MONO, letterSpacing: "0.1em" }}>REMOVE</button>
                   </div>
                 </div>
-                <div style={{ fontFamily: MONO, fontSize: 13, color: GOLD, marginLeft: 12 }}>${it.price * it.qty}</div>
+                <div style={{ fontFamily: MONO, fontSize: 13, color: GOLD, marginLeft: 12 }}>{it.symbol ?? "$"}{it.price * it.qty}</div>
               </div>
             ))}
 
             <div style={{ display: "flex", justifyContent: "space-between", margin: "20px 0", fontFamily: MONO, fontSize: 15, color: "#E8E2D5" }}>
               <span>SUBTOTAL</span>
-              <span style={{ color: GOLD }}>${total}</span>
+              <span style={{ color: GOLD }}>{sym}{total}</span>
             </div>
             <div style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.08em", marginBottom: 14 }}>SHIPPING + TAX CALCULATED AT CHECKOUT</div>
             <Link href="/checkout" onClick={() => setOpen(false)} style={{ display: "block", textAlign: "center", textDecoration: "none", fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "15px" }}>

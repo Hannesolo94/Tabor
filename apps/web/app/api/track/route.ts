@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const BOT = /(bot|crawl|spider|slurp|bingpreview|facebookexternalhit|headless|lighthouse|pingdom|monitor)/i;
-const TYPES = new Set(["pageview", "add_to_cart", "begin_checkout", "purchase"]);
+const TYPES = new Set(["pageview", "add_to_cart", "begin_checkout", "purchase", "app_click"]);
 
 export async function POST(req: Request) {
   const ua = req.headers.get("user-agent") ?? "";

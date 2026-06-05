@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CATEGORIES, PERSONAS, categoryById, personaById } from "@/lib/catalog";
 import { getProducts } from "@/lib/products-db";
+import { getRegion } from "@/lib/region";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const metadata = { title: "Shop · TABOR" };
@@ -20,7 +21,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const persona = sp.persona && personaById(sp.persona) ? sp.persona : undefined;
   const q = (sp.q ?? "").trim() || undefined;
 
-  const items = await getProducts({ category: type, persona, q });
+  const region = await getRegion();
+  const items = await getProducts(region, { category: type, persona, q });
 
   const cat = type ? categoryById(type) : undefined;
   const per = persona ? personaById(persona) : undefined;

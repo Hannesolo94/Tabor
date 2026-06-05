@@ -15,7 +15,7 @@ export function AddToCart({ p }: { p: Product }) {
   const [added, setAdded] = useState(false);
 
   const onAdd = () => {
-    add({ sku: p.sku, name: p.name, price: p.price, size }, qty);
+    add({ sku: p.sku, name: p.name, price: p.price, size, symbol: p.currencySymbol }, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
   };
@@ -48,7 +48,7 @@ export function AddToCart({ p }: { p: Product }) {
           <button onClick={() => setQty((q) => q + 1)} style={{ background: "none", border: "none", color: GOLD, width: 38, height: 46, cursor: "pointer", fontSize: 16 }}>+</button>
         </div>
         <button onClick={onAdd} style={{ flex: 1, minWidth: 200, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "15px 24px", cursor: "pointer" }}>
-          {added ? "Added to bag ✓" : `Add to Bag · $${p.price * qty}`}
+          {added ? "Added to bag ✓" : `Add to Bag · ${p.currencySymbol}${p.price * qty}`}
         </button>
       </div>
     </div>

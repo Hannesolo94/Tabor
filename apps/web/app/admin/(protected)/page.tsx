@@ -71,6 +71,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
         <Stat label="Repeat rate" value={`${d.repeatRate.toFixed(0)}%`} sub="customers with 2+ orders" />
         <Stat label="Cart abandon" value={`${d.cartAbandon.toFixed(0)}%`} sub="added but not bought" />
         <Stat label="COGS" value={money(d.cogs)} sub="supplier cost" />
+        <Stat label="App clicks" value={String(d.appClicks)} sub="store-button taps" />
       </div>
 
       {/* charts */}

@@ -8,6 +8,7 @@ import { AddToCart } from "@/components/product/AddToCart";
 import { categoryById, personaById } from "@/lib/catalog";
 import { getProductBySku, getSuggestions } from "@/lib/products-db";
 import { getMedia } from "@/lib/media-db";
+import { getRegion } from "@/lib/region";
 import { getProductReviews, getReviewSummary } from "@/lib/reviews-db";
 import { ProductReviews } from "@/components/reviews/ProductReviews";
 import { Stars } from "@/components/reviews/Stars";
@@ -17,18 +18,19 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  const p = await getProductBySku(sku);
+  const p = await getProductBySku(sku, "INTL");
   return { title: p ? `${p.name} · TABOR` : "TABOR" };
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  const p = await getProductBySku(sku);
+  const region = await getRegion();
+  const p = await getProductBySku(sku, region);
   if (!p) notFound();
   const persona = personaById(p.persona);
   const cat = categoryById(p.category);
   const [also, media, reviews, summary] = await Promise.all([
-    getSuggestions(p, 4),
+    getSuggestions(p, region, 4),
     getMedia(p.sku),
     getProductReviews(p.sku),
     getReviewSummary(p.sku),
@@ -55,7 +57,7 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
               {persona?.name} · {persona?.tag}
             </Link>
             <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(38px,7vw,64px)", color: "#E8E2D5", margin: "8px 0 6px", lineHeight: 0.95 }}>{p.name}</h1>
-            <div style={{ fontFamily: MONO, fontSize: 16, color: GOLD, marginBottom: 6 }}>${p.price}</div>
+            <div style={{ fontFamily: MONO, fontSize: 16, color: GOLD, marginBottom: 6 }}>{p.currencySymbol}{p.price}</div>
             {summary.count > 0 && (
               <a href="#reviews" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 8 }}>
                 <Stars rating={summary.avg} />

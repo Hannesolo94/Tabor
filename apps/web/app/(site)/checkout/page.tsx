@@ -11,6 +11,7 @@ import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
 export default function CheckoutPage() {
   const { lines, total, count } = useCart();
+  const sym = lines[0]?.symbol ?? "$";
 
   useEffect(() => {
     if (lines.length > 0) track("begin_checkout", { value: total });
@@ -42,12 +43,12 @@ export default function CheckoutPage() {
                       {it.size && it.size !== "One size" ? `SIZE ${it.size.toUpperCase()} · ` : ""}QTY {it.qty}
                     </div>
                   </div>
-                  <div style={{ fontFamily: MONO, fontSize: 13, color: GOLD }}>${it.price * it.qty}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 13, color: GOLD }}>{it.symbol ?? "$"}{it.price * it.qty}</div>
                 </div>
               ))}
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16, fontFamily: MONO, fontSize: 15, color: "#E8E2D5" }}>
                 <span>SUBTOTAL</span>
-                <span style={{ color: GOLD }}>${total}</span>
+                <span style={{ color: GOLD }}>{sym}{total}</span>
               </div>
               <div style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.08em", marginTop: 6 }}>SHIPPING + TAX CALCULATED BY REGION AT PAYMENT</div>
             </div>
@@ -59,7 +60,7 @@ export default function CheckoutPage() {
                 Secure checkout is being wired up. Cards and local payment methods will be live here shortly, with region-based pricing and worldwide shipping.
               </p>
               <button disabled style={{ width: "100%", marginTop: 16, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "15px", opacity: 0.5, cursor: "not-allowed" }}>
-                Pay ${total}
+                Pay {sym}{total}
               </button>
               <div style={{ fontFamily: MONO, fontSize: 9, color: "#6E6A60", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>SECURE PAYMENT · SHIPS WORLDWIDE<br />PRINTED ON DEMAND</div>
             </div>

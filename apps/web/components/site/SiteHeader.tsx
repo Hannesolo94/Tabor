@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { TaborSeal } from "@/components/TaborSeal";
+import { RegionSwitcher } from "./RegionSwitcher";
 import { CATEGORIES, PERSONAS } from "@/lib/catalog";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
@@ -36,6 +37,7 @@ export function SiteHeader() {
           <form action="/shop" method="get" style={{ display: "flex" }}>
             <input name="q" placeholder="Search..." aria-label="Search products" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "7px 10px", width: 120 }} />
           </form>
+          <RegionSwitcher />
           <button onClick={() => setOpen(true)} style={{ ...linkStyle, color: GOLD, border: `1px solid ${GOLD}88`, padding: "8px 14px" }}>
             Bag{count ? ` · ${count}` : ""}
           </button>

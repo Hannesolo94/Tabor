@@ -6,6 +6,7 @@ import { TaborSeal } from "@/components/TaborSeal";
 import { ProductCard } from "@/components/product/ProductCard";
 import { PERSONAS, categoriesPresent, personaById } from "@/lib/catalog";
 import { getProducts } from "@/lib/products-db";
+import { getRegion } from "@/lib/region";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ per
   const { persona: personaId } = await params;
   const persona = personaById(personaId);
   if (!persona) notFound();
-  const products = await getProducts({ persona: persona.id });
+  const region = await getRegion();
+  const products = await getProducts(region, { persona: persona.id });
   const cats = categoriesPresent(products);
 
   return (

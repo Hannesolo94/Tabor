@@ -13,7 +13,7 @@ export function ProductCard({ p }: { p: Product }) {
   const persona = personaById(p.persona);
   const onAdd = (e: React.MouseEvent) => {
     e.preventDefault();
-    add({ sku: p.sku, name: p.name, price: p.price, size: p.sizes?.[0] });
+    add({ sku: p.sku, name: p.name, price: p.price, size: p.sizes?.[0], symbol: p.currencySymbol });
   };
   return (
     <Link href={`/product/${p.sku}`} style={{ textDecoration: "none", display: "block" }}>
@@ -28,7 +28,7 @@ export function ProductCard({ p }: { p: Product }) {
           <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginTop: 4 }}>{p.name}</div>
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.1em", marginTop: 3 }}>{p.note.toUpperCase()}</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-            <span style={{ fontFamily: MONO, fontSize: 15, color: GOLD }}>${p.price}</span>
+            <span style={{ fontFamily: MONO, fontSize: 15, color: GOLD }}>{p.currencySymbol}{p.price}</span>
             {p.inStock ? (
               <button
                 onClick={onAdd}

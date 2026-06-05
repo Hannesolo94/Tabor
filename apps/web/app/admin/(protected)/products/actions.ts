@@ -52,6 +52,7 @@ export async function saveProduct(_prev: SaveState, formData: FormData): Promise
     category: String(formData.get("category") ?? "apparel"),
     base_price: Number(formData.get("base_price") ?? 0) || 0,
     cost: Number(formData.get("cost") ?? 0) || 0,
+    price_za: Number(formData.get("price_za") ?? 0) || 0,
     description: String(formData.get("description") ?? ""),
     blurb: String(formData.get("blurb") ?? ""),
     note: String(formData.get("note") ?? ""),

@@ -9,6 +9,8 @@ import { getFeatured } from "@/lib/products-db";
 import { getHero } from "@/lib/content-db";
 import { getHomeReviews } from "@/lib/reviews-db";
 import { Stars } from "@/components/reviews/Stars";
+import { AppButtons } from "@/components/site/AppButtons";
+import { getRegion } from "@/lib/region";
 import { GOLD, MONO, PIRATA, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +29,8 @@ const btnGold: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 700, font
 const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, background: "transparent", border: `1px solid ${GOLD}`, padding: "16px 34px", textDecoration: "none" };
 
 export default async function Home() {
-  const [featured, hero, reviews] = await Promise.all([getFeatured(), getHero(), getHomeReviews(6)]);
+  const region = await getRegion();
+  const [featured, hero, reviews] = await Promise.all([getFeatured(region), getHero(), getHomeReviews(6)]);
   return (
     <div style={{ background: "#0A0A0A" }}>
       {/* hero (editable in admin -> Content) */}
@@ -126,11 +129,7 @@ export default async function Home() {
             <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em", marginBottom: 10 }}>[ MORE THAN MERCH ]</div>
             <h2 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: "clamp(26px,4.5vw,40px)", color: "#E8E2D5", margin: "0 0 16px", letterSpacing: "0.02em" }}>The gear is the uniform. The app is the climb.</h2>
             <p style={{ fontFamily: BODY, fontSize: 15, color: "#9A948A", lineHeight: 1.65, margin: "0 0 20px" }}>TABOR is a free brotherhood app for Christian men who game. Scripture, fitness, and accountability as a daily quest, guided by a System that calls you upward. Wear the mark, then live it.</p>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {["App Store", "Google Play"].map((s) => (
-                <span key={s} style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: CINZEL, fontWeight: 600, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}55`, padding: "12px 20px" }}><span style={{ color: GOLD }}>▸</span>{s}</span>
-              ))}
-            </div>
+            <AppButtons />
           </div>
           <div style={{ display: "grid", placeItems: "center" }}>
             <div style={{ width: 220, border: `1px solid ${GOLD}44`, background: "radial-gradient(ellipse 90% 70% at 50% 0%, #16140e, #0A0A0A 72%)", padding: "40px 24px", textAlign: "center" }}>

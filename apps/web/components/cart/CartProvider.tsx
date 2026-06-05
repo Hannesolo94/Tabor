@@ -13,6 +13,7 @@ export interface CartLine {
   price: number;
   size?: string;
   qty: number;
+  symbol?: string; // currency symbol for the region the item was added in
 }
 
 interface CartCtx {

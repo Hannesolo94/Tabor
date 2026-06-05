@@ -3,6 +3,7 @@
 // (personas, categories) stays static in catalog.ts.
 import { createClient } from "@supabase/supabase-js";
 import type { CategoryId, PersonaId, Product } from "./catalog";
+import { REGIONS, type RegionId } from "./region";
 
 function client() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -15,6 +16,7 @@ interface Row {
   sku: string;
   name: string;
   base_price: number | null;
+  price_za: number | null;
   collection: string | null;
   category: string | null;
   tagline: string | null;
@@ -31,11 +33,15 @@ interface Row {
   track_inventory: boolean | null;
 }
 
-function map(r: Row): Product {
+function map(r: Row, region: RegionId): Product {
+  const cur = REGIONS[region];
+  const price = region === "ZA" && Number(r.price_za) > 0 ? Number(r.price_za) : Number(r.base_price ?? 0);
   return {
     sku: r.sku,
     name: r.name,
-    price: Number(r.base_price ?? 0),
+    price,
+    currencySymbol: cur.symbol,
+    currencyCode: cur.code,
     persona: (r.collection ?? "sentinel") as PersonaId,
     category: (r.category ?? "apparel") as CategoryId,
     tagline: r.tagline ?? "",
@@ -53,31 +59,31 @@ function map(r: Row): Product {
 }
 
 const COLS =
-  "sku,name,base_price,collection,category,tagline,note,blurb,description,tone,ink,mark,sizes,featured,image_url,inventory,track_inventory";
+  "sku,name,base_price,price_za,collection,category,tagline,note,blurb,description,tone,ink,mark,sizes,featured,image_url,inventory,track_inventory";
 
-export async function getProducts(filter?: { persona?: string; category?: string; q?: string }): Promise<Product[]> {
+export async function getProducts(region: RegionId, filter?: { persona?: string; category?: string; q?: string }): Promise<Product[]> {
   let query = client().from("products").select(COLS).eq("status", "live").order("sort", { ascending: true });
   if (filter?.persona) query = query.eq("collection", filter.persona);
   if (filter?.category) query = query.eq("category", filter.category);
   if (filter?.q) query = query.ilike("name", `%${filter.q}%`);
   const { data, error } = await query;
   if (error || !data) return [];
-  return (data as Row[]).map(map);
+  return (data as Row[]).map((r) => map(r, region));
 }
 
-export async function getProductBySku(sku: string): Promise<Product | null> {
+export async function getProductBySku(sku: string, region: RegionId): Promise<Product | null> {
   const { data } = await client().from("products").select(COLS).eq("sku", sku).eq("status", "live").maybeSingle();
-  return data ? map(data as Row) : null;
+  return data ? map(data as Row, region) : null;
 }
 
-export async function getFeatured(): Promise<Product[]> {
+export async function getFeatured(region: RegionId): Promise<Product[]> {
   const { data } = await client().from("products").select(COLS).eq("status", "live").eq("featured", true).order("sort", { ascending: true });
-  return ((data as Row[]) ?? []).map(map);
+  return ((data as Row[]) ?? []).map((r) => map(r, region));
 }
 
 /** Same persona first, then same category (other personas), excluding self. */
-export async function getSuggestions(p: Product, limit = 4): Promise<Product[]> {
-  const all = await getProducts();
+export async function getSuggestions(p: Product, region: RegionId, limit = 4): Promise<Product[]> {
+  const all = await getProducts(region);
   const samePersona = all.filter((x) => x.sku !== p.sku && x.persona === p.persona);
   const sameCategory = all.filter((x) => x.sku !== p.sku && x.category === p.category && x.persona !== p.persona);
   const seen = new Set<string>();

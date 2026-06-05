@@ -128,6 +128,8 @@ export interface Product {
   featured?: boolean;
   inStock: boolean; // derived from inventory/track_inventory
   imageUrl?: string | null; // real product image (falls back to generated art)
+  currencySymbol: string; // resolved for the viewing region ($ or R)
+  currencyCode: string; // USD | ZAR
 }
 
 /** Which categories actually have products, given a fetched product list. */
