@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { Waitlist } from "@/components/home/Waitlist";
 import { CATEGORIES, PERSONAS } from "@/lib/catalog";
 import { getFeatured } from "@/lib/products-db";
+import { getHero } from "@/lib/content-db";
 import { GOLD, MONO, PIRATA, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -24,22 +25,29 @@ const btnGold: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 700, font
 const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, background: "transparent", border: `1px solid ${GOLD}`, padding: "16px 34px", textDecoration: "none" };
 
 export default async function Home() {
-  const featured = await getFeatured();
+  const [featured, hero] = await Promise.all([getFeatured(), getHero()]);
   return (
     <div style={{ background: "#0A0A0A" }}>
-      {/* hero */}
+      {/* hero (editable in admin -> Content) */}
       <section style={{ minHeight: "86vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", padding: "90px 24px 70px", position: "relative", overflow: "hidden" }}>
+        {hero.bg_type === "video" && hero.bg_url && (
+          <video src={hero.bg_url} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.5 }} />
+        )}
+        {hero.bg_type === "image" && hero.bg_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={hero.bg_url} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.5 }} />
+        )}
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 50% 40%, rgba(201,169,97,0.12), transparent 70%)" }} />
-        <div style={{ position: "absolute", inset: 0, opacity: 0.04, display: "grid", placeItems: "center" }}><TaborSeal id="hero-bg" size={640} /></div>
+        {hero.bg_type === "none" && <div style={{ position: "absolute", inset: 0, opacity: 0.04, display: "grid", placeItems: "center" }}><TaborSeal id="hero-bg" size={640} /></div>}
         <div style={{ position: "relative" }}>
-          <div style={{ fontFamily: MONO, fontSize: 12, color: GOLD, letterSpacing: "0.3em", marginBottom: 18 }}>[ SACRED-TACTICAL GEAR ]</div>
-          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(58px, 12vw, 150px)", color: "#E8E2D5", margin: 0, lineHeight: 0.88 }}>Wear the Climb</h1>
-          <p style={{ fontFamily: BODY, fontSize: "clamp(15px,2.4vw,19px)", color: "#B8B2A6", maxWidth: 580, margin: "22px auto 0", lineHeight: 1.6 }}>
-            Heavyweight, muted, premium. Apparel and gear forged for Christian men who train, game, and refuse to drift. Four collections, one brotherhood.
-          </p>
+          {hero.eyebrow && <div style={{ fontFamily: MONO, fontSize: 12, color: GOLD, letterSpacing: "0.3em", marginBottom: 18 }}>[ {hero.eyebrow.toUpperCase()} ]</div>}
+          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(58px, 12vw, 150px)", color: "#E8E2D5", margin: 0, lineHeight: 0.88 }}>{hero.headline}</h1>
+          {hero.subcopy && (
+            <p style={{ fontFamily: BODY, fontSize: "clamp(15px,2.4vw,19px)", color: "#B8B2A6", maxWidth: 580, margin: "22px auto 0", lineHeight: 1.6 }}>{hero.subcopy}</p>
+          )}
           <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 30, flexWrap: "wrap" }}>
-            <Link href="/shop" style={btnGold}>Shop the Drop</Link>
-            <Link href="#collections" style={btnGhost}>Find Your Collection</Link>
+            {hero.cta1_label && <Link href={hero.cta1_href || "/shop"} style={btnGold}>{hero.cta1_label}</Link>}
+            {hero.cta2_label && <Link href={hero.cta2_href || "#collections"} style={btnGhost}>{hero.cta2_label}</Link>}
           </div>
           <div style={{ fontFamily: MONO, fontSize: 10, color: "#7A746A", letterSpacing: "0.16em", marginTop: 22 }}>PRINT-ON-DEMAND · SHIPS WORLDWIDE</div>
         </div>
