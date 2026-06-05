@@ -54,7 +54,8 @@ function map(r: Row, region: RegionId): Product {
     sizes: r.sizes ?? [],
     featured: !!r.featured,
     imageUrl: r.image_url,
-    inStock: !r.track_inventory || (r.inventory ?? 0) > 0,
+    // not buyable if out of stock OR misconfigured to a zero/negative price
+    inStock: (!r.track_inventory || (r.inventory ?? 0) > 0) && price > 0,
   };
 }
 

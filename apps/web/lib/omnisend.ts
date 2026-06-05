@@ -22,6 +22,7 @@ export async function omnisendAddContact(email: string, tags: string[] = []): Pr
   try {
     const res = await fetch("https://api.omnisend.com/v3/contacts", {
       method: "POST",
+      signal: AbortSignal.timeout(4000), // never hang the request path
       headers: { "X-API-KEY": cfg.key, "Content-Type": "application/json" },
       body: JSON.stringify({
         identifiers: [

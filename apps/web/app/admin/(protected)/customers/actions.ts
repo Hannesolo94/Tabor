@@ -47,13 +47,12 @@ export async function deleteCustomer(formData: FormData): Promise<void> {
   // waitlist + notes
   await admin.from("waitlist").delete().eq("email", email);
   await admin.from("customer_notes").delete().eq("email", email);
-  // giveaway votes/nominees and orders are keyed by user_id; if a registered
-  // auth user exists for this email, deleting them cascades those rows.
-  const { data: list } = await admin.auth.admin.listUsers();
-  const user = list?.users.find((u) => u.email === email);
-  if (user) {
-    await admin.from("profiles").delete().eq("user_id", user.id);
-    await admin.auth.admin.deleteUser(user.id);
+  // if a registered auth user exists for this email, deleting them cascades
+  // their owned rows (orders/votes/etc).
+  const { data: prof } = await admin.from("profiles").select("user_id").eq("email", email).maybeSingle();
+  if (prof?.user_id) {
+    await admin.from("profiles").delete().eq("user_id", prof.user_id);
+    await admin.auth.admin.deleteUser(prof.user_id);
   }
 
   revalidatePath("/admin/customers");

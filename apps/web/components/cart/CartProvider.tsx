@@ -40,7 +40,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) setLines(JSON.parse(raw));
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        // keep only well-formed lines (guards against old/corrupt blobs)
+        setLines(parsed.filter((l) => l && typeof l.sku === "string" && typeof l.price === "number" && typeof l.qty === "number"));
+      }
     } catch {
       /* ignore */
     }
@@ -57,6 +62,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const add = useCallback((line: Omit<CartLine, "qty">, qty = 1) => {
     track("add_to_cart", { sku: line.sku, value: line.price * qty });
     setLines((prev) => {
+      // Never mix currencies: if the region/currency changed, start a fresh bag.
+      if (prev.length > 0 && (prev[0]!.symbol ?? "$") !== (line.symbol ?? "$")) {
+        return [{ ...line, qty }];
+      }
       const i = prev.findIndex((l) => sameLine(l, line.sku, line.size));
       if (i >= 0) {
         const next = [...prev];

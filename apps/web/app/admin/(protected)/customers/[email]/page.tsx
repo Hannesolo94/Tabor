@@ -5,7 +5,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { DeleteCustomer } from "../DeleteCustomer";
 import { addNote, deleteNote } from "../actions";
-import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
+import { GOLD, MONO, CINZEL, BODY, formatMoney } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -16,22 +16,18 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
   const sb = await supabaseServer();
   const admin = supabaseAdmin();
 
-  const [waitlist, notes, usersRes] = await Promise.all([
+  const [waitlist, notes, profRes] = await Promise.all([
     sb.from("waitlist").select("source, created_at").eq("email", email).maybeSingle(),
     sb.from("customer_notes").select("id, body, author, created_at").eq("email", email).order("created_at", { ascending: false }),
-    admin.auth.admin.listUsers(),
+    admin.from("profiles").select("user_id, name, streak, role").eq("email", email).maybeSingle(),
   ]);
 
-  const user = usersRes.data?.users.find((u) => u.email === email) ?? null;
-  let orders: { id: string; status: string; total: number | null; created_at: string }[] = [];
-  let profile: { name: string | null; streak: number | null; role: string | null } | null = null;
+  const profile = profRes.data ? { name: profRes.data.name, streak: profRes.data.streak, role: profRes.data.role } : null;
+  const user = profRes.data ? { id: profRes.data.user_id } : null;
+  let orders: { id: string; status: string; total: number | null; currency?: string | null; created_at: string }[] = [];
   if (user) {
-    const [o, p] = await Promise.all([
-      admin.from("orders").select("id, status, total, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
-      admin.from("profiles").select("name, streak, role").eq("user_id", user.id).maybeSingle(),
-    ]);
+    const o = await admin.from("orders").select("id, status, total, currency, created_at").eq("user_id", user.id).order("created_at", { ascending: false });
     orders = o.data ?? [];
-    profile = p.data ?? null;
   }
 
   const Row = ({ k, v }: { k: string; v: string }) => (
@@ -70,7 +66,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
             orders.map((o) => (
               <div key={o.id} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                 <span style={{ fontFamily: MONO, fontSize: 11, color: "#C3BDB1" }}>{o.status.toUpperCase()}</span>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: GOLD }}>${o.total ?? 0}</span>
+                <span style={{ fontFamily: MONO, fontSize: 11, color: GOLD }}>{formatMoney(o.total ?? 0, o.currency)}</span>
               </div>
             ))
           )}

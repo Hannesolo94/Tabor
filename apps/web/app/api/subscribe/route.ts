@@ -4,8 +4,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { omnisendAddContact } from "@/lib/omnisend";
+import { sameOrigin } from "@/lib/http";
 
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   let body: { email?: string; source?: string };
   try {
     body = await req.json();

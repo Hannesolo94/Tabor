@@ -2,11 +2,13 @@
 // obvious bots. Public endpoint (no auth) but writes nothing readable to clients.
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { sameOrigin } from "@/lib/http";
 
 const BOT = /(bot|crawl|spider|slurp|bingpreview|facebookexternalhit|headless|lighthouse|pingdom|monitor)/i;
 const TYPES = new Set(["pageview", "add_to_cart", "begin_checkout", "purchase", "app_click"]);
 
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ ok: true, skipped: "origin" });
   const ua = req.headers.get("user-agent") ?? "";
   if (BOT.test(ua)) return NextResponse.json({ ok: true, skipped: "bot" });
 

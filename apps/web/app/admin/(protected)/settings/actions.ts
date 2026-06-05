@@ -6,6 +6,7 @@
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
+import { sanitizePixels } from "@/lib/pixels-db";
 
 export async function saveStore(formData: FormData): Promise<void> {
   const value = {
@@ -23,12 +24,12 @@ export async function saveStore(formData: FormData): Promise<void> {
 }
 
 export async function savePixels(formData: FormData): Promise<void> {
-  const value = {
-    meta: String(formData.get("meta") ?? "").trim(),
-    ga4: String(formData.get("ga4") ?? "").trim(),
-    gads: String(formData.get("gads") ?? "").trim(),
-    gtm: String(formData.get("gtm") ?? "").trim(),
-  };
+  const value = sanitizePixels({
+    meta: String(formData.get("meta") ?? ""),
+    ga4: String(formData.get("ga4") ?? ""),
+    gads: String(formData.get("gads") ?? ""),
+    gtm: String(formData.get("gtm") ?? ""),
+  });
   const sb = await supabaseServer();
   await sb.from("app_settings").upsert({ key: "pixels", value, updated_at: new Date().toISOString() });
   revalidatePath("/admin/settings");

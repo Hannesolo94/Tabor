@@ -3,6 +3,7 @@
 // browser-direct to the review-media storage bucket first; we just record URLs.
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { sameOrigin } from "@/lib/http";
 
 interface Body {
   sku?: string;
@@ -16,6 +17,7 @@ interface Body {
 }
 
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   let b: Body;
   try {
     b = await req.json();

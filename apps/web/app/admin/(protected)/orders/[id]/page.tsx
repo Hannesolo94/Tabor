@@ -19,8 +19,8 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
   let email = "guest";
   if (o.user_id) {
     const admin = supabaseAdmin();
-    const { data: list } = await admin.auth.admin.listUsers();
-    email = list?.users.find((u) => u.id === o.user_id)?.email ?? "guest";
+    const { data: prof } = await admin.from("profiles").select("email").eq("user_id", o.user_id).maybeSingle();
+    email = prof?.email ?? "guest";
   }
   const items = (Array.isArray(o.items) ? o.items : []) as { sku?: string; name?: string; qty?: number; quantity?: number; price?: number }[];
   const sym = o.currency === "ZAR" ? "R" : "$";

@@ -31,12 +31,10 @@ export async function setupAdminPassword(_prev: SetupState, formData: FormData):
   if (!email) return { ok: false, error: "Admin email not configured." };
 
   const sb = supabaseAdmin();
-  const { data: list, error: listErr } = await sb.auth.admin.listUsers();
-  if (listErr) return { ok: false, error: listErr.message };
-  const user = list.users.find((u) => u.email === email);
-  if (!user) return { ok: false, error: "Admin user not found." };
+  const { data: prof } = await sb.from("profiles").select("user_id").eq("email", email).maybeSingle();
+  if (!prof?.user_id) return { ok: false, error: "Admin user not found." };
 
-  const { error } = await sb.auth.admin.updateUserById(user.id, { password: pw, email_confirm: true });
+  const { error } = await sb.auth.admin.updateUserById(prof.user_id, { password: pw, email_confirm: true });
   if (error) return { ok: false, error: error.message };
 
   await sb.from("content").upsert({ key: SETUP_FLAG, value: { done: true } });
