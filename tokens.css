@@ -1,0 +1,162 @@
+/* HOLY — Sprint 1 design tokens */
+:root {
+  --holy-black: #0A0A0A;
+  --holy-surface: #15151A;
+  --holy-surface-2: #1E1E24;
+  --holy-gold: #C9A961;
+  --holy-gold-deep: #A8843E;
+  --holy-gold-light: #E6CB85;
+  --holy-bronze: #8B5A2B;
+  --holy-silver: #C0C0C0;
+  --holy-ivory: #E8E2D5;
+  --holy-ivory-muted: #8A8378;
+  --holy-crimson: #7A1F1F;
+  --holy-crimson-glow: #C03A3A;
+  --holy-parchment: #E8E2D5;
+  --holy-parchment-2: #D4CCB8;
+  --holy-parchment-deep: #B8AE96;
+
+  --font-display: "Big Shoulders Display", "Archivo Black", system-ui, sans-serif;
+  --font-display-alt: "Archivo Black", "Big Shoulders Display", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-scripture: "Cormorant Garamond", "Georgia", serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  --font-roman: "Cinzel", "Trajan Pro", serif;
+  --font-blackletter: "UnifrakturMaguntia", "Old English Text MT", serif;
+}
+
+/* ───── reusable visual atoms ───── */
+
+/* Gold-leaf surface: layered radial gradients + turbulence overlay
+   so it feels like beaten leaf rather than a CSS gradient. */
+.holy-gold-leaf {
+  background:
+    radial-gradient(ellipse 60% 80% at 20% 30%, #E6CB85 0%, transparent 50%),
+    radial-gradient(ellipse 40% 60% at 80% 70%, #B8923D 0%, transparent 55%),
+    radial-gradient(ellipse 30% 30% at 65% 25%, #F1DDA0 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 30% 85%, #9C7728 0%, transparent 65%),
+    linear-gradient(135deg, #C9A961 0%, #A8843E 50%, #C9A961 100%);
+  position: relative;
+  isolation: isolate;
+}
+.holy-gold-leaf::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.42  0 0 0 0 0.18  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/></svg>");
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.holy-gold-leaf::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='c'><feTurbulence type='turbulence' baseFrequency='0.04 0.08' numOctaves='3' seed='7'/><feDisplacementMap in='SourceGraphic' scale='4'/></filter><g stroke='%23000' stroke-width='0.4' fill='none' opacity='0.35' filter='url(%23c)'><path d='M0 40 Q80 35 160 50 T320 45'/><path d='M0 110 Q90 120 180 100 T320 115'/><path d='M0 180 Q70 165 150 185 T320 175'/><path d='M0 250 Q100 240 200 260 T320 255'/><path d='M40 0 Q35 80 50 160 T45 320'/><path d='M180 0 Q170 100 195 200 T185 320'/></g></svg>");
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Parchment surface with subtle paper grain + aged edges. */
+.holy-parchment {
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 50%, #EBE3CC 0%, #D9CFB2 70%, #B8AE8C 100%);
+  position: relative;
+  isolation: isolate;
+  color: #2A2418;
+}
+.holy-parchment::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 0.25  0 0 0 0 0.18  0 0 0 0 0.08  0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.55'/></svg>");
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.holy-parchment::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='s' x='0' y='0'><feTurbulence type='turbulence' baseFrequency='0.02' numOctaves='3'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.25  0 0 0 0 0.1  0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23s)'/></svg>");
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Distressed black surface (for streetwear concepts) */
+.holy-grit {
+  background: #0A0A0A;
+  position: relative;
+  isolation: isolate;
+}
+.holy-grit::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' seed='11'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23g)' opacity='0.22'/></svg>");
+  mix-blend-mode: screen;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Soft tactical glow border (Solo Leveling-ish translucent panel) */
+.holy-tactical {
+  background: rgba(20, 22, 30, 0.72);
+  border: 1px solid rgba(201, 169, 97, 0.45);
+  box-shadow:
+    inset 0 0 24px rgba(201, 169, 97, 0.08),
+    0 0 0 1px rgba(201, 169, 97, 0.08),
+    0 0 32px rgba(201, 169, 97, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+/* Bracket-prefixed system text */
+.holy-system {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--holy-gold);
+  text-transform: uppercase;
+}
+
+.holy-display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.92;
+}
+
+.holy-roman {
+  font-family: var(--font-roman);
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Text crackle (for foil-on-leaf type) */
+.holy-foil {
+  background:
+    linear-gradient(135deg, #F1DDA0 0%, #C9A961 30%, #E6CB85 50%, #A8843E 75%, #D4B477 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.3));
+}
+
+/* Card scaffolding for logo artboards */
+.lg-frame {
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  position: relative;
+}
+.lg-stage { display: grid; place-items: center; padding: 28px; position: relative; overflow: hidden; }
+.lg-foot {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(232, 226, 213, 0.08);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--holy-ivory-muted);
+  text-transform: uppercase;
+}
+.lg-foot .lg-tag { color: var(--holy-gold); }
