@@ -40,3 +40,19 @@ button {
     scroll-behavior: auto;
   }
 }
+
+/* ── responsive nav ── */
+.tabor-mobile-toggle {
+  display: none;
+}
+.tabor-mobile-menu {
+  display: block;
+}
+@media (max-width: 820px) {
+  .tabor-desktop-nav {
+    display: none !important;
+  }
+  .tabor-mobile-toggle {
+    display: flex !important;
+  }
+}

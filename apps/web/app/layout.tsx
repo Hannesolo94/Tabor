@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Cinzel, Cormorant_Garamond, Inter, JetBrains_Mono, Pirata_One } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/components/cart/CartProvider";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -25,7 +29,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${inter.variable} ${mono.variable} ${cinzel.variable} ${pirata.variable} ${cormorant.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <CartProvider>
+          <SiteHeader />
+          <main>{children}</main>
+          <SiteFooter />
+          <CartDrawer />
+        </CartProvider>
+      </body>
     </html>
   );
 }
