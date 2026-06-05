@@ -1,2 +1,2 @@
 # Tabor
-The Holy transfiguration app for Christians
+The Holy transfiguration app and website for Christian Gamers and fitness lovers
