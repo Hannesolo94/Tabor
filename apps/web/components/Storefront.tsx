@@ -147,11 +147,14 @@ function Waitlist() {
     if (!email.includes("@")) return;
     setState("saving");
     if (!supabase) {
-      // No Supabase env wired yet; treat as success locally so the UI is testable.
-      setState("done");
+      // Misconfiguration (NEXT_PUBLIC_SUPABASE_* missing at build time). Never
+      // fake success: surface an error so a broken deploy is obvious.
+      console.error("Supabase env not configured; waitlist cannot save.");
+      setState("error");
       return;
     }
     const { error } = await supabase.from("waitlist").insert({ email, source: "web" });
+    if (error) console.error("waitlist insert failed:", error.message);
     setState(error ? "error" : "done");
   }
 
