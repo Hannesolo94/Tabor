@@ -5,6 +5,7 @@
 // re-looking-up the catalog.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { track } from "@/lib/track";
 
 export interface CartLine {
   sku: string;
@@ -53,6 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [lines]);
 
   const add = useCallback((line: Omit<CartLine, "qty">, qty = 1) => {
+    track("add_to_cart", { sku: line.sku, value: line.price * qty });
     setLines((prev) => {
       const i = prev.findIndex((l) => sameLine(l, line.sku, line.size));
       if (i >= 0) {

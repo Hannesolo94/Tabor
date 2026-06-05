@@ -4,11 +4,19 @@
 // wired to Peach Payments once the merchant account is live (gateway-agnostic
 // scaffold for now). Region/currency + live shipping rates come with that work.
 import Link from "next/link";
+import { useEffect } from "react";
 import { useCart } from "@/components/cart/CartProvider";
+import { track } from "@/lib/track";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
 export default function CheckoutPage() {
   const { lines, total, count } = useCart();
+
+  useEffect(() => {
+    if (lines.length > 0) track("begin_checkout", { value: total });
+    // fire once on entering checkout
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div style={{ background: "#0A0A0A", minHeight: "70vh", padding: "50px 24px 80px" }}>

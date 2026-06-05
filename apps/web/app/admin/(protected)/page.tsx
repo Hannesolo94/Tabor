@@ -1,65 +1,115 @@
-// Admin dashboard. Reads live data via the admin's RLS-authed session.
-import { supabaseServer } from "@/lib/supabase/server";
-import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
+// Admin dashboard. Shopify-style: date range, top summary, charts, funnel,
+// best-sellers, traffic sources. Sales metrics come from orders (fill in once
+// checkout is live); traffic/conversion collect from day one.
+import Link from "next/link";
+import { getDashboard, type RangeKey } from "@/lib/analytics-db";
+import { BarList, Funnel, LineChart } from "@/components/admin/Charts";
+import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+const money = (n: number) => `$${n.toFixed(n < 100 ? 2 : 0)}`;
+const RANGES: { key: RangeKey; label: string }[] = [
+  { key: "today", label: "Today" },
+  { key: "7d", label: "7 days" },
+  { key: "30d", label: "30 days" },
+  { key: "90d", label: "90 days" },
+];
+
+function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
-    <div style={{ border: "1px solid rgba(201,169,97,0.18)", background: "#0E0E12", padding: "20px 22px" }}>
-      <div style={{ fontFamily: MONO, fontSize: 9.5, color: "#8A847A", letterSpacing: "0.16em", textTransform: "uppercase" }}>{label}</div>
-      <div style={{ fontFamily: PIRATA, fontSize: 38, color: "#E8E2D5", lineHeight: 1.1, marginTop: 6 }}>{value}</div>
-      {sub && <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.1em", marginTop: 2 }}>{sub}</div>}
+    <div style={{ border: "1px solid rgba(201,169,97,0.18)", background: "#0E0E12", padding: "16px 18px" }}>
+      <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase" }}>{label}</div>
+      <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: accent ? GOLD : "#E8E2D5", lineHeight: 1.1, marginTop: 6 }}>{value}</div>
+      {sub && <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#6E6A60", letterSpacing: "0.08em", marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
 
-export default async function AdminDashboard() {
-  const sb = await supabaseServer();
+function Card({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <span style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em" }}>{title}</span>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
 
-  const [waitlist, customers, orders] = await Promise.all([
-    sb.from("waitlist").select("email, source, created_at", { count: "exact" }).order("created_at", { ascending: false }).limit(8),
-    sb.from("profiles").select("user_id", { count: "exact", head: true }),
-    sb.from("orders").select("total", { count: "exact" }),
-  ]);
-
-  const signupCount = waitlist.count ?? 0;
-  const customerCount = customers.count ?? 0;
-  const orderCount = orders.count ?? 0;
-  const revenue = (orders.data ?? []).reduce((a, b) => a + (Number(b.total) || 0), 0);
-  const recent = waitlist.data ?? [];
+export default async function AdminDashboard({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
+  const sp = await searchParams;
+  const rangeKey = (["today", "7d", "30d", "90d"].includes(sp.range ?? "") ? sp.range : "30d") as RangeKey;
+  const d = await getDashboard(rangeKey);
 
   return (
     <div>
-      <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ OVERVIEW ]</div>
-      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 26px" }}>Dashboard</h1>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 34 }}>
-        <Stat label="Revenue" value={`$${revenue.toFixed(0)}`} sub="ALL TIME" />
-        <Stat label="Orders" value={String(orderCount)} sub={orderCount === 0 ? "AWAITING CHECKOUT" : "TOTAL"} />
-        <Stat label="Email Signups" value={String(signupCount)} sub="WAITLIST + PROMO" />
-        <Stat label="Registered" value={String(customerCount)} sub="APP/SITE ACCOUNTS" />
-      </div>
-
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(201,169,97,0.12)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", letterSpacing: "0.04em" }}>Recent Signups</span>
-          <span style={{ fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.12em" }}>LATEST {recent.length}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 22, flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ {d.fromLabel.slice(5)} → {d.toLabel.slice(5)} ]</div>
+          <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Dashboard</h1>
         </div>
-        {recent.length === 0 ? (
-          <div style={{ padding: "22px 20px", fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No signups yet.</div>
-        ) : (
-          recent.map((r, i) => (
-            <div key={r.email + i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-              <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1" }}>{r.email}</span>
-              <span style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                <span style={{ fontFamily: MONO, fontSize: 8.5, color: GOLD, letterSpacing: "0.1em", border: `1px solid ${GOLD}33`, padding: "2px 6px", textTransform: "uppercase" }}>{r.source || "web"}</span>
-                <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#6E6A60" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
-              </span>
-            </div>
-          ))
-        )}
+        <div style={{ display: "flex", gap: 6 }}>
+          {RANGES.map((r) => (
+            <Link key={r.key} href={`/admin?range=${r.key}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "8px 12px", border: `1px solid ${GOLD}44`, color: rangeKey === r.key ? "#0A0A0A" : "#9A948A", background: rangeKey === r.key ? `linear-gradient(180deg,#E8D08C,${GOLD})` : "transparent" }}>{r.label}</Link>
+          ))}
+        </div>
       </div>
+
+      {/* summary */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 12 }}>
+        <Stat label="Revenue" value={money(d.revenue)} sub={d.orderCount ? `${d.orderCount} orders` : "awaiting checkout"} accent />
+        <Stat label="Orders" value={String(d.orderCount)} sub={`AOV ${money(d.aov)}`} />
+        <Stat label="Conversion" value={`${d.conversion.toFixed(1)}%`} sub="orders / sessions" />
+        <Stat label="Sessions" value={String(d.sessions)} sub={`${d.visitors} visitors`} />
+        <Stat label="Pageviews" value={String(d.pageviews)} />
+        <Stat label="Gross margin" value={d.revenue ? `${d.marginPct.toFixed(0)}%` : "—"} sub={d.revenue ? money(d.margin) : "set product costs"} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 26 }}>
+        <Stat label="Avg LTV" value={money(d.ltv)} sub="per customer, all time" />
+        <Stat label="Repeat rate" value={`${d.repeatRate.toFixed(0)}%`} sub="customers with 2+ orders" />
+        <Stat label="Cart abandon" value={`${d.cartAbandon.toFixed(0)}%`} sub="added but not bought" />
+        <Stat label="COGS" value={money(d.cogs)} sub="supplier cost" />
+      </div>
+
+      {/* charts */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14, marginBottom: 14 }}>
+        <Card title="Revenue"><LineChart labels={d.series.labels} values={d.series.revenue} format={money} /></Card>
+        <Card title="Sessions"><LineChart labels={d.series.labels} values={d.series.sessions} /></Card>
+      </div>
+
+      {/* funnel + sources */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14, marginBottom: 14 }}>
+        <Card title="Funnel">
+          <Funnel steps={[{ label: "Pageviews", value: d.funnel.pageviews }, { label: "Add to cart", value: d.funnel.addToCart }, { label: "Checkout", value: d.funnel.checkout }, { label: "Purchase", value: d.funnel.purchase }]} />
+        </Card>
+        <Card title="Traffic sources"><BarList items={d.sources.map((s) => ({ label: s.source, value: s.count }))} /></Card>
+      </div>
+
+      {/* best sellers */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14, marginBottom: 14 }}>
+        <Card title="Best-selling products"><BarList items={d.topProducts.map((p) => ({ label: p.name, value: p.revenue, sub: `${p.qty} sold` }))} format={money} /></Card>
+        <Card title="Top categories"><BarList items={d.topCategories.map((c) => ({ label: c.category, value: c.revenue, sub: `${c.qty} sold` }))} format={money} /></Card>
+      </div>
+
+      {/* low stock */}
+      {d.lowStock.length > 0 && (
+        <Card title="Low stock alerts" action={<Link href="/admin/products" style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.1em", textDecoration: "none" }}>MANAGE →</Link>}>
+          {d.lowStock.map((p) => (
+            <div key={p.sku} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+              <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1" }}>{p.name}</span>
+              <span style={{ fontFamily: MONO, fontSize: 11, color: p.inventory === 0 ? "#C03A3A" : GOLD }}>{p.inventory === 0 ? "SOLD OUT" : `${p.inventory} left`}</span>
+            </div>
+          ))}
+        </Card>
+      )}
+
+      {d.orderCount === 0 && (
+        <p style={{ fontFamily: MONO, fontSize: 10, color: "#6E6A60", letterSpacing: "0.06em", marginTop: 18, lineHeight: 1.6 }}>
+          SALES METRICS POPULATE ONCE CHECKOUT IS LIVE. TRAFFIC + CONVERSION ARE COLLECTING NOW.
+        </p>
+      )}
     </div>
   );
 }

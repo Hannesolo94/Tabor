@@ -20,7 +20,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function ProductForm({ product, isNew }: { product?: Partial<Product> & { status?: string; inventory?: number; trackInventory?: boolean; sort?: number }; isNew?: boolean }) {
+export function ProductForm({ product, isNew }: { product?: Partial<Product> & { status?: string; inventory?: number; trackInventory?: boolean; sort?: number; cost?: number }; isNew?: boolean }) {
   const [state, action, pending] = useActionState(saveProduct, initial);
   const p = product ?? {};
 
@@ -48,6 +48,9 @@ export function ProductForm({ product, isNew }: { product?: Partial<Product> & {
         </Field>
         <Field label="Price (USD)">
           <input name="base_price" type="number" step="1" min="0" defaultValue={p.price ?? 0} style={inp} />
+        </Field>
+        <Field label="Cost / supplier (for margin)">
+          <input name="cost" type="number" step="0.01" min="0" defaultValue={p.cost ?? 0} style={inp} />
         </Field>
       </div>
 

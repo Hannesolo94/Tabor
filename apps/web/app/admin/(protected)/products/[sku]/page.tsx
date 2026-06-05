@@ -23,6 +23,7 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
     persona: data.collection,
     category: data.category,
     price: Number(data.base_price ?? 0),
+    cost: Number(data.cost ?? 0),
     blurb: data.blurb ?? "",
     description: data.description ?? "",
     note: data.note ?? "",

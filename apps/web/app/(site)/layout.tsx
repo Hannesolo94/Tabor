@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { AnnouncementBar } from "@/components/site/AnnouncementBar";
 import { VersesPopup } from "@/components/site/VersesPopup";
+import { Tracker } from "@/components/site/Tracker";
 import { PromoPopup } from "@/components/promo/PromoPopup";
 import { getAnnouncements } from "@/lib/announcements-db";
 
@@ -20,6 +21,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <CartDrawer />
       <PromoPopup />
       <VersesPopup />
+      <Tracker />
     </CartProvider>
   );
 }
