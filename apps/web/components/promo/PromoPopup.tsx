@@ -10,7 +10,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import { TaborSeal } from "@/components/TaborSeal";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
