@@ -4,11 +4,15 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { AnnouncementBar } from "@/components/site/AnnouncementBar";
 import { PromoPopup } from "@/components/promo/PromoPopup";
+import { getAnnouncements } from "@/lib/announcements-db";
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const announcements = await getAnnouncements();
   return (
     <CartProvider>
+      <AnnouncementBar items={announcements} />
       <SiteHeader />
       <main>{children}</main>
       <SiteFooter />
