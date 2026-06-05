@@ -8,6 +8,9 @@ import { AddToCart } from "@/components/product/AddToCart";
 import { categoryById, personaById } from "@/lib/catalog";
 import { getProductBySku, getSuggestions } from "@/lib/products-db";
 import { getMedia } from "@/lib/media-db";
+import { getProductReviews, getReviewSummary } from "@/lib/reviews-db";
+import { ProductReviews } from "@/components/reviews/ProductReviews";
+import { Stars } from "@/components/reviews/Stars";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +27,12 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
   if (!p) notFound();
   const persona = personaById(p.persona);
   const cat = categoryById(p.category);
-  const [also, media] = await Promise.all([getSuggestions(p, 4), getMedia(p.sku)]);
+  const [also, media, reviews, summary] = await Promise.all([
+    getSuggestions(p, 4),
+    getMedia(p.sku),
+    getProductReviews(p.sku),
+    getReviewSummary(p.sku),
+  ]);
 
   return (
     <div style={{ background: "#0A0A0A" }}>
@@ -48,6 +56,12 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
             </Link>
             <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(38px,7vw,64px)", color: "#E8E2D5", margin: "8px 0 6px", lineHeight: 0.95 }}>{p.name}</h1>
             <div style={{ fontFamily: MONO, fontSize: 16, color: GOLD, marginBottom: 6 }}>${p.price}</div>
+            {summary.count > 0 && (
+              <a href="#reviews" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 8 }}>
+                <Stars rating={summary.avg} />
+                <span style={{ fontFamily: MONO, fontSize: 10, color: "#9A948A", letterSpacing: "0.06em" }}>{summary.avg.toFixed(1)} ({summary.count})</span>
+              </a>
+            )}
             <div style={{ fontFamily: MONO, fontSize: 10, color: "#7A746A", letterSpacing: "0.12em", marginBottom: 22 }}>{p.note.toUpperCase()}</div>
 
             <AddToCart p={p} />
@@ -69,6 +83,11 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
           </div>
         </div>
       </section>
+
+      {/* reviews */}
+      <div id="reviews">
+        <ProductReviews sku={p.sku} reviews={reviews} summary={summary} />
+      </div>
 
       {/* you may also like */}
       {also.length > 0 && (

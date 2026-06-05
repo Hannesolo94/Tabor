@@ -7,6 +7,8 @@ import { Waitlist } from "@/components/home/Waitlist";
 import { CATEGORIES, PERSONAS } from "@/lib/catalog";
 import { getFeatured } from "@/lib/products-db";
 import { getHero } from "@/lib/content-db";
+import { getHomeReviews } from "@/lib/reviews-db";
+import { Stars } from "@/components/reviews/Stars";
 import { GOLD, MONO, PIRATA, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +27,7 @@ const btnGold: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 700, font
 const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, background: "transparent", border: `1px solid ${GOLD}`, padding: "16px 34px", textDecoration: "none" };
 
 export default async function Home() {
-  const [featured, hero] = await Promise.all([getFeatured(), getHero()]);
+  const [featured, hero, reviews] = await Promise.all([getFeatured(), getHero(), getHomeReviews(6)]);
   return (
     <div style={{ background: "#0A0A0A" }}>
       {/* hero (editable in admin -> Content) */}
@@ -159,6 +161,35 @@ export default async function Home() {
           </p>
         </div>
       </section>
+
+      {/* reviews / UGC */}
+      {reviews.length > 0 && (
+        <section style={{ padding: "80px 24px", background: "#0C0C10", borderTop: "1px solid rgba(201,169,97,0.12)" }}>
+          <div style={{ maxWidth: 1240, margin: "0 auto" }}>
+            <SectionHead kicker="[ FROM THE BROTHERHOOD ]" title="What they're saying" sub="Real words from real brothers in the gear." />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+              {reviews.map((r) => (
+                <Link key={r.id} href={r.sku ? `/product/${r.sku}` : "/shop"} style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "20px 20px", display: "flex", flexDirection: "column" }}>
+                  <Stars rating={r.rating} />
+                  {r.media.length > 0 && (
+                    <div style={{ marginTop: 12, aspectRatio: "1/1", overflow: "hidden", border: `1px solid ${GOLD}22` }}>
+                      {r.media[0]!.type === "video" ? (
+                        <video src={r.media[0]!.url} muted autoPlay loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={r.media[0]!.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      )}
+                    </div>
+                  )}
+                  {r.title && <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginTop: 12 }}>{r.title}</div>}
+                  <p style={{ fontFamily: BODY, fontSize: 13.5, color: "#9A948A", lineHeight: 1.6, margin: "6px 0 0", flex: 1 }}>{r.body}</p>
+                  <div style={{ fontFamily: MONO, fontSize: 9.5, color: GOLD, letterSpacing: "0.1em", marginTop: 12, textTransform: "uppercase" }}>— {r.name}</div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <Waitlist />
     </div>
