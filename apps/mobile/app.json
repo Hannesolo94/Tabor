@@ -15,6 +15,9 @@
     "android": {
       "package": "quest.tabor.app"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ]
   }
 }
