@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ persona: string }> }) {
   const { persona } = await params;
   const p = personaById(persona);
-  return { title: p ? `${p.name} · TABOR` : "TABOR" };
+  if (!p) return { title: "TABOR" };
+  return { title: p.name, description: p.blurb, alternates: { canonical: `/collections/${p.id}` }, openGraph: { title: `${p.name} · TABOR`, description: p.blurb } };
 }
 
 export default async function CollectionPage({ params }: { params: Promise<{ persona: string }> }) {

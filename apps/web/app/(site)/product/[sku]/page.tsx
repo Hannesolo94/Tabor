@@ -19,7 +19,14 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
   const p = await getProductBySku(sku, "INTL");
-  return { title: p ? `${p.name} · TABOR` : "TABOR" };
+  if (!p) return { title: "TABOR" };
+  const desc = p.blurb || p.description?.slice(0, 155) || "TABOR sacred-tactical gear.";
+  return {
+    title: p.name,
+    description: desc,
+    alternates: { canonical: `/product/${p.sku}` },
+    openGraph: { title: `${p.name} · TABOR`, description: desc, type: "website", images: p.imageUrl ? [{ url: p.imageUrl }] : undefined },
+  };
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ sku: string }> }) {
