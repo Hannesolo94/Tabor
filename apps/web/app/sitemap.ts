@@ -27,5 +27,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* sitemap still returns statics */
   }
 
-  return [...statics, ...collections, ...categories, ...products];
+  let posts: MetadataRoute.Sitemap = [];
+  let customCollections: MetadataRoute.Sitemap = [];
+  try {
+    const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+    const [{ data: postRows }, { data: colRows }] = await Promise.all([
+      sb.from("posts").select("slug, updated_at").eq("status", "published"),
+      sb.from("collections").select("slug").eq("visible", true),
+    ]);
+    posts = [{ url: `${BASE}/blog`, priority: 0.6 }, ...(postRows ?? []).map((p) => ({ url: `${BASE}/blog/${p.slug}`, lastModified: p.updated_at ? new Date(p.updated_at) : undefined, priority: 0.6 }))];
+    customCollections = (colRows ?? []).map((c) => ({ url: `${BASE}/collection/${c.slug}`, priority: 0.7 }));
+  } catch {
+    /* ignore */
+  }
+
+  return [...statics, ...collections, ...categories, ...customCollections, ...products, ...posts];
 }
