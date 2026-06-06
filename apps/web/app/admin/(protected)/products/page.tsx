@@ -7,12 +7,15 @@ import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminProducts() {
+export default async function AdminProducts({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const q = ((await searchParams).q ?? "").trim();
   const sb = await supabaseServer();
-  const { data } = await sb
+  let query = sb
     .from("products")
     .select("sku,name,collection,category,base_price,status,featured,inventory,track_inventory,sort")
     .order("sort", { ascending: true });
+  if (q) query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+  const { data } = await query;
   const rows = (data ?? []) as Row[];
 
   return (
@@ -26,7 +29,10 @@ export default async function AdminProducts() {
         <Link href="/admin/products/new" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "11px 18px", textDecoration: "none" }}>+ New Product</Link>
       </div>
 
-      <p style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginBottom: 10 }}>TIP: TICK PRODUCTS TO BULK-ASSIGN COLLECTION/TYPE OR PUBLISH AT ONCE.</p>
+      <form action="/admin/products" method="get" style={{ marginBottom: 12, maxWidth: 360 }}>
+        <input name="q" defaultValue={q} placeholder="Search products by name or SKU…" style={{ width: "100%", fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "9px 12px" }} />
+      </form>
+      <p style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginBottom: 10 }}>{q ? `${rows.length} MATCH "${q.toUpperCase()}" · ` : ""}TIP: TICK PRODUCTS TO BULK-ASSIGN COLLECTION/TYPE OR PUBLISH AT ONCE.</p>
       <ProductsTable rows={rows} />
     </div>
   );

@@ -7,13 +7,16 @@ import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
-export default async function CustomersPage() {
+export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const q = ((await searchParams).q ?? "").trim();
   const sb = await supabaseServer();
-  const { data, count } = await sb
+  let query = sb
     .from("waitlist")
     .select("email, source, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .limit(500);
+  if (q) query = query.ilike("email", `%${q}%`);
+  const { data, count } = await query;
 
   const rows = data ?? [];
   const bySource = rows.reduce<Record<string, number>>((acc, r) => {
@@ -37,6 +40,10 @@ export default async function CustomersPage() {
           <a href="/admin/customers/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
         </div>
       </div>
+
+      <form action="/admin/customers" method="get" style={{ marginBottom: 18, maxWidth: 360 }}>
+        <input name="q" defaultValue={q} placeholder="Search by email…" style={{ width: "100%", fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "9px 12px" }} />
+      </form>
 
       {/* source breakdown */}
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22 }}>

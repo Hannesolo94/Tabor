@@ -2,7 +2,7 @@
 // is live); traffic/conversion come from `analytics_events` (collecting now).
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-export type RangeKey = "today" | "7d" | "30d" | "90d";
+export type RangeKey = "today" | "7d" | "30d" | "90d" | "custom";
 
 export interface Series {
   labels: string[]; // YYYY-MM-DD per day
@@ -38,30 +38,43 @@ export interface Dashboard {
   topCategories: { category: string; qty: number; revenue: number }[];
   sources: { source: string; count: number }[];
   lowStock: { sku: string; name: string; inventory: number }[];
+  // revenue + orders split by region (alongside the overall totals above)
+  regions: { region: string; revenue: number; orders: number }[];
 }
 
 const DAY = 86400000;
 function dayKey(d: Date) {
   return d.toISOString().slice(0, 10);
 }
-function rangeBounds(key: RangeKey): { from: Date; days: number } {
+function rangeBounds(key: RangeKey, custom?: { from?: string; to?: string }): { from: Date; to: Date; days: number } {
   const now = new Date();
+  // custom range: explicit from/to (inclusive), capped at ~13 months
+  if (key === "custom" && custom?.from && custom?.to) {
+    const f = new Date(custom.from + "T00:00:00Z");
+    const t = new Date(custom.to + "T00:00:00Z");
+    const from = f <= t ? f : t;
+    const to = f <= t ? t : f;
+    const days = Math.min(400, Math.max(1, Math.round((to.getTime() - from.getTime()) / DAY) + 1));
+    return { from, to, days };
+  }
   const days = key === "today" ? 1 : key === "7d" ? 7 : key === "30d" ? 30 : 90;
   const from = new Date(now.getTime() - (days - 1) * DAY);
   from.setUTCHours(0, 0, 0, 0);
-  return { from, days };
+  return { from, to: now, days };
 }
 
 interface OrderItem { sku?: string; qty?: number; quantity?: number; price?: number }
 
-export async function getDashboard(rangeKey: RangeKey): Promise<Dashboard> {
+export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string; to?: string }): Promise<Dashboard> {
   const sb = supabaseAdmin();
-  const { from, days } = rangeBounds(rangeKey);
+  const { from, to, days } = rangeBounds(rangeKey, custom);
   const fromIso = from.toISOString();
+  // include the whole `to` day
+  const toIso = new Date(to.getTime() + DAY).toISOString();
 
   const [eventsRes, ordersRes, allOrdersRes, productsRes] = await Promise.all([
-    sb.from("analytics_events").select("type, session_id, visitor_id, referrer, created_at").gte("created_at", fromIso),
-    sb.from("orders").select("total, items, user_id, created_at, status").gte("created_at", fromIso),
+    sb.from("analytics_events").select("type, session_id, visitor_id, referrer, created_at").gte("created_at", fromIso).lt("created_at", toIso),
+    sb.from("orders").select("total, items, user_id, created_at, status, region").gte("created_at", fromIso).lt("created_at", toIso),
     sb.from("orders").select("total, user_id"),
     sb.from("products").select("sku, name, category, cost, inventory, track_inventory"),
   ]);
@@ -84,9 +97,13 @@ export async function getDashboard(rangeKey: RangeKey): Promise<Dashboard> {
   let cogs = 0;
   const prodAgg = new Map<string, { qty: number; revenue: number }>();
   const catAgg = new Map<string, { qty: number; revenue: number }>();
+  const regionAgg = new Map<string, { revenue: number; orders: number }>();
   for (const o of orders) {
     const day = dayKey(new Date(o.created_at));
     revenue += Number(o.total) || 0;
+    const reg = (o as { region?: string }).region || "INTL";
+    const ra = regionAgg.get(reg) ?? { revenue: 0, orders: 0 };
+    ra.revenue += Number(o.total) || 0; ra.orders += 1; regionAgg.set(reg, ra);
     if (revByDay.has(day)) revByDay.set(day, revByDay.get(day)! + (Number(o.total) || 0));
     if (ordByDay.has(day)) ordByDay.set(day, ordByDay.get(day)! + 1);
     const items = (Array.isArray(o.items) ? o.items : []) as OrderItem[];
@@ -164,6 +181,7 @@ export async function getDashboard(rangeKey: RangeKey): Promise<Dashboard> {
       sessions: labels.map((l) => sessByDay.get(l)?.size ?? 0),
     },
     topProducts, topCategories, sources, lowStock,
+    regions: [...regionAgg.entries()].map(([region, v]) => ({ region, ...v })).sort((a, b) => b.revenue - a.revenue),
   };
 }
 

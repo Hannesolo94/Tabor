@@ -38,10 +38,12 @@ function Card({ title, children, action }: { title: string; children: React.Reac
   );
 }
 
-export default async function AdminDashboard({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
+export default async function AdminDashboard({ searchParams }: { searchParams: Promise<{ range?: string; from?: string; to?: string }> }) {
   const sp = await searchParams;
-  const rangeKey = (["today", "7d", "30d", "90d"].includes(sp.range ?? "") ? sp.range : "30d") as RangeKey;
-  const d = await getDashboard(rangeKey);
+  const isCustom = sp.range === "custom" && sp.from && sp.to;
+  const rangeKey = (isCustom ? "custom" : ["today", "7d", "30d", "90d"].includes(sp.range ?? "") ? sp.range : "30d") as RangeKey;
+  const d = await getDashboard(rangeKey, isCustom ? { from: sp.from, to: sp.to } : undefined);
+  const regionSym = (r: string) => (r === "ZA" ? "R" : "$");
 
   return (
     <div>
@@ -50,10 +52,19 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
           <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ {d.fromLabel.slice(5)} → {d.toLabel.slice(5)} ]</div>
           <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Dashboard</h1>
         </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          {RANGES.map((r) => (
-            <Link key={r.key} href={`/admin?range=${r.key}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "8px 12px", border: `1px solid ${GOLD}44`, color: rangeKey === r.key ? "#0A0A0A" : "#9A948A", background: rangeKey === r.key ? `linear-gradient(180deg,#E8D08C,${GOLD})` : "transparent" }}>{r.label}</Link>
-          ))}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            {RANGES.map((r) => (
+              <Link key={r.key} href={`/admin?range=${r.key}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "8px 12px", border: `1px solid ${GOLD}44`, color: rangeKey === r.key && !isCustom ? "#0A0A0A" : "#9A948A", background: rangeKey === r.key && !isCustom ? `linear-gradient(180deg,#E8D08C,${GOLD})` : "transparent" }}>{r.label}</Link>
+            ))}
+          </div>
+          <form action="/admin" method="get" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <input type="hidden" name="range" value="custom" />
+            <input type="date" name="from" defaultValue={isCustom ? sp.from : d.fromLabel} aria-label="From date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "7px 8px" }} />
+            <span style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A" }}>→</span>
+            <input type="date" name="to" defaultValue={isCustom ? sp.to : d.toLabel} aria-label="To date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "7px 8px" }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: isCustom ? "#0A0A0A" : "#9A948A", background: isCustom ? `linear-gradient(180deg,#E8D08C,${GOLD})` : "transparent", border: `1px solid ${GOLD}44`, padding: "7px 12px", cursor: "pointer" }}>Apply</button>
+          </form>
         </div>
       </div>
 
@@ -86,6 +97,25 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
           <Funnel steps={[{ label: "Pageviews", value: d.funnel.pageviews }, { label: "Add to cart", value: d.funnel.addToCart }, { label: "Checkout", value: d.funnel.checkout }, { label: "Purchase", value: d.funnel.purchase }]} />
         </Card>
         <Card title="Traffic sources"><BarList items={d.sources.map((s) => ({ label: s.source, value: s.count }))} /></Card>
+      </div>
+
+      {/* revenue by region */}
+      <div style={{ marginBottom: 14 }}>
+        <Card title="Revenue by region">
+          {d.regions.length === 0 ? (
+            <p style={{ fontFamily: MONO, fontSize: 11, color: "#8A847A" }}>No regional sales yet. ZA and International revenue will split out here once orders flow.</p>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+              {d.regions.map((r) => (
+                <div key={r.region} style={{ border: "1px solid rgba(201,169,97,0.14)", padding: "12px 14px" }}>
+                  <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em" }}>{r.region === "ZA" ? "SOUTH AFRICA" : "INTERNATIONAL"}</div>
+                  <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 22, color: GOLD, marginTop: 4 }}>{regionSym(r.region)}{r.revenue.toFixed(0)}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 9, color: "#9A948A", letterSpacing: "0.08em", marginTop: 2 }}>{r.orders} {r.orders === 1 ? "ORDER" : "ORDERS"}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
       </div>
 
       {/* best sellers */}

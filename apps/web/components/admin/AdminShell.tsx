@@ -27,6 +27,9 @@ export function AdminShell({ email, name, children }: { email?: string; name?: s
           <TaborSeal id="admin-nav" size={26} />
           <span style={{ fontFamily: PIRATA, fontSize: 22, color: GOLD }}>Tabor</span>
         </Link>
+        <form action="/admin/search" method="get" style={{ marginBottom: 16 }}>
+          <input name="q" placeholder="Search…" aria-label="Search admin" style={{ width: "100%", fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "8px 10px" }} />
+        </form>
         <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
           {NAV.map((n) => (
             <Link key={n.href} href={n.soon ? "#" : n.href} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: "0.08em", color: n.soon ? "#8A847A" : "#C3BDB1", textDecoration: "none", padding: "10px 10px", textTransform: "uppercase", display: "flex", justifyContent: "space-between", alignItems: "center", pointerEvents: n.soon ? "none" : "auto" }}>
