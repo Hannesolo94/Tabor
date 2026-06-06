@@ -4,7 +4,7 @@
   "private": true,
   "description": "TABOR — Sons of Fire. Gamified brotherhood app for Christian men.",
   "workspaces": [
-    "apps/*",
+    "apps/web",
     "packages/*"
   ],
   "scripts": {

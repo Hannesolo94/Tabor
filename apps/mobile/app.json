@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "TABOR",
+    "slug": "tabor",
+    "scheme": "tabor",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "backgroundColor": "#0A0A0A",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "quest.tabor.app"
+    },
+    "android": {
+      "package": "quest.tabor.app"
+    },
+    "plugins": ["expo-router"]
+  }
+}
