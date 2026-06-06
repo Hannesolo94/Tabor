@@ -75,7 +75,8 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   const [eventsRes, ordersRes, allOrdersRes, productsRes] = await Promise.all([
     sb.from("analytics_events").select("type, session_id, visitor_id, referrer, created_at").gte("created_at", fromIso).lt("created_at", toIso),
     sb.from("orders").select("total, items, user_id, created_at, status, region").gte("created_at", fromIso).lt("created_at", toIso),
-    sb.from("orders").select("total, user_id"),
+    sb.from("orders").select("total, user_id").limit(10000), // safety cap for all-time LTV
+
     sb.from("products").select("sku, name, category, cost, inventory, track_inventory"),
   ]);
 
