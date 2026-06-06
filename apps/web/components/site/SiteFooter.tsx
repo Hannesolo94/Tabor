@@ -71,7 +71,7 @@ export async function SiteFooter() {
         FULFILLED LOCALLY + WORLDWIDE · PRINTED ON DEMAND
         <br />
         <span style={{ display: "inline-flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
-          {[["Shipping", "/shipping"], ["Returns", "/returns"], ["Privacy", "/privacy"], ["Terms", "/terms"]].map(([l, h]) => (
+          {[["Shipping", "/shipping"], ["Returns", "/returns"], ["Request Return", "/returns/request"], ["Privacy", "/privacy"], ["Terms", "/terms"]].map(([l, h]) => (
             <Link key={h} href={h} style={{ color: "#8A847A", textDecoration: "none" }}>{l.toUpperCase()}</Link>
           ))}
         </span>
