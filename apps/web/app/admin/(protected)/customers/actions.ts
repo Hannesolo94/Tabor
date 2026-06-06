@@ -21,6 +21,23 @@ export async function syncAllToEmailPlatform(): Promise<void> {
   revalidatePath("/admin/customers");
 }
 
+export async function addTag(formData: FormData): Promise<void> {
+  const email = String(formData.get("email") ?? "");
+  const tag = String(formData.get("tag") ?? "").trim().toLowerCase();
+  if (!email || !tag) return;
+  const sb = await supabaseServer();
+  await sb.from("customer_tags").upsert({ email, tag });
+  revalidatePath(`/admin/customers/${encodeURIComponent(email)}`);
+}
+
+export async function removeTag(formData: FormData): Promise<void> {
+  const email = String(formData.get("email") ?? "");
+  const tag = String(formData.get("tag") ?? "");
+  const sb = await supabaseServer();
+  await sb.from("customer_tags").delete().eq("email", email).eq("tag", tag);
+  revalidatePath(`/admin/customers/${encodeURIComponent(email)}`);
+}
+
 export async function addNote(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "");
   const body = String(formData.get("body") ?? "").trim();

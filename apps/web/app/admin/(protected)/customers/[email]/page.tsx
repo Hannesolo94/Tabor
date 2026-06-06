@@ -4,7 +4,7 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { DeleteCustomer } from "../DeleteCustomer";
-import { addNote, deleteNote } from "../actions";
+import { addNote, deleteNote, addTag, removeTag } from "../actions";
 import { GOLD, MONO, CINZEL, BODY, formatMoney } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -16,11 +16,13 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
   const sb = await supabaseServer();
   const admin = supabaseAdmin();
 
-  const [waitlist, notes, profRes] = await Promise.all([
+  const [waitlist, notes, profRes, tagsRes] = await Promise.all([
     sb.from("waitlist").select("source, created_at").eq("email", email).maybeSingle(),
     sb.from("customer_notes").select("id, body, author, created_at").eq("email", email).order("created_at", { ascending: false }),
     admin.from("profiles").select("user_id, name, streak, role").eq("email", email).maybeSingle(),
+    sb.from("customer_tags").select("tag").eq("email", email).order("tag"),
   ]);
+  const tags = (tagsRes.data ?? []).map((t) => t.tag);
 
   const profile = profRes.data ? { name: profRes.data.name, streak: profRes.data.streak, role: profRes.data.role } : null;
   const user = profRes.data ? { id: profRes.data.user_id } : null;
@@ -70,6 +72,24 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      {/* tags */}
+      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px", marginTop: 20 }}>
+        <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em", marginBottom: 12 }}>TAGS</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+          {tags.map((t) => (
+            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: MONO, fontSize: 10, color: GOLD, border: `1px solid ${GOLD}44`, padding: "5px 8px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              {t}
+              <form action={removeTag} style={{ display: "inline" }}><input type="hidden" name="email" value={email} /><input type="hidden" name="tag" value={t} /><button type="submit" aria-label={`Remove tag ${t}`} style={{ background: "none", border: "none", color: "#8A847A", cursor: "pointer", padding: 0, fontSize: 12, lineHeight: 1 }}>×</button></form>
+            </span>
+          ))}
+          <form action={addTag} style={{ display: "inline-flex", gap: 6 }}>
+            <input type="hidden" name="email" value={email} />
+            <input name="tag" placeholder="add tag (e.g. vip, sa, lapsed)" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "6px 9px", width: 180 }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "none", border: "1px solid rgba(201,169,97,0.3)", padding: "6px 10px", cursor: "pointer" }}>Add</button>
+          </form>
         </div>
       </div>
 

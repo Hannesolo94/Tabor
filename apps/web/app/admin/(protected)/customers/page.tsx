@@ -7,15 +7,26 @@ import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
-export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const q = ((await searchParams).q ?? "").trim();
+export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ q?: string; tag?: string }> }) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+  const tag = (sp.tag ?? "").trim().toLowerCase();
   const sb = await supabaseServer();
+
+  // all tags (for chips + per-row badges)
+  const { data: tagRows } = await sb.from("customer_tags").select("email, tag");
+  const allTags = [...new Set((tagRows ?? []).map((t) => t.tag))].sort();
+  const tagsByEmail = new Map<string, string[]>();
+  for (const t of tagRows ?? []) tagsByEmail.set(t.email, [...(tagsByEmail.get(t.email) ?? []), t.tag]);
+  const taggedEmails = tag ? new Set((tagRows ?? []).filter((t) => t.tag === tag).map((t) => t.email)) : null;
+
   let query = sb
     .from("waitlist")
     .select("email, source, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .limit(500);
   if (q) query = query.ilike("email", `%${q}%`);
+  if (taggedEmails) query = query.in("email", [...taggedEmails].slice(0, 500));
   const { data, count } = await query;
 
   const rows = data ?? [];
@@ -41,9 +52,20 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         </div>
       </div>
 
-      <form action="/admin/customers" method="get" style={{ marginBottom: 18, maxWidth: 360 }}>
+      <form action="/admin/customers" method="get" style={{ marginBottom: 14, maxWidth: 360 }}>
         <input name="q" defaultValue={q} placeholder="Search by email…" style={{ width: "100%", fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "9px 12px" }} />
       </form>
+
+      {/* segment chips (tags) */}
+      {allTags.length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18, alignItems: "center" }}>
+          <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em" }}>SEGMENTS:</span>
+          <Link href="/admin/customers" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "5px 10px", border: `1px solid ${GOLD}44`, color: !tag ? "#0A0A0A" : "#C3BDB1", background: !tag ? GOLD : "none" }}>All</Link>
+          {allTags.map((t) => (
+            <Link key={t} href={`/admin/customers?tag=${encodeURIComponent(t)}`} style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "5px 10px", border: `1px solid ${GOLD}44`, color: tag === t ? "#0A0A0A" : "#C3BDB1", background: tag === t ? GOLD : "none" }}>{t}</Link>
+          ))}
+        </div>
+      )}
 
       {/* source breakdown */}
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22 }}>
@@ -65,7 +87,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         ) : (
           rows.map((r, i) => (
             <Link key={r.email + i} href={`/admin/customers/${encodeURIComponent(r.email)}`} style={{ textDecoration: "none", display: "grid", gridTemplateColumns: "1fr 120px 110px", alignItems: "center", padding: "11px 18px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-              <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1", wordBreak: "break-all" }}>{r.email}</span>
+              <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1", wordBreak: "break-all" }}>
+                {r.email}
+                {(tagsByEmail.get(r.email) ?? []).map((t) => <span key={t} style={{ fontFamily: MONO, fontSize: 8, color: GOLD, border: `1px solid ${GOLD}44`, padding: "1px 5px", marginLeft: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{t}</span>)}
+              </span>
               <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.08em", textTransform: "uppercase" }}>{r.source || "web"}</span>
               <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#8A847A" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
             </Link>
