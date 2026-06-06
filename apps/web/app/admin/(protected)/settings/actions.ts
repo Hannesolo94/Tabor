@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
 import { sanitizePixels } from "@/lib/pixels-db";
+import { logAudit } from "@/lib/audit";
 
 export async function saveStore(formData: FormData): Promise<void> {
   const value = {
@@ -20,6 +21,7 @@ export async function saveStore(formData: FormData): Promise<void> {
   };
   const sb = await supabaseServer();
   await sb.from("app_settings").upsert({ key: "store", value, updated_at: new Date().toISOString() });
+  await logAudit("settings.update", "settings", "store");
   revalidatePath("/admin/settings");
 }
 

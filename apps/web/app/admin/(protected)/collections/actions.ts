@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
+import { logAudit } from "@/lib/audit";
 
 export async function createCollection(formData: FormData): Promise<void> {
   const title = String(formData.get("title") ?? "").trim();
@@ -40,6 +41,7 @@ export async function deleteCollection(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   const sb = await supabaseServer();
   await sb.from("collections").delete().eq("id", id);
+  await logAudit("collection.delete", "collection", id);
   revalidatePath("/admin/collections");
   revalidatePath("/");
   redirect("/admin/collections");

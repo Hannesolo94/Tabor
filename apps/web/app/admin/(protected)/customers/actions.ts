@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { omnisendAddContact } from "@/lib/omnisend";
+import { logAudit } from "@/lib/audit";
 
 /** Push all existing waitlist contacts to the email platform (if enabled). */
 export async function syncAllToEmailPlatform(): Promise<void> {
@@ -55,6 +56,7 @@ export async function deleteCustomer(formData: FormData): Promise<void> {
     await admin.auth.admin.deleteUser(prof.user_id);
   }
 
+  await logAudit("customer.erase", "customer", email, { hadAccount: !!prof?.user_id });
   revalidatePath("/admin/customers");
   redirect("/admin/customers");
 }

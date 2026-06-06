@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
+import { logAudit } from "@/lib/audit";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface SaveState {
@@ -80,6 +81,7 @@ export async function deleteProduct(formData: FormData): Promise<void> {
   const sku = String(formData.get("sku") ?? "");
   const sb = await supabaseServer();
   await sb.from("products").delete().eq("sku", sku);
+  await logAudit("product.delete", "product", sku);
   revalidatePath("/admin/products");
   redirect("/admin/products");
 }
