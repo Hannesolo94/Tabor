@@ -17,6 +17,7 @@ const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Discounts", href: "/admin/discounts" },
   { label: "Orders", href: "/admin/orders" },
   { label: "Returns", href: "/admin/returns" },
+  { label: "Community", href: "/admin/community" },
   { label: "Marketing", href: "/admin/marketing" },
   { label: "Suppliers", href: "/admin/suppliers" },
   { label: "Settings", href: "/admin/settings" },
