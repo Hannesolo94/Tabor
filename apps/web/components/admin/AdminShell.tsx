@@ -10,6 +10,7 @@ const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Assistant", href: "/admin/assistant" },
   { label: "Customers", href: "/admin/customers" },
   { label: "Products", href: "/admin/products" },
+  { label: "Collections", href: "/admin/collections" },
   { label: "Reviews", href: "/admin/reviews" },
   { label: "Content", href: "/admin/content" },
   { label: "Discounts", href: "/admin/discounts" },
