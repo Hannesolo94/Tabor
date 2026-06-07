@@ -86,11 +86,16 @@ export default function Guild() {
     setRoster(await loadRoster(g.id));
   }
 
-  async function react(m: Msg, emoji: string) {
+  function react(m: Msg, emoji: string) {
     if (!userId) return;
-    const mine = reactions[m.id]?.mine.includes(emoji) ?? false;
-    await toggleReaction(m.id, userId, emoji, !mine);
-    setReactions(await loadReactions(messages.map((x) => x.id), userId));
+    const cur = reactions[m.id] ?? { counts: {}, mine: [] };
+    const mine = cur.mine.includes(emoji);
+    const counts = { ...cur.counts };
+    counts[emoji] = Math.max(0, (counts[emoji] ?? 0) + (mine ? -1 : 1));
+    if (counts[emoji] === 0) delete counts[emoji];
+    const mineNext = mine ? cur.mine.filter((e) => e !== emoji) : [...cur.mine, emoji];
+    setReactions((r) => ({ ...r, [m.id]: { counts, mine: mineNext } })); // optimistic, no refetch
+    toggleReaction(m.id, userId, emoji, !mine).catch(() => {});
   }
 
   function onMessagePress(m: Msg) {

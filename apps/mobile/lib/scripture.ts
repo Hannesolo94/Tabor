@@ -11,13 +11,9 @@ export interface Prayer { id: string; body: string; answered: boolean; created_a
 let _books: BookInfo[] | null = null;
 export async function getBooks(): Promise<BookInfo[]> {
   if (_books) return _books;
-  const { data } = await supabase.from("bible_verses").select("book_order, book, chapter");
-  const map = new Map<number, { book: string; chapters: number }>();
-  for (const r of data ?? []) {
-    const cur = map.get(r.book_order);
-    if (!cur || r.chapter > cur.chapters) map.set(r.book_order, { book: r.book, chapters: Math.max(cur?.chapters ?? 0, r.chapter) });
-  }
-  _books = [...map.entries()].map(([book_order, v]) => ({ book_order, book: v.book, chapters: v.chapters })).sort((a, b) => a.book_order - b.book_order);
+  // reads the 66-row bible_books view, not the ~31k verse rows
+  const { data } = await supabase.from("bible_books").select("book_order, book, chapters").order("book_order");
+  _books = (data as BookInfo[]) ?? [];
   return _books;
 }
 
