@@ -39,6 +39,8 @@ export async function loadDm(threadId: string): Promise<DmMsg[]> {
 }
 export async function sendDm(threadId: string, userId: string, body: string): Promise<{ error?: string }> {
   const { error } = await supabase.from("messages").insert({ dm_thread_id: threadId, author_id: userId, body, kind: "text" });
+  // generic push (no content — DMs are E2EE, server never sees plaintext)
+  if (!error) supabase.rpc("notify_message", { p_channel: null, p_dm: threadId, p_body: null }).then(() => {});
   return { error: error?.message };
 }
 export function subscribeDm(threadId: string, cb: (m: DmMsg) => void): () => void {

@@ -45,6 +45,7 @@ export async function loadMessages(channelId: string): Promise<Msg[]> {
 
 export async function sendMessage(channelId: string, guildId: string, userId: string, body: string): Promise<{ error?: string }> {
   const { error } = await supabase.from("messages").insert({ channel_id: channelId, guild_id: guildId, author_id: userId, body, kind: "text" });
+  if (!error) supabase.rpc("notify_message", { p_channel: channelId, p_dm: null, p_body: body }).then(() => {});
   return { error: error?.message };
 }
 

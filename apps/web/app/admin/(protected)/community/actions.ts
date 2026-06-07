@@ -5,6 +5,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, emailShell } from "@/lib/email";
+import { sendExpoPush } from "@/lib/push";
 
 /** Compose a community announcement and fan it out to every user's inbox. */
 export async function sendBroadcast(formData: FormData): Promise<void> {
@@ -33,6 +34,10 @@ export async function sendBroadcast(formData: FormData): Promise<void> {
     const html = emailShell(title, body.replace(/\n/g, "<br/>"));
     await Promise.allSettled(emails.slice(0, 1000).map((to) => sendEmail(to, title, html)));
   }
+
+  // announcements always push to every device (no opt-out, per requirement)
+  const { data: toks } = await admin.from("push_tokens").select("token");
+  await sendExpoPush((toks ?? []).map((t) => t.token), title, body.slice(0, 140), deepLink ? { route: deepLink } : undefined);
 
   await admin.from("broadcasts").insert({ title, body, deep_link: deepLink, sent_by: user?.email ?? "admin", audience: ids.length });
   await logAudit("broadcast.send", "broadcast", undefined, { title, audience: ids.length, emailed: alsoEmail });

@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail, emailShell } from "@/lib/email";
+import { sendExpoPush } from "@/lib/push";
 
 export const dynamic = "force-dynamic";
 
@@ -37,5 +38,17 @@ export async function GET(req: Request) {
   const results = await Promise.allSettled(recipients.slice(0, 2000).map((p) => sendEmail(p.email as string, "TABOR: your daily quest awaits", html)));
   const sent = results.filter((r) => r.status === "fulfilled" && (r.value as { ok: boolean }).ok).length;
 
-  return NextResponse.json({ ok: true, candidates: recipients.length, sent });
+  // push to opted-in users (push.quests, default on) who haven't sealed today
+  const pushUserIds = (profiles ?? []).filter((p) => {
+    if (!p.onboarded || sealedSet.has(p.user_id)) return false;
+    const prefs = (p.notif_prefs ?? {}) as { push?: { quests?: boolean } };
+    return prefs.push?.quests !== false;
+  }).map((p) => p.user_id);
+  let pushed = 0;
+  if (pushUserIds.length) {
+    const { data: toks } = await admin.from("push_tokens").select("token").in("user_id", pushUserIds);
+    pushed = await sendExpoPush((toks ?? []).map((t) => t.token), "Your daily quest awaits", "The day is not sealed. Three quests stand. Open TABOR and take the ground.", { route: "/(tabs)" });
+  }
+
+  return NextResponse.json({ ok: true, candidates: recipients.length, sent, pushed });
 }

@@ -10,6 +10,7 @@ import { JetBrainsMono_400Regular } from "@expo-google-fonts/jetbrains-mono";
 import { CormorantGaramond_500Medium_Italic } from "@expo-google-fonts/cormorant-garamond";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { ensureKeys } from "@/lib/crypto";
+import { registerForPush } from "@/lib/push";
 import { DonationPrompt } from "@/components/DonationPrompt";
 import { C, F } from "@/lib/theme";
 
@@ -38,7 +39,7 @@ function useAuthGate(session: unknown, loading: boolean, onboarded: boolean | nu
 function RootNav() {
   const { session, loading, onboarded } = useAuth();
   useAuthGate(session, loading, onboarded);
-  useEffect(() => { if (session?.user) ensureKeys(session.user.id).catch(() => {}); }, [session]);
+  useEffect(() => { if (session?.user) { ensureKeys(session.user.id).catch(() => {}); registerForPush(session.user.id).catch(() => {}); } }, [session]);
   return (
     <>
       <StatusBar style="light" />
