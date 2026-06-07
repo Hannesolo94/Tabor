@@ -6,6 +6,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@tabor/shared": [
+        "../../packages/shared/src/index.ts"
       ]
     }
   },

@@ -3,10 +3,10 @@
 // as pure (state) => state functions with no React / localStorage dependency.
 // `today` is always injected so the logic is deterministic and unit-testable.
 
-import { STAT_GAIN_RATIO } from "./constants.js";
-import { addDays } from "./dates.js";
-import { levelFromXp, rankIdxFromLevel } from "./derive.js";
-import type { GameState } from "./types.js";
+import { STAT_GAIN_RATIO } from "./constants";
+import { addDays } from "./dates";
+import { levelFromXp, rankIdxFromLevel } from "./derive";
+import type { GameState } from "./types";
 
 /**
  * Auto-unlock achievements derivable purely from streak/rank.

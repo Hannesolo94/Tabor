@@ -5,7 +5,7 @@ import {
   newPlayer,
   reconcile,
   useFreeze,
-} from "../src/game/index.js";
+} from "../src/game/index";
 
 const TODAY = "2026-06-05";
 

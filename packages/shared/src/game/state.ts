@@ -3,9 +3,9 @@
 // a genuinely empty new-player state. Both are provided here; both are pure and
 // take `today` so they stay deterministic.
 
-import { DEFAULT_QUESTS } from "./constants.js";
-import { addDays } from "./dates.js";
-import type { GameState } from "./types.js";
+import { DEFAULT_QUESTS } from "./constants";
+import { addDays } from "./dates";
+import type { GameState } from "./types";
 
 /** A clean state for a brand-new player (before onboarding fills in details). */
 export function newPlayer(today: string): GameState {

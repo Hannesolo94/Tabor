@@ -2,8 +2,8 @@
 // Ported from proto-state.jsx (levelFromXp / rankIdxFromLevel / xpAtLevel and
 // the rankProgress computation in useTabor).
 
-import { RANK_LEVELS, RANKS, XP_PER_LEVEL } from "./constants.js";
-import type { DerivedRank, GameState } from "./types.js";
+import { RANK_LEVELS, RANKS, XP_PER_LEVEL } from "./constants";
+import type { DerivedRank, GameState } from "./types";
 
 /** Level for a given total xp. Level 1 is the floor. */
 export function levelFromXp(xp: number): number {

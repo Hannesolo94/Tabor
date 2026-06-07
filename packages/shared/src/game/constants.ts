@@ -2,7 +2,7 @@
 // Do NOT change these values without updating the spec — web, app, and the
 // daily-rollover Edge Function all depend on them agreeing.
 
-import type { Achievement, ClassDef, ClassName, Quest, StatKey } from "./types.js";
+import type { Achievement, ClassDef, ClassName, Quest, StatKey } from "./types";
 
 export const RANKS = [
   "Recruit",
