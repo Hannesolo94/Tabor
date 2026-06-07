@@ -1,74 +1,173 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, Image, TextInput, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "@/lib/supabase";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
-import { todayKey } from "@/lib/quests";
-import { C, F } from "@/lib/theme";
+import { useProfile } from "@/lib/useProfile";
 import { useTabBar } from "@/lib/tabbar";
+import { supabase } from "@/lib/supabase";
+import { todayKey } from "@/lib/quests";
+import { listExercises, generateProgram, getRoutines, MUSCLE_GROUPS, type Exercise, type Routine } from "@/lib/fitness";
+import { C, F } from "@/lib/theme";
 
-const ROUTINES = [
-  { name: "Sentinel Strength", tag: "STRENGTH", moves: ["Push-ups x20", "Squats x30", "Plank 60s", "Lunges x20", "Burpees x10"] },
-  { name: "Crusader Conditioning", tag: "HIIT", moves: ["Jumping jacks 40s", "Mountain climbers 40s", "High knees 40s", "Rest 20s", "Repeat x4"] },
-  { name: "Pilgrim Mobility", tag: "RECOVERY", moves: ["Hip openers", "Cat-cow x10", "World's greatest stretch", "Deep squat hold 60s"] },
-];
-
-type Phase = "idle" | "work" | "rest" | "done";
+const GOALS = [{ v: "strength", l: "Strength" }, { v: "muscle", l: "Muscle" }, { v: "fatloss", l: "Fat loss" }, { v: "endurance", l: "Endurance" }];
+const EQUIP = [{ v: "none", l: "Bodyweight" }, { v: "dumbbells", l: "Dumbbells" }, { v: "full", l: "Full gym" }];
 
 export default function Body() {
   const tb = useTabBar();
+  const router = useRouter();
   const { session } = useAuth();
+  const { profile } = useProfile();
   const userId = session?.user.id;
-  const [tab, setTab] = useState<"tabata" | "routines">("tabata");
-  const [count, setCount] = useState(0);
-
-  async function refreshCount() {
-    if (!userId) return;
-    const { count: n } = await supabase.from("workouts").select("id", { count: "exact", head: true }).eq("user_id", userId);
-    setCount(n ?? 0);
-  }
-  useEffect(() => { refreshCount(); /* eslint-disable-next-line */ }, [userId]);
+  const [tab, setTab] = useState<"program" | "library" | "timer">("program");
 
   async function logWorkout(name = "Workout", mins = 15) {
     if (!userId) return;
     await supabase.from("workouts").insert({ user_id: userId, name, mins, day: todayKey() });
-    refreshCount();
   }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
-      <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
+      <View style={{ paddingHorizontal: 22, paddingTop: 8 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ FITNESS GUILD ]</Text>
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>The Body</Text>
-        <Text style={{ color: C.muted, fontSize: 12, marginTop: 4 }}>{count} workout{count === 1 ? "" : "s"} logged</Text>
-
-        <View style={{ flexDirection: "row", gap: 8, marginTop: 16, marginBottom: 18 }}>
-          {(["tabata", "routines"] as const).map((t) => (
-            <Pressable key={t} onPress={() => setTab(t)} style={{ paddingVertical: 7, paddingHorizontal: 14, borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
-              <Text style={{ color: tab === t ? C.black : C.muted, fontSize: 10, letterSpacing: 1, fontWeight: "700" }}>{t === "tabata" ? "TABATA TIMER" : "ROUTINES"}</Text>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 14, marginBottom: 6 }}>
+          {(["program", "library", "timer"] as const).map((t) => (
+            <Pressable key={t} onPress={() => setTab(t)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
+              <Text style={{ color: tab === t ? C.black : C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>{t === "program" ? "PROGRAM" : t === "library" ? "LIBRARY" : "TABATA"}</Text>
             </Pressable>
           ))}
         </View>
+      </View>
 
-        {tab === "tabata" ? <Tabata onComplete={() => logWorkout("Tabata Session", 4)} /> : (
-          <View>
-            {ROUTINES.map((r) => (
-              <View key={r.name} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 12, borderRadius: 2 }}>
-                <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{r.tag}</Text>
-                <Text style={{ color: C.ivory, fontSize: 17, fontWeight: "700", marginTop: 3, marginBottom: 8 }}>{r.name}</Text>
-                {r.moves.map((m) => <Text key={m} style={{ color: C.text, fontSize: 14, lineHeight: 24 }}>• {m}</Text>)}
-                <Pressable onPress={() => logWorkout(r.name, 15)} style={{ marginTop: 12, borderWidth: 1, borderColor: C.gold, paddingVertical: 10, alignItems: "center", borderRadius: 2 }}>
-                  <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2 }}>MARK COMPLETE</Text>
-                </Pressable>
-              </View>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+      {tab === "program" && <ProgramTab userId={userId} profile={profile} onScroll={tb?.onScroll} router={router} />}
+      {tab === "library" && <LibraryTab onScroll={tb?.onScroll} router={router} />}
+      {tab === "timer" && (
+        <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
+          <Tabata onComplete={() => logWorkout("Tabata Session", 4)} />
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; profile: any; onScroll: any; router: any }) {
+  const [routines, setRoutines] = useState<Routine[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [goal, setGoal] = useState("muscle");
+  const [equip, setEquip] = useState("full");
+  const [days, setDays] = useState(3);
+
+  async function load() { if (userId) setRoutines(await getRoutines(userId)); setLoading(false); }
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
+
+  async function generate() {
+    if (!userId) return;
+    setBusy(true);
+    await generateProgram(userId, { fitness_level: profile?.fitness_level ?? "beginner", equipment: equip, goals: goal, days });
+    await load();
+    setBusy(false);
+  }
+
+  if (loading) return <ActivityIndicator color={C.gold} style={{ marginTop: 40 }} />;
+
+  return (
+    <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
+      <View style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, borderRadius: 2, marginBottom: 18 }}>
+        <Text style={{ color: C.ivory, fontSize: 14, fontFamily: F.headMid, marginBottom: 10 }}>Tune your program</Text>
+        <Chips label="GOAL" options={GOALS} value={goal} onPick={setGoal} />
+        <Chips label="EQUIPMENT" options={EQUIP} value={equip} onPick={setEquip} />
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
+          <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>DAYS / WEEK</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <Pressable onPress={() => setDays((d) => Math.max(2, d - 1))}><Text style={{ color: C.gold, fontSize: 22 }}>−</Text></Pressable>
+            <Text style={{ color: C.ivory, fontSize: 18, fontFamily: F.head, width: 28, textAlign: "center" }}>{days}</Text>
+            <Pressable onPress={() => setDays((d) => Math.min(6, d + 1))}><Text style={{ color: C.gold, fontSize: 22 }}>+</Text></Pressable>
+          </View>
+        </View>
+        <Pressable onPress={generate} disabled={busy} style={{ backgroundColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2, marginTop: 14, opacity: busy ? 0.6 : 1 }}>
+          <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>{busy ? "FORGING…" : routines.length ? "REGENERATE PROGRAM" : "GENERATE MY PROGRAM"}</Text>
+        </Pressable>
+      </View>
+
+      {routines.length === 0 ? (
+        <Text style={{ color: C.muted, fontSize: 14, fontFamily: F.body }}>No program yet. Set your goal above and forge one. You can also build custom routines from the Library.</Text>
+      ) : (
+        <>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono, marginBottom: 10 }}>YOUR PROGRAM · {routines.length} DAYS</Text>
+          {routines.map((r) => (
+            <Pressable key={r.id} onPress={() => router.push(`/routine/${r.id}`)} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, borderRadius: 2, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <View>
+                <Text style={{ color: C.ivory, fontSize: 16, fontFamily: F.headMid }}>{r.name}</Text>
+                <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 3 }}>{(r.focus || "").toUpperCase()}{r.generated ? "" : " · CUSTOM"}</Text>
+              </View>
+              <Text style={{ color: C.gold, fontSize: 18 }}>›</Text>
+            </Pressable>
+          ))}
+        </>
+      )}
+    </ScrollView>
+  );
+}
+
+function LibraryTab({ onScroll, router }: { onScroll: any; router: any }) {
+  const [q, setQ] = useState("");
+  const [muscle, setMuscle] = useState<string | null>(null);
+  const [items, setItems] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function run() {
+    setLoading(true);
+    const group = MUSCLE_GROUPS.find((m) => m.label === muscle);
+    setItems(await listExercises({ q, muscles: group?.muscles }));
+    setLoading(false);
+  }
+  useEffect(() => { run(); /* eslint-disable-next-line */ }, [muscle]);
+
+  return (
+    <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+      <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+        <TextInput value={q} onChangeText={setQ} onSubmitEditing={run} placeholder="Search 870+ exercises…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} />
+        <Pressable onPress={run} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>GO</Text></Pressable>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 14 }} contentContainerStyle={{ gap: 8 }}>
+        <Chip label="All" active={!muscle} onPress={() => setMuscle(null)} />
+        {MUSCLE_GROUPS.map((m) => <Chip key={m.label} label={m.label} active={muscle === m.label} onPress={() => setMuscle(m.label)} />)}
+      </ScrollView>
+      {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 20 }} /> : items.map((e) => (
+        <Pressable key={e.id} onPress={() => router.push(`/exercise/${e.id}`)} style={{ flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)", paddingVertical: 10 }}>
+          <View style={{ width: 54, height: 54, borderRadius: 2, backgroundColor: C.surface, overflow: "hidden" }}>
+            {e.image_url ? <Image source={{ uri: e.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" /> : null}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: C.ivory, fontSize: 14, fontFamily: F.bodyMid }} numberOfLines={1}>{e.name}</Text>
+            <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginTop: 2 }}>{(e.equipment || "—").toUpperCase()} · {(e.primary_muscles[0] || "").toUpperCase()}</Text>
+          </View>
+          <Text style={{ color: C.gold, fontSize: 18 }}>›</Text>
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
+}
+
+function Chips({ label, options, value, onPick }: { label: string; options: { v: string; l: string }[]; value: string; onPick: (v: string) => void }) {
+  return (
+    <View style={{ marginTop: 8 }}>
+      <Text style={{ color: C.muted, fontSize: 9, letterSpacing: 2, fontFamily: F.mono, marginBottom: 6 }}>{label}</Text>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
+        {options.map((o) => <Chip key={o.v} label={o.l} active={value === o.v} onPress={() => onPick(o.v)} />)}
+      </View>
+    </View>
+  );
+}
+function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return <Pressable onPress={onPress} style={{ paddingVertical: 7, paddingHorizontal: 12, borderWidth: 1, borderColor: active ? C.gold : C.line, backgroundColor: active ? C.gold : "transparent", borderRadius: 2 }}><Text style={{ color: active ? C.black : C.muted, fontSize: 11, fontFamily: F.bodyMid }}>{label}</Text></Pressable>;
+}
+
+// ---- Tabata timer ----
+type Phase = "idle" | "work" | "rest" | "done";
 function Tabata({ onComplete }: { onComplete: () => void }) {
   const [work, setWork] = useState(20);
   const [rest, setRest] = useState(10);
@@ -85,14 +184,9 @@ function Tabata({ onComplete }: { onComplete: () => void }) {
     timer.current = setInterval(() => {
       setLeft((l) => {
         if (l > 1) return l - 1;
-        // phase transition
         setPhase((p) => {
           if (p === "work") { setLeft(rest); return "rest"; }
-          // rest finished
-          setRound((r) => {
-            if (r >= rounds) { setRunning(false); setPhase("done"); onComplete(); return r; }
-            setLeft(work); setPhase("work"); return r + 1;
-          });
+          setRound((r) => { if (r >= rounds) { setRunning(false); setPhase("done"); onComplete(); return r; } setLeft(work); setPhase("work"); return r + 1; });
           return p;
         });
         return l;
@@ -101,16 +195,10 @@ function Tabata({ onComplete }: { onComplete: () => void }) {
     return () => { if (timer.current) clearInterval(timer.current); };
   }, [running, work, rest, rounds, onComplete]);
 
-  useEffect(() => {
-    Animated.loop(Animated.sequence([
-      Animated.timing(pulse, { toValue: 1.06, duration: 500, useNativeDriver: true }),
-      Animated.timing(pulse, { toValue: 1, duration: 500, useNativeDriver: true }),
-    ])).start();
-  }, [pulse]);
+  useEffect(() => { Animated.loop(Animated.sequence([Animated.timing(pulse, { toValue: 1.06, duration: 500, useNativeDriver: true }), Animated.timing(pulse, { toValue: 1, duration: 500, useNativeDriver: true })])).start(); }, [pulse]);
 
   const start = () => { setPhase("work"); setRound(1); setLeft(work); setRunning(true); };
   const reset = () => { setRunning(false); setPhase("idle"); setRound(1); setLeft(work); };
-
   const color = phase === "work" ? C.gold : phase === "rest" ? "#6fa8dc" : phase === "done" ? C.green : C.muted;
 
   return (
@@ -122,40 +210,31 @@ function Tabata({ onComplete }: { onComplete: () => void }) {
           <Stepper label="ROUNDS" value={rounds} set={setRounds} step={1} min={1} />
         </View>
       )}
-
       <Animated.View style={{ transform: [{ scale: running ? pulse : 1 }], width: 220, height: 220, borderRadius: 110, borderWidth: 3, borderColor: color, alignItems: "center", justifyContent: "center", marginVertical: 10 }}>
         <Text style={{ color, fontSize: 12, letterSpacing: 4, fontFamily: F.mono }}>{phase === "done" ? "COMPLETE" : phase.toUpperCase()}</Text>
-        <Text style={{ color: C.ivory, fontSize: 64, fontWeight: "800", fontFamily: F.head }}>{phase === "done" ? "✓" : left}</Text>
-        {phase !== "idle" && phase !== "done" && <Text style={{ color: C.muted, fontSize: 12, letterSpacing: 2 }}>ROUND {round}/{rounds}</Text>}
+        <Text style={{ color: C.ivory, fontSize: 64, fontFamily: F.head }}>{phase === "done" ? "✓" : left}</Text>
+        {phase !== "idle" && phase !== "done" && <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.mono }}>ROUND {round}/{rounds}</Text>}
       </Animated.View>
-
       <View style={{ flexDirection: "row", gap: 12, marginTop: 18 }}>
         {phase === "idle" || phase === "done" ? (
-          <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 2 }}>
-            <Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{phase === "done" ? "GO AGAIN" : "START"}</Text>
-          </Pressable>
+          <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>{phase === "done" ? "GO AGAIN" : "START"}</Text></Pressable>
         ) : (
           <>
-            <Pressable onPress={() => setRunning((r) => !r)} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 2 }}>
-              <Text style={{ color: C.gold, fontWeight: "700", letterSpacing: 2 }}>{running ? "PAUSE" : "RESUME"}</Text>
-            </Pressable>
-            <Pressable onPress={reset} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 2 }}>
-              <Text style={{ color: C.muted, fontWeight: "700", letterSpacing: 2 }}>RESET</Text>
-            </Pressable>
+            <Pressable onPress={() => setRunning((r) => !r)} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.headMid, letterSpacing: 1 }}>{running ? "PAUSE" : "RESUME"}</Text></Pressable>
+            <Pressable onPress={reset} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 2 }}><Text style={{ color: C.muted, fontFamily: F.headMid, letterSpacing: 1 }}>RESET</Text></Pressable>
           </>
         )}
       </View>
     </View>
   );
 }
-
 function Stepper({ label, value, set, step, min }: { label: string; value: number; set: (n: number) => void; step: number; min: number }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}>
-      <Text style={{ color: C.muted, fontSize: 12, letterSpacing: 2 }}>{label}</Text>
+      <Text style={{ color: C.muted, fontSize: 12, letterSpacing: 2, fontFamily: F.mono }}>{label}</Text>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 18 }}>
         <Pressable onPress={() => set(Math.max(min, value - step))} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>−</Text></Pressable>
-        <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "700", width: 40, textAlign: "center" }}>{value}</Text>
+        <Text style={{ color: C.ivory, fontSize: 18, fontFamily: F.head, width: 40, textAlign: "center" }}>{value}</Text>
         <Pressable onPress={() => set(value + step)} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>+</Text></Pressable>
       </View>
     </View>
