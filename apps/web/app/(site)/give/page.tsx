@@ -31,6 +31,9 @@ export default async function GivePage() {
           <p style={{ fontFamily: BODY, fontSize: 16, color: "#9A948A", lineHeight: 1.6, margin: "16px auto 0", maxWidth: 560 }}>
             TABOR is free for every brother, for life. You keep it that way. Two ways to stand with us: <strong style={{ color: "#E8E2D5" }}>give below</strong>, or <strong style={{ color: "#E8E2D5" }}>wear the climb</strong> from our store. Both build the Kingdom.
           </p>
+          <p style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.1em", margin: "16px auto 0", maxWidth: 520 }}>
+            NO ADS. EVER. WE NEVER SELL YOUR DATA. TABOR IS FUNDED ONLY BY BROTHERS AND BY THE GEAR. A SEAMLESS, SACRED SPACE.
+          </p>
         </div>
       </section>
 

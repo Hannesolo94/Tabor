@@ -37,6 +37,7 @@ export function DonationPrompt({ enabled }: { enabled: boolean }) {
           <Text style={{ color: C.text, fontSize: 14.5, lineHeight: 22, fontFamily: F.body, textAlign: "center", marginTop: 10 }}>
             This brotherhood is free for life, brother. You keep it that way. Stand with the mission by giving, or by wearing the climb. Half of every gift goes to charities we choose together.
           </Text>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono, textAlign: "center", marginTop: 10 }}>NO ADS. EVER. WE NEVER SELL YOUR DATA.</Text>
           <Pressable onPress={() => { Linking.openURL(`${SITE}/give`); snooze(); }} style={{ backgroundColor: C.gold, paddingVertical: 14, width: "100%", alignItems: "center", borderRadius: 2, marginTop: 18 }}>
             <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SUPPORT THE MISSION</Text>
           </Pressable>
