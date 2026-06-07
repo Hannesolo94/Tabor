@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, type Channel, type Msg, type Member } from "@/lib/guild";
+import { blockUser } from "@/lib/social";
+import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { rankForLevel, levelFromXp } from "@/lib/game";
 import { C } from "@/lib/theme";
 
@@ -57,11 +59,23 @@ export default function Guild() {
   async function send() {
     const body = input.trim();
     if (!body || !active || !guildId || !userId) return;
+    if (violatesGuidelines(body)) { Alert.alert("Keep it honoring", "That message breaks the community guidelines."); return; }
     setInput("");
     const optimistic: Msg = { id: `tmp-${Date.now()}`, body, author_id: userId, created_at: new Date().toISOString() };
     setMessages((prev) => [...prev, optimistic]);
     setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 60);
-    await sendMessage(active.id, guildId, userId, body);
+    const { error } = await sendMessage(active.id, guildId, userId, body);
+    const msg = sendErrorMessage(error);
+    if (msg) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Not sent", msg); }
+  }
+
+  function moderate(m: Msg) {
+    if (!m.author_id || m.author_id === userId) return;
+    Alert.alert("Message options", undefined, [
+      { text: "Report", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); Alert.alert("Reported", "Thank you. Our team will review it."); } },
+      { text: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } },
+      { text: "Cancel", style: "cancel" },
+    ]);
   }
 
   if (loading) {
@@ -100,12 +114,13 @@ export default function Guild() {
             {messages.map((m) => {
               const mine = m.author_id === userId;
               return (
-                <View key={m.id} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
+                <Pressable key={m.id} onLongPress={() => moderate(m)} delayLongPress={350} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
                   <Text style={{ color: mine ? C.gold : C.muted, fontSize: 9, letterSpacing: 1, marginBottom: 3, textAlign: mine ? "right" : "left" }}>{mine ? "YOU" : (m.author_id ? nameMap[m.author_id] ?? "Brother" : "System").toUpperCase()}</Text>
                   <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 2 }}>
                     <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>
                   </View>
-                </View>
+                  {!mine && <Text style={{ color: C.muted, fontSize: 8, marginTop: 2 }}>hold to report</Text>}
+                </Pressable>
               );
             })}
           </ScrollView>

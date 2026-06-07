@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { loadDm, sendDm, subscribeDm, type DmMsg } from "@/lib/social";
+import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { C } from "@/lib/theme";
 
 export default function DM() {
@@ -28,10 +29,22 @@ export default function DM() {
   async function send() {
     const body = input.trim();
     if (!body || !id || !userId) return;
+    if (violatesGuidelines(body)) { Alert.alert("Keep it honoring", "That message breaks the community guidelines."); return; }
     setInput("");
-    setMessages((prev) => [...prev, { id: `tmp-${Date.now()}`, body, author_id: userId, created_at: new Date().toISOString() }]);
+    const tmpId = `tmp-${Date.now()}`;
+    setMessages((prev) => [...prev, { id: tmpId, body, author_id: userId, created_at: new Date().toISOString() }]);
     setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 60);
-    await sendDm(id, userId, body);
+    const { error } = await sendDm(id, userId, body);
+    const m = sendErrorMessage(error);
+    if (m) { setMessages((prev) => prev.filter((x) => x.id !== tmpId)); Alert.alert("Not sent", m); }
+  }
+
+  function report(m: DmMsg) {
+    if (!m.author_id || m.author_id === userId || !userId) return;
+    Alert.alert("Report this message?", undefined, [
+      { text: "Report", style: "destructive", onPress: async () => { await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "dm" }); Alert.alert("Reported", "Thank you. Our team will review it."); } },
+      { text: "Cancel", style: "cancel" },
+    ]);
   }
 
   return (
@@ -46,11 +59,11 @@ export default function DM() {
           {messages.map((m) => {
             const mine = m.author_id === userId;
             return (
-              <View key={m.id} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
+              <Pressable key={m.id} onLongPress={() => report(m)} delayLongPress={350} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
                 <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 2 }}>
                   <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>
                 </View>
-              </View>
+              </Pressable>
             );
           })}
         </ScrollView>
