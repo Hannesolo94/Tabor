@@ -5,27 +5,42 @@ import { TaborSeal } from "@/components/TaborSeal";
 import { LogoutButton } from "./LogoutButton";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
-const NAV: { label: string; href: string; soon?: boolean }[] = [
-  { label: "Dashboard", href: "/admin" },
-  { label: "Assistant", href: "/admin/assistant" },
-  { label: "Customers", href: "/admin/customers" },
-  { label: "Products", href: "/admin/products" },
-  { label: "Collections", href: "/admin/collections" },
-  { label: "Reviews", href: "/admin/reviews" },
-  { label: "Content", href: "/admin/content" },
-  { label: "Blog", href: "/admin/blog" },
-  { label: "Discounts", href: "/admin/discounts" },
-  { label: "Orders", href: "/admin/orders" },
-  { label: "Returns", href: "/admin/returns" },
-  { label: "Community", href: "/admin/community" },
-  { label: "Donations", href: "/admin/donations" },
-  { label: "Giveaways", href: "/admin/giveaways" },
-  { label: "Moderation", href: "/admin/moderation" },
-  { label: "Tickets", href: "/admin/tickets" },
-  { label: "Marketing", href: "/admin/marketing" },
-  { label: "Suppliers", href: "/admin/suppliers" },
-  { label: "Settings", href: "/admin/settings" },
-  { label: "Audit Log", href: "/admin/audit" },
+// Grouped nav (IA audit). Routes are unchanged; only labels/grouping differ.
+const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[] = [
+  { section: "Overview", items: [
+    { label: "Dashboard", href: "/admin" },
+    { label: "Assistant", href: "/admin/assistant" },
+  ] },
+  { section: "Commerce", items: [
+    { label: "Products", href: "/admin/products" },
+    { label: "Collections", href: "/admin/collections" },
+    { label: "Discounts", href: "/admin/discounts" },
+    { label: "Suppliers", href: "/admin/suppliers" },
+  ] },
+  { section: "Orders & Customers", items: [
+    { label: "Orders", href: "/admin/orders" },
+    { label: "Returns", href: "/admin/returns" },
+    { label: "Customers", href: "/admin/customers" },
+    { label: "Reviews", href: "/admin/reviews" },
+  ] },
+  { section: "Content", items: [
+    { label: "Pages", href: "/admin/content" },
+    { label: "Blog", href: "/admin/blog" },
+  ] },
+  { section: "Community", items: [
+    { label: "Broadcast", href: "/admin/community" },
+    { label: "Moderation", href: "/admin/moderation" },
+    { label: "Tickets", href: "/admin/tickets" },
+    { label: "Giveaways", href: "/admin/giveaways" },
+  ] },
+  { section: "Growth", items: [
+    { label: "Marketing", href: "/admin/marketing" },
+    { label: "Donations", href: "/admin/donations" },
+  ] },
+  { section: "System", items: [
+    { label: "Settings", href: "/admin/settings" },
+    { label: "Audit Log", href: "/admin/audit" },
+  ] },
 ];
 
 export function AdminShell({ email, name, children }: { email?: string; name?: string | null; children: React.ReactNode }) {
@@ -40,12 +55,16 @@ export function AdminShell({ email, name, children }: { email?: string; name?: s
         <form action="/admin/search" method="get" style={{ marginBottom: 16 }}>
           <input name="q" placeholder="Search…" aria-label="Search admin" style={{ width: "100%", fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "8px 10px" }} />
         </form>
-        <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.soon ? "#" : n.href} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: "0.08em", color: n.soon ? "#8A847A" : "#C3BDB1", textDecoration: "none", padding: "10px 10px", textTransform: "uppercase", display: "flex", justifyContent: "space-between", alignItems: "center", pointerEvents: n.soon ? "none" : "auto" }}>
-              {n.label}
-              {n.soon && <span style={{ fontSize: 7.5, color: GOLD, letterSpacing: "0.1em", border: `1px solid ${GOLD}44`, padding: "2px 4px" }}>SOON</span>}
-            </Link>
+        <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, overflowY: "auto" }}>
+          {NAV_GROUPS.map((g) => (
+            <div key={g.section} style={{ marginBottom: 10 }}>
+              <div style={{ fontFamily: MONO, fontSize: 8.5, color: GOLD, letterSpacing: "0.18em", textTransform: "uppercase", padding: "4px 10px 4px", opacity: 0.7 }}>{g.section}</div>
+              {g.items.map((n) => (
+                <Link key={n.href} href={n.href} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: "0.08em", color: "#C3BDB1", textDecoration: "none", padding: "7px 10px", textTransform: "uppercase", display: "block" }}>
+                  {n.label}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
         <div style={{ borderTop: "1px solid rgba(201,169,97,0.14)", paddingTop: 14, marginTop: 14 }}>
