@@ -74,8 +74,9 @@ export default function Status() {
           <Action label="THE SYSTEM" onPress={() => router.push("/system")} />
           <Action label="GUILDS" onPress={() => router.push("/guilds")} />
         </View>
-        <View style={{ marginTop: 10 }}>
+        <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
           <Action label="INBOX" onPress={() => router.push("/notifications")} />
+          <Action label="SETTINGS" onPress={() => router.push("/settings")} />
         </View>
 
         {/* history */}

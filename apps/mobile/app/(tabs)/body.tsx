@@ -62,6 +62,13 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
 
   async function load() { if (userId) setRoutines(await getRoutines(userId)); setLoading(false); }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
+  // pre-fill from onboarding answers
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.equipment) setEquip(profile.equipment);
+    if (Array.isArray(profile.goals) && profile.goals[0]) setGoal(profile.goals[0]);
+    if (profile.days_per_week) setDays(profile.days_per_week);
+  }, [profile]);
 
   async function generate() {
     if (!userId) return;
