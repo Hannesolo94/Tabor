@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Switch } from "react-native";
+import { View, Text, Pressable, ScrollView, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
@@ -11,8 +11,22 @@ const DEFAULTS: Prefs = { push: { quests: true, guild: true, dm: true }, email: 
 
 export default function Settings() {
   const router = useRouter();
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const userId = session?.user.id;
+
+  function confirmDelete() {
+    Alert.alert(
+      "Delete your account?",
+      "This permanently erases your profile, progress, messages, and all data. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete everything", style: "destructive", onPress: async () => {
+          try { await supabase.rpc("delete_my_account"); } catch { /* row already gone */ }
+          await signOut();
+        } },
+      ],
+    );
+  }
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [loaded, setLoaded] = useState(false);
 
@@ -53,6 +67,12 @@ export default function Settings() {
           Announcements from the brotherhood are always delivered. Phone push activates with the published app; email reminders send once the email provider is connected.
         </Text>
         {!loaded ? null : null}
+
+        <Text style={[sec, { color: C.red }]}>DANGER ZONE</Text>
+        <Pressable onPress={confirmDelete} style={{ borderWidth: 1, borderColor: "rgba(192,58,58,0.5)", paddingVertical: 14, alignItems: "center", borderRadius: 2 }}>
+          <Text style={{ color: C.red, fontSize: 13, letterSpacing: 1, fontFamily: F.mono }}>DELETE MY ACCOUNT</Text>
+        </Pressable>
+        <Text style={{ color: C.muted, fontSize: 11, lineHeight: 17, fontFamily: F.body, marginTop: 8 }}>Permanently erases your account and all your data. This cannot be undone.</Text>
       </ScrollView>
     </SafeAreaView>
   );
