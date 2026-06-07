@@ -1,37 +1,63 @@
 import { LegalPage, Section } from "@/components/site/Legal";
 
-export const metadata = { title: "Terms of Service · TABOR" };
+export const metadata = { title: "Terms & Community Guidelines", description: "The terms of use and community guidelines for TABOR." };
 
 export default function Terms() {
   return (
-    <LegalPage title="Terms of Service" updated="June 2026">
-      <Section h="Agreement">
-        By using tabor.quest or placing an order, you agree to these Terms. If you do not agree, please do not use the site.
+    <LegalPage title="Terms & Covenant" updated="June 2026">
+      <Section h="Draft notice">
+        This is a working draft for review. Have it reviewed by a qualified attorney before launch.
       </Section>
-      <Section h="Our products">
-        Our items are made to order through print-on-demand. This means each item is produced for you after you order it. Because of this, production and delivery take longer than off-the-shelf stock, and made-to-order items are generally not eligible for change-of-mind returns (see our Refund &amp; Returns Policy).
+
+      <Section h="1. Acceptance & eligibility">
+        By creating an account or using TABOR (the "Service") you agree to these Terms and our Community Guidelines below. You must be <strong>18 years or older</strong> to use TABOR. If you do not agree, do not use the Service.
       </Section>
-      <Section h="Pricing and currency">
-        Prices are shown in the currency for your region. The price, applicable taxes, and shipping are confirmed at checkout based on your shipping address, which determines the final price and the fulfilment partner. Regional pricing may differ; the price that applies to your order is the one for your delivery destination at checkout.
+
+      <Section h="2. The Service">
+        TABOR provides a faith, fitness, and brotherhood community: daily quests, scripture, training tools, guilds and messaging, plus links to our apparel store and a way to support the mission. Features may change over time.
       </Section>
-      <Section h="Orders">
-        An order is an offer to buy. We may accept or decline any order, and may cancel and refund an order if an item is unavailable, mispriced, or the order appears fraudulent. You are responsible for giving accurate shipping details.
+
+      <Section h="3. Your account">
+        Keep your login credentials secure; you are responsible for activity on your account. Tell us immediately at support@tabor.quest if you suspect unauthorised use.
       </Section>
-      <Section h="Accounts">
-        If you create an account, keep your login secure. You are responsible for activity under your account. You may delete your account and data at any time.
+
+      <Section h="4. Community Guidelines — zero tolerance">
+        TABOR has <strong>zero tolerance for objectionable content and abusive behaviour</strong>. You agree NOT to post, send, or upload anything that is:
+        <ul style={ul}>
+          <li>Hateful, harassing, threatening, or bullying;</li>
+          <li>Sexual, obscene, or pornographic; any content sexualising minors is strictly forbidden and will be reported to authorities;</li>
+          <li>Violent, illegal, or promoting self-harm or harm to others;</li>
+          <li>Spam, scams, impersonation, or deceptive content;</li>
+          <li>Infringing on others' rights or privacy.</li>
+        </ul>
+        Treat every member with honour. We may remove content and <strong>suspend or permanently ban</strong> any user who breaks these rules, typically acting on reports within 24 hours.
       </Section>
-      <Section h="Intellectual property">
-        The TABOR name, marks, designs, and content are our property and may not be copied, resold, or used without permission. Brand art is original; no third-party game or franchise IP is used.
+
+      <Section h="5. Reporting & blocking">
+        You can <strong>report</strong> any message or user and <strong>block</strong> anyone from contacting you (these tools are in the app). Reports are reviewed by our team. Because direct messages are end-to-end encrypted, reporting a DM includes the content from the reporting user's device so we can act on it.
       </Section>
-      <Section h="Acceptable use">
-        Do not misuse the site, attempt to breach security, scrape data, or upload unlawful or infringing content (including in reviews). We may remove content and suspend access for violations.
+
+      <Section h="6. Your content">
+        You own the content you create. You grant TABOR a licence to host and display it as needed to run the Service. You are responsible for your content and confirm you have the right to share it. We may remove content that violates these Terms.
       </Section>
-      <Section h="Limitation of liability">
-        The site and products are provided on a reasonable-efforts basis. To the extent permitted by law, we are not liable for indirect or consequential loss. Nothing here limits rights you have under applicable consumer law.
+
+      <Section h="7. Store & donations">
+        Apparel and gear purchases are governed by our Shipping and Returns policies. Donations are processed on our website by our payment provider. We are transparent about the split: a stated percentage of each gift goes to the charities our community chooses, and the remainder supports TABOR's operations. <strong>The portion retained for operations is not a tax-deductible donation.</strong> Donating does not unlock any in-app features.
       </Section>
-      <Section h="Governing law">
-        These Terms are governed by the laws of South Africa. We may update these Terms; continued use after changes means you accept them.
+
+      <Section h="8. Termination & deletion">
+        You may delete your account at any time (Settings → Delete my account), which erases your personal data. We may suspend or terminate accounts that violate these Terms.
+      </Section>
+
+      <Section h="9. Disclaimers & liability">
+        The Service is provided "as is". Fitness content is general information, not medical advice — consult a professional before starting any program. To the maximum extent permitted by law, TABOR is not liable for indirect or consequential damages.
+      </Section>
+
+      <Section h="10. Governing law & contact">
+        These Terms are governed by the laws of the Republic of South Africa (to be confirmed for your operating entity). Questions: <strong>support@tabor.quest</strong>. We may update these Terms; continued use means acceptance of the changes.
       </Section>
     </LegalPage>
   );
 }
+
+const ul: React.CSSProperties = { margin: "8px 0 0", paddingLeft: 20 };
