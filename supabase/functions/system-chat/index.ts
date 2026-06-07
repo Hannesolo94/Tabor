@@ -18,9 +18,11 @@ const FALLBACKS = [
   "The day is not yet sealed. Rise.",
 ];
 
+interface ChatMsg { role: "user" | "system" | "assistant"; content: string }
 interface ChatBody {
-  message: string;
-  context?: Record<string, unknown>; // name, class, rank, level, streak, etc.
+  messages?: ChatMsg[];                 // the app sends a conversation history
+  message?: string;                     // backward-compatible single message
+  context?: Record<string, unknown>;    // name, class, rank, level, streak, etc.
 }
 
 Deno.serve(async (req) => {
@@ -40,6 +42,12 @@ Deno.serve(async (req) => {
 
   const ctx = body.context ? `\n\n[USER CONTEXT]\n${JSON.stringify(body.context)}` : "";
 
+  // Accept either a conversation history (messages[]) or a single message.
+  const history = (body.messages ?? (body.message ? [{ role: "user", content: body.message }] : []))
+    .slice(-10)
+    .map((m) => ({ role: m.role === "system" ? "assistant" : m.role, content: m.content }));
+  if (!history.length) return json({ reply: FALLBACKS[0], fallback: true });
+
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -52,7 +60,7 @@ Deno.serve(async (req) => {
         model: MODEL,
         max_tokens: 300,
         system: SYSTEM_PROMPT + ctx,
-        messages: [{ role: "user", content: body.message }],
+        messages: history,
       }),
     });
     if (!res.ok) throw new Error(`anthropic ${res.status}`);
