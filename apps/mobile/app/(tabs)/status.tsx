@@ -8,11 +8,13 @@ import { useProfile } from "@/lib/useProfile";
 import { levelProgress, RANKS } from "@/lib/game";
 import { todayKey } from "@/lib/quests";
 import { Seal } from "@/components/Seal";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
+import { useTabBar } from "@/lib/tabbar";
 
 const CLASSES = ["Sentinel", "Scribe", "Crusader", "Pilgrim"];
 
 export default function Status() {
+  const tb = useTabBar();
   const router = useRouter();
   const { session, signOut } = useAuth();
   const { profile } = useProfile();
@@ -45,10 +47,10 @@ export default function Status() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
-      <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
+      <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
         <View style={{ alignItems: "center", marginBottom: 6 }}>
           <Seal size={64} />
-          <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", marginTop: 12 }}>{profile?.name || "Brother"}</Text>
+          <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head, marginTop: 12 }}>{profile?.name || "Brother"}</Text>
           <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 3, marginTop: 2 }}>{prog.rank.toUpperCase()}</Text>
           {profile?.handle ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>@{String(profile.handle)}</Text> : null}
         </View>
@@ -119,7 +121,7 @@ export default function Status() {
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
-  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 10, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 8, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.gold, fontSize: 15, fontWeight: "800", marginTop: 3 }} numberOfLines={1}>{value}</Text></View>;
+  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 10, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 8, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.gold, fontSize: 15, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text></View>;
 }
 function Tag({ label, value }: { label: string; value: string }) {
   return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 8, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.ivory, fontSize: 14, fontWeight: "600", marginTop: 3, textTransform: "capitalize" }}>{value}</Text></View>;

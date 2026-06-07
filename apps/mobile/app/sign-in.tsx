@@ -3,7 +3,7 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingVi
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { Seal } from "@/components/Seal";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 export default function SignIn() {
   const { signIn, signUp } = useAuth();
@@ -29,7 +29,7 @@ export default function SignIn() {
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 28 }} keyboardShouldPersistTaps="handled">
           <View style={{ alignItems: "center", marginBottom: 30 }}>
             <Seal size={72} />
-            <Text style={{ color: C.gold, fontSize: 34, fontWeight: "800", letterSpacing: 6, marginTop: 16 }}>TABOR</Text>
+            <Text style={{ color: C.gold, fontSize: 44, fontFamily: F.display, letterSpacing: 2, marginTop: 16 }}>TABOR</Text>
             <Text style={{ color: C.muted, fontSize: 11, letterSpacing: 4, marginTop: 4 }}>SONS OF FIRE</Text>
           </View>
 
@@ -47,7 +47,7 @@ export default function SignIn() {
           {!!notice && <Text style={{ color: C.green, fontSize: 12, marginTop: 4 }}>{notice}</Text>}
 
           <Pressable onPress={submit} disabled={busy} style={{ marginTop: 18, backgroundColor: C.gold, paddingVertical: 16, alignItems: "center", borderRadius: 2, opacity: busy ? 0.6 : 1 }}>
-            {busy ? <ActivityIndicator color={C.black} /> : <Text style={{ color: C.black, fontWeight: "800", letterSpacing: 2 }}>{mode === "in" ? "ENTER" : "AWAKEN"}</Text>}
+            {busy ? <ActivityIndicator color={C.black} /> : <Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{mode === "in" ? "ENTER" : "AWAKEN"}</Text>}
           </Pressable>
 
           <Pressable onPress={() => { setMode(mode === "in" ? "up" : "in"); setError(""); setNotice(""); }} style={{ marginTop: 18, alignItems: "center" }}>

@@ -3,11 +3,13 @@ import { View, Text, Pressable, ScrollView, Animated } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { VERSES, verseForDay, type Verse } from "@/lib/verses";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
+import { useTabBar } from "@/lib/tabbar";
 
 const BM_KEY = "tabor.bookmarks";
 
 export default function Word() {
+  const tb = useTabBar();
   const today = verseForDay();
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [tab, setTab] = useState<"today" | "armory" | "saved">("today");
@@ -30,9 +32,9 @@ export default function Word() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
-      <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
-        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4 }}>[ SCRIPTURE RAID ]</Text>
-        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", marginTop: 6 }}>The Word</Text>
+      <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
+        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ SCRIPTURE RAID ]</Text>
+        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>The Word</Text>
 
         <View style={{ flexDirection: "row", gap: 8, marginTop: 16, marginBottom: 18 }}>
           {(["today", "armory", "saved"] as const).map((t) => (

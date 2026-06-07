@@ -1,13 +1,13 @@
 import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 export function Pillar({ tag, title, intro, points }: { tag: string; title: string; intro: string; points: string[] }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
       <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
-        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4 }}>[ {tag} ]</Text>
-        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", marginTop: 6 }}>{title}</Text>
+        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ {tag} ]</Text>
+        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>{title}</Text>
         <Text style={{ color: C.muted, fontSize: 14, marginTop: 10, lineHeight: 22 }}>{intro}</Text>
         <View style={{ marginTop: 22 }}>
           {points.map((p) => (

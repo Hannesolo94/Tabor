@@ -1,5 +1,5 @@
 import Svg, { Circle, Path } from "react-native-svg";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 // Simplified TABOR seal: ringed mountain + flame/cross. Placeholder until the
 // full brand mark (tabor-mark.jsx) is ported to RN SVG.

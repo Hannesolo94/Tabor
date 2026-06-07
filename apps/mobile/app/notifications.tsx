@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 interface Note { id: string; kind: string | null; title: string | null; body: string | null; read: boolean; created_at: string }
 
@@ -30,7 +30,7 @@ export default function Notifications() {
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderBottomWidth: 1, borderBottomColor: C.line }}>
         <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 22 }}>‹</Text></Pressable>
-        <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800" }}>Inbox</Text>
+        <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800", fontFamily: F.head }}>Inbox</Text>
       </View>
       {loading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}><ActivityIndicator color={C.gold} /></View>

@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator, Alert 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ensureHandle, searchUsers, listFriends, sendFriendRequest, respondFriend, openDm, blockUser, type FriendRow, type SearchRow } from "@/lib/social";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 export default function Friends() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function Friends() {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderBottomWidth: 1, borderBottomColor: C.line }}>
         <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 22 }}>‹</Text></Pressable>
         <View>
-          <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800" }}>Brothers</Text>
+          <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800", fontFamily: F.head }}>Brothers</Text>
           <Text style={{ color: C.muted, fontSize: 10 }}>your handle: <Text style={{ color: C.gold }}>@{handle}</Text> · share to be added</Text>
         </View>
       </View>
@@ -60,7 +60,7 @@ export default function Friends() {
         <Text style={sec}>FIND A BROTHER</Text>
         <View style={{ flexDirection: "row", gap: 8, marginBottom: 8 }}>
           <TextInput value={q} onChangeText={setQ} onSubmitEditing={runSearch} placeholder="Search by name or @handle" placeholderTextColor={C.muted} autoCapitalize="none" style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2 }} />
-          <Pressable onPress={runSearch} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800" }}>FIND</Text></Pressable>
+          <Pressable onPress={runSearch} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>FIND</Text></Pressable>
         </View>
         {searching && <ActivityIndicator color={C.gold} style={{ marginVertical: 8 }} />}
         {results.map((u) => (
@@ -70,7 +70,7 @@ export default function Friends() {
         {incoming.length > 0 && <><Text style={sec}>REQUESTS</Text>{incoming.map((f) => (
           <View key={f.id} style={card}>
             <View style={{ flex: 1 }}><Text style={{ color: C.ivory, fontSize: 15 }}>{f.name || "Brother"}</Text><Text style={{ color: C.muted, fontSize: 11 }}>@{f.handle} wants to connect</Text></View>
-            <Pressable onPress={async () => { await respondFriend(f.id, true); refresh(); }} style={btnGold}><Text style={{ color: C.black, fontWeight: "800", fontSize: 11 }}>ACCEPT</Text></Pressable>
+            <Pressable onPress={async () => { await respondFriend(f.id, true); refresh(); }} style={btnGold}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, fontSize: 11 }}>ACCEPT</Text></Pressable>
             <Pressable onPress={async () => { await respondFriend(f.id, false); refresh(); }} style={btnGhost}><Text style={{ color: C.muted, fontSize: 11 }}>DECLINE</Text></Pressable>
           </View>
         ))}</>}
@@ -80,7 +80,7 @@ export default function Friends() {
         {accepted.map((f) => (
           <View key={f.id} style={card}>
             <View style={{ flex: 1 }}><Text style={{ color: C.ivory, fontSize: 15 }}>{f.name || "Brother"}</Text><Text style={{ color: C.muted, fontSize: 11 }}>@{f.handle} · {(f.cls || "Pilgrim")}</Text></View>
-            <Pressable onPress={() => dm(f)} style={btnGold}><Text style={{ color: C.black, fontWeight: "800", fontSize: 11 }}>MESSAGE</Text></Pressable>
+            <Pressable onPress={() => dm(f)} style={btnGold}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, fontSize: 11 }}>MESSAGE</Text></Pressable>
             <Pressable onPress={() => confirmBlock(f)} style={btnGhost}><Text style={{ color: C.muted, fontSize: 11 }}>BLOCK</Text></Pressable>
           </View>
         ))}
@@ -97,7 +97,7 @@ function Row({ title, sub, action, onAction }: { title: string; sub: string; act
   return (
     <View style={card}>
       <View style={{ flex: 1 }}><Text style={{ color: C.ivory, fontSize: 15 }}>{title}</Text><Text style={{ color: C.muted, fontSize: 11 }}>{sub}</Text></View>
-      {action && <Pressable onPress={onAction} style={btnGold}><Text style={{ color: C.black, fontWeight: "800", fontSize: 11 }}>{action}</Text></Pressable>}
+      {action && <Pressable onPress={onAction} style={btnGold}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, fontSize: 11 }}>{action}</Text></Pressable>}
     </View>
   );
 }

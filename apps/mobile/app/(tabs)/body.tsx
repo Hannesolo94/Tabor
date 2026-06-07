@@ -4,7 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { todayKey } from "@/lib/quests";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
+import { useTabBar } from "@/lib/tabbar";
 
 const ROUTINES = [
   { name: "Sentinel Strength", tag: "STRENGTH", moves: ["Push-ups x20", "Squats x30", "Plank 60s", "Lunges x20", "Burpees x10"] },
@@ -15,6 +16,7 @@ const ROUTINES = [
 type Phase = "idle" | "work" | "rest" | "done";
 
 export default function Body() {
+  const tb = useTabBar();
   const { session } = useAuth();
   const userId = session?.user.id;
   const [tab, setTab] = useState<"tabata" | "routines">("tabata");
@@ -35,9 +37,9 @@ export default function Body() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
-      <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
-        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4 }}>[ FITNESS GUILD ]</Text>
-        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", marginTop: 6 }}>The Body</Text>
+      <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
+        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ FITNESS GUILD ]</Text>
+        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>The Body</Text>
         <Text style={{ color: C.muted, fontSize: 12, marginTop: 4 }}>{count} workout{count === 1 ? "" : "s"} logged</Text>
 
         <View style={{ flexDirection: "row", gap: 8, marginTop: 16, marginBottom: 18 }}>
@@ -122,15 +124,15 @@ function Tabata({ onComplete }: { onComplete: () => void }) {
       )}
 
       <Animated.View style={{ transform: [{ scale: running ? pulse : 1 }], width: 220, height: 220, borderRadius: 110, borderWidth: 3, borderColor: color, alignItems: "center", justifyContent: "center", marginVertical: 10 }}>
-        <Text style={{ color, fontSize: 12, letterSpacing: 4 }}>{phase === "done" ? "COMPLETE" : phase.toUpperCase()}</Text>
-        <Text style={{ color: C.ivory, fontSize: 64, fontWeight: "800" }}>{phase === "done" ? "✓" : left}</Text>
+        <Text style={{ color, fontSize: 12, letterSpacing: 4, fontFamily: F.mono }}>{phase === "done" ? "COMPLETE" : phase.toUpperCase()}</Text>
+        <Text style={{ color: C.ivory, fontSize: 64, fontWeight: "800", fontFamily: F.head }}>{phase === "done" ? "✓" : left}</Text>
         {phase !== "idle" && phase !== "done" && <Text style={{ color: C.muted, fontSize: 12, letterSpacing: 2 }}>ROUND {round}/{rounds}</Text>}
       </Animated.View>
 
       <View style={{ flexDirection: "row", gap: 12, marginTop: 18 }}>
         {phase === "idle" || phase === "done" ? (
           <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 2 }}>
-            <Text style={{ color: C.black, fontWeight: "800", letterSpacing: 2 }}>{phase === "done" ? "GO AGAIN" : "START"}</Text>
+            <Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{phase === "done" ? "GO AGAIN" : "START"}</Text>
           </Pressable>
         ) : (
           <>

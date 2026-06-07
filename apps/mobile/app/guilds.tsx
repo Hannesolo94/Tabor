@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { browseGuilds, joinGuild, myGuilds, createGuild, type GuildRow } from "@/lib/social";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 const GUIDELINES = "Guilds are brotherhoods under Christ. Keep it honoring: no hate, harassment, or filth. Lead well, sharpen each other.";
 
@@ -45,7 +45,7 @@ export default function Guilds() {
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderBottomWidth: 1, borderBottomColor: C.line }}>
         <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 22 }}>‹</Text></Pressable>
-        <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800" }}>Guilds</Text>
+        <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800", fontFamily: F.head }}>Guilds</Text>
       </View>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, marginBottom: 10 }}>JOIN A GUILD</Text>
@@ -58,7 +58,7 @@ export default function Guilds() {
                 <Text style={{ color: C.muted, fontSize: 11 }}>Open guild</Text>
               </View>
               {joined ? <Text style={{ color: C.green, fontSize: 10, letterSpacing: 1 }}>● JOINED</Text>
-                : <Pressable onPress={() => join(g)} style={{ backgroundColor: C.gold, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontSize: 11 }}>JOIN</Text></Pressable>}
+                : <Pressable onPress={() => join(g)} style={{ backgroundColor: C.gold, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, fontSize: 11 }}>JOIN</Text></Pressable>}
             </View>
           );
         })}
@@ -68,7 +68,7 @@ export default function Guilds() {
         <TextInput value={name} onChangeText={setName} placeholder="Guild name" placeholderTextColor={C.muted} style={inp} />
         <TextInput value={tag} onChangeText={setTag} placeholder="Tag (e.g. IV, ZA, FIRE)" placeholderTextColor={C.muted} autoCapitalize="characters" maxLength={5} style={inp} />
         <Pressable onPress={create} disabled={creating} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 2, marginTop: 6, opacity: creating ? 0.6 : 1 }}>
-          <Text style={{ color: C.black, fontWeight: "800", letterSpacing: 2 }}>{creating ? "FORGING…" : "CREATE GUILD"}</Text>
+          <Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{creating ? "FORGING…" : "CREATE GUILD"}</Text>
         </Pressable>
         <Text style={{ color: C.muted, fontSize: 11, textAlign: "center", marginTop: 10 }}>By creating a guild you agree to uphold the community guidelines.</Text>
       </ScrollView>

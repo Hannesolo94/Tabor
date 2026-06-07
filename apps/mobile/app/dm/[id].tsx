@@ -5,7 +5,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { loadDm, sendDm, subscribeDm, type DmMsg } from "@/lib/social";
 import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 export default function DM() {
   const router = useRouter();
@@ -51,7 +51,7 @@ export default function DM() {
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderBottomWidth: 1, borderBottomColor: C.line }}>
         <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 22 }}>‹</Text></Pressable>
-        <View><Text style={{ color: C.ivory, fontSize: 16, fontWeight: "800" }}>{name || "Direct Message"}</Text><Text style={{ color: C.muted, fontSize: 9, letterSpacing: 2 }}>DIRECT MESSAGE</Text></View>
+        <View><Text style={{ color: C.ivory, fontSize: 16, fontWeight: "800", fontFamily: F.head }}>{name || "Direct Message"}</Text><Text style={{ color: C.muted, fontSize: 9, letterSpacing: 2 }}>DIRECT MESSAGE</Text></View>
       </View>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={10} style={{ flex: 1 }}>
         <ScrollView ref={scroller} style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
@@ -69,7 +69,7 @@ export default function DM() {
         </ScrollView>
         <View style={{ flexDirection: "row", gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: C.line }}>
           <TextInput value={input} onChangeText={setInput} placeholder="Message…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2 }} onSubmitEditing={send} returnKeyType="send" />
-          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800" }}>SEND</Text></Pressable>
+          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

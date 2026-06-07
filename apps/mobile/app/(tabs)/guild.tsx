@@ -6,7 +6,7 @@ import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, 
 import { blockUser } from "@/lib/social";
 import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { rankForLevel, levelFromXp } from "@/lib/game";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 export default function Guild() {
   const { session } = useAuth();
@@ -85,9 +85,9 @@ export default function Guild() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
       <View style={{ paddingHorizontal: 18, paddingTop: 8, paddingBottom: 6 }}>
-        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4 }}>[ BROTHERHOOD ]</Text>
+        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ BROTHERHOOD ]</Text>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={{ color: C.ivory, fontSize: 24, fontWeight: "800" }}>Sons of Tabor</Text>
+          <Text style={{ color: C.ivory, fontSize: 24, fontWeight: "800", fontFamily: F.head }}>Sons of Tabor</Text>
           <View style={{ flexDirection: "row", gap: 6 }}>
             {(["chat", "roster"] as const).map((v) => (
               <Pressable key={v} onPress={() => setView(v)} style={{ paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: view === v ? C.gold : C.line, backgroundColor: view === v ? C.gold : "transparent", borderRadius: 2 }}>
@@ -127,7 +127,7 @@ export default function Guild() {
 
           <View style={{ flexDirection: "row", gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: C.line }}>
             <TextInput value={input} onChangeText={setInput} placeholder={`Message #${active?.name ?? ""}`} placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2 }} onSubmitEditing={send} returnKeyType="send" />
-            <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800" }}>SEND</Text></Pressable>
+            <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
           </View>
         </KeyboardAvoidingView>
       ) : (
@@ -135,7 +135,7 @@ export default function Guild() {
           <Text style={{ color: C.muted, fontSize: 11, letterSpacing: 2, marginBottom: 12 }}>THE LEADERBOARD · {roster.length} {roster.length === 1 ? "BROTHER" : "BROTHERS"}</Text>
           {roster.map((m, i) => (
             <View key={m.user_id} style={{ flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}>
-              <Text style={{ color: i < 3 ? C.gold : C.muted, fontSize: 16, fontWeight: "800", width: 34 }}>{i + 1}</Text>
+              <Text style={{ color: i < 3 ? C.gold : C.muted, fontSize: 16, fontWeight: "800", fontFamily: F.head, width: 34 }}>{i + 1}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: m.user_id === userId ? C.gold : C.ivory, fontSize: 15, fontWeight: "600" }}>{m.name || "Brother"}{m.user_id === userId ? " (you)" : ""}</Text>
                 <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, marginTop: 2 }}>{(m.cls || "Pilgrim").toUpperCase()} · {rankForLevel(levelFromXp(Number(m.xp) || 0)).toUpperCase()} · {Number(m.streak) || 0}d</Text>

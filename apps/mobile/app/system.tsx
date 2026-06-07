@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { askSystem, type SysMsg } from "@/lib/system";
 import { Seal } from "@/components/Seal";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 export default function System() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function System() {
         <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 22 }}>‹</Text></Pressable>
         <Seal size={26} />
         <View>
-          <Text style={{ color: C.ivory, fontSize: 16, fontWeight: "800" }}>The System</Text>
+          <Text style={{ color: C.ivory, fontSize: 16, fontWeight: "800", fontFamily: F.head }}>The System</Text>
           <Text style={{ color: C.muted, fontSize: 9, letterSpacing: 2 }}>YOUR MENTOR</Text>
         </View>
       </View>
@@ -50,7 +50,7 @@ export default function System() {
         </ScrollView>
         <View style={{ flexDirection: "row", gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: C.line }}>
           <TextInput value={input} onChangeText={setInput} placeholder="Speak to the System…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2 }} onSubmitEditing={send} returnKeyType="send" />
-          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800" }}>SEND</Text></Pressable>
+          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

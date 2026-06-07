@@ -5,9 +5,11 @@ import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
 import { loadToday, toggleQuest, sealDay, type Quest } from "@/lib/quests";
 import { levelProgress } from "@/lib/game";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
+import { useTabBar } from "@/lib/tabbar";
 
 export default function Quests() {
+  const tb = useTabBar();
   const { session } = useAuth();
   const { profile, loading: pLoading } = useProfile();
   const userId = session?.user.id;
@@ -60,9 +62,9 @@ export default function Quests() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
-      <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
-        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4 }}>[ THE SYSTEM ]</Text>
-        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", marginTop: 6 }}>Daily Quest</Text>
+      <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
+        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ THE SYSTEM ]</Text>
+        <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>Daily Quest</Text>
         <Text style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>{profile?.name ? `${profile.name}, the` : "The"} climb continues.{profile?.cls ? ` ${String(profile.cls)}.` : ""}</Text>
 
         <View style={{ flexDirection: "row", gap: 12, marginTop: 20 }}>
@@ -97,7 +99,7 @@ export default function Quests() {
 
         {sealed && (
           <Animated.View style={{ borderWidth: 1, borderColor: C.gold, padding: 20, marginTop: 8, alignItems: "center", borderRadius: 2, transform: [{ scale: sealAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }], opacity: sealAnim }}>
-            <Text style={{ color: C.gold, fontSize: 14, letterSpacing: 4 }}>[ DAY SEALED ]</Text>
+            <Text style={{ color: C.gold, fontSize: 14, letterSpacing: 4, fontFamily: F.mono }}>[ DAY SEALED ]</Text>
             <Text style={{ color: C.text, fontSize: 14, marginTop: 8, textAlign: "center", lineHeight: 21 }}>The day is won. Your streak holds. Return tomorrow, brother.</Text>
           </Animated.View>
         )}
@@ -110,7 +112,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2 }}>
       <Text style={{ color: C.muted, fontSize: 8, letterSpacing: 2 }}>{label}</Text>
-      <Text style={{ color: C.gold, fontSize: 16, fontWeight: "800", marginTop: 3 }} numberOfLines={1}>{value}</Text>
+      <Text style={{ color: C.gold, fontSize: 16, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text>
     </View>
   );
 }

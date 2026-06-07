@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Seal } from "@/components/Seal";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 type Faith = "believer" | "seeker" | null;
 
@@ -57,7 +57,7 @@ export default function Onboarding() {
           <View style={{ alignItems: "center" }}>
             <Seal size={80} />
             <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 5, marginTop: 20 }}>[ THE AWAKENING ]</Text>
-            <Text style={{ color: C.ivory, fontSize: 30, fontWeight: "800", marginTop: 12, textAlign: "center" }}>Before you climb</Text>
+            <Text style={{ color: C.ivory, fontSize: 30, fontWeight: "800", fontFamily: F.head, marginTop: 12, textAlign: "center" }}>Before you climb</Text>
             <Text style={{ color: C.muted, fontSize: 15, lineHeight: 23, textAlign: "center", marginTop: 14 }}>
               The System must know where you stand. A few questions. Answer honestly. This shapes your path.
             </Text>
@@ -131,7 +131,7 @@ function Step({ n }: { n: number }) {
 function Btn({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} style={{ marginTop: 26, backgroundColor: C.gold, paddingVertical: 15, paddingHorizontal: 40, borderRadius: 2 }}>
-      <Text style={{ color: C.black, fontWeight: "800", letterSpacing: 2 }}>{label.toUpperCase()}</Text>
+      <Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{label.toUpperCase()}</Text>
     </Pressable>
   );
 }
@@ -145,4 +145,4 @@ function Choice({ label, sub, onPress, selected, muted }: { label: string; sub?:
   );
 }
 
-const title = { color: C.ivory, fontSize: 23, fontWeight: "800" as const, marginBottom: 16, lineHeight: 30 };
+const title = { color: C.ivory, fontSize: 23, fontWeight: "800" as const, fontFamily: F.head, marginBottom: 16, lineHeight: 30 };

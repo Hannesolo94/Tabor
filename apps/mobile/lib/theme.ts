@@ -1,6 +1,17 @@
-// Brand tokens (mirrors /docs/BRAND.md + tokens.css). Custom fonts (Cinzel,
-// Pirata One) come next via @expo-google-fonts; the draft uses system fonts with
-// weight + letter-spacing to evoke the brand.
+// Brand tokens (mirrors /docs/BRAND.md + tokens.css + the website fonts).
+// Font families match the web: Pirata One (wordmark/display), Cinzel (headings),
+// Inter (body), JetBrains Mono (labels), Cormorant (scripture).
+export const F = {
+  display: "PirataOne_400Regular",
+  head: "Cinzel_700Bold",
+  headMid: "Cinzel_600SemiBold",
+  body: "Inter_400Regular",
+  bodyMid: "Inter_600SemiBold",
+  bodyBold: "Inter_700Bold",
+  mono: "JetBrainsMono_400Regular",
+  scripture: "CormorantGaramond_500Medium_Italic",
+};
+
 export const C = {
   black: "#0A0A0A",
   surface: "#15151A",

@@ -1,8 +1,15 @@
 import { useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
+import { PirataOne_400Regular } from "@expo-google-fonts/pirata-one";
+import { Cinzel_600SemiBold, Cinzel_700Bold } from "@expo-google-fonts/cinzel";
+import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from "@expo-google-fonts/inter";
+import { JetBrainsMono_400Regular } from "@expo-google-fonts/jetbrains-mono";
+import { CormorantGaramond_500Medium_Italic } from "@expo-google-fonts/cormorant-garamond";
 import { AuthProvider, useAuth } from "@/lib/auth";
-import { C } from "@/lib/theme";
+import { C, F } from "@/lib/theme";
 
 function useAuthGate(session: unknown, loading: boolean, onboarded: boolean | null) {
   const segments = useSegments();
@@ -38,6 +45,16 @@ function RootNav() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    PirataOne_400Regular,
+    Cinzel_600SemiBold, Cinzel_700Bold,
+    Inter_400Regular, Inter_600SemiBold, Inter_700Bold,
+    JetBrainsMono_400Regular,
+    CormorantGaramond_500Medium_Italic,
+  });
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, backgroundColor: C.black, alignItems: "center", justifyContent: "center" }}><ActivityIndicator color={C.gold} /></View>;
+  }
   return (
     <AuthProvider>
       <RootNav />
