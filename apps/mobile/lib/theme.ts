@@ -1,6 +1,7 @@
-// Brand tokens (mirrors /docs/BRAND.md + tokens.css + the website fonts).
-// Font families match the web: Pirata One (wordmark/display), Cinzel (headings),
-// Inter (body), JetBrains Mono (labels), Cormorant (scripture).
+// Brand tokens. Colors come from @tabor/shared (single source of truth). Fonts
+// stay here because RN uses loaded font module names, not CSS families.
+import { brand } from "@tabor/shared";
+
 export const F = {
   display: "PirataOne_400Regular",
   head: "Cinzel_700Bold",
@@ -12,16 +13,17 @@ export const F = {
   scripture: "CormorantGaramond_500Medium_Italic",
 };
 
+const k = brand.colors;
 export const C = {
-  black: "#0A0A0A",
-  surface: "#15151A",
-  surface2: "#0E0E12",
-  gold: "#C9A961",
-  goldLight: "#E8D08C",
-  ivory: "#E8E2D5",
-  text: "#C3BDB1",
-  muted: "#8A847A",
-  line: "rgba(201,169,97,0.16)",
-  green: "#7BBF7B",
-  red: "#C03A3A",
+  black: k.black,
+  surface: k.surface,
+  surface2: k.surface2,
+  gold: k.gold,
+  goldLight: k.goldLight,
+  ivory: k.ivory,
+  text: k.text,
+  muted: k.muted,
+  line: k.line,
+  green: k.green,
+  red: k.red,
 };

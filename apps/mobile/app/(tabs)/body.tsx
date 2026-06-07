@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Image, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, Image, TextInput, ActivityIndicator, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
@@ -140,17 +140,31 @@ function LibraryTab({ onScroll, router }: { onScroll: any; router: any }) {
   useEffect(() => { run(); /* eslint-disable-next-line */ }, [muscle]);
 
   return (
-    <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-      <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
-        <TextInput value={q} onChangeText={setQ} onSubmitEditing={run} placeholder="Search 870+ exercises…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} />
-        <Pressable onPress={run} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>GO</Text></Pressable>
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 14 }} contentContainerStyle={{ gap: 8 }}>
-        <Chip label="All" active={!muscle} onPress={() => setMuscle(null)} />
-        {MUSCLE_GROUPS.map((m) => <Chip key={m.label} label={m.label} active={muscle === m.label} onPress={() => setMuscle(m.label)} />)}
-      </ScrollView>
-      {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 20 }} /> : items.map((e) => (
-        <Pressable key={e.id} onPress={() => router.push(`/exercise/${e.id}`)} style={{ flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)", paddingVertical: 10 }}>
+    <FlatList
+      data={loading ? [] : items}
+      keyExtractor={(e) => e.id}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ padding: 22, paddingBottom: 40 }}
+      initialNumToRender={12}
+      windowSize={7}
+      removeClippedSubviews
+      ListHeaderComponent={
+        <View>
+          <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+            <TextInput value={q} onChangeText={setQ} onSubmitEditing={run} placeholder="Search 870+ exercises…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} />
+            <Pressable onPress={run} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>GO</Text></Pressable>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 14 }} contentContainerStyle={{ gap: 8 }}>
+            <Chip label="All" active={!muscle} onPress={() => setMuscle(null)} />
+            {MUSCLE_GROUPS.map((m) => <Chip key={m.label} label={m.label} active={muscle === m.label} onPress={() => setMuscle(m.label)} />)}
+          </ScrollView>
+          {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 20 }} /> : null}
+        </View>
+      }
+      renderItem={({ item: e }) => (
+        <Pressable onPress={() => router.push(`/exercise/${e.id}`)} style={{ flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)", paddingVertical: 10 }}>
           <View style={{ width: 54, height: 54, borderRadius: 2, backgroundColor: C.surface, overflow: "hidden" }}>
             {e.image_url ? <Image source={{ uri: e.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" /> : null}
           </View>
@@ -160,8 +174,8 @@ function LibraryTab({ onScroll, router }: { onScroll: any; router: any }) {
           </View>
           <Text style={{ color: C.gold, fontSize: 18 }}>›</Text>
         </Pressable>
-      ))}
-    </ScrollView>
+      )}
+    />
   );
 }
 

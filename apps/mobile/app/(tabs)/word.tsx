@@ -51,7 +51,7 @@ function Today({ onScroll }: { onScroll: any }) {
     <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
       <Animated.View style={{ opacity: fade }}>
         <View style={{ borderWidth: 1, borderColor: C.gold, backgroundColor: C.surface2, padding: 22, borderRadius: 2 }}>
-          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono }}>{v.theme.toUpperCase()}</Text>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono }}>{(v.theme ?? "The Word").toUpperCase()}</Text>
           <Text style={{ color: C.ivory, fontSize: 21, lineHeight: 32, marginTop: 14, fontFamily: F.scripture }}>{v.text}</Text>
           <Text style={{ color: C.gold, fontSize: 14, marginTop: 16, fontFamily: F.headMid }}>— {v.ref}</Text>
         </View>

@@ -2,5 +2,6 @@
 export * as game from "./game/index";
 export * as brand from "./brand/index";
 
-// Also re-export the game engine flat for ergonomic imports.
+// Also re-export the game engine + scripture flat for ergonomic imports.
 export * from "./game/index";
+export * from "./scripture/index";
