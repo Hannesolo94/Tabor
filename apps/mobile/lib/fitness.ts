@@ -143,3 +143,21 @@ export async function addExerciseToRoutine(routineId: string, exerciseId: string
 export async function deleteRoutine(routineId: string): Promise<void> {
   await supabase.from("routines").delete().eq("id", routineId);
 }
+
+export interface WorkoutRow { id: string; name: string; mins: number | null; day: string; created_at: string }
+export interface PR { lift: string; value: number }
+
+export async function getWorkouts(userId: string): Promise<WorkoutRow[]> {
+  const { data } = await supabase.from("workouts").select("id, name, mins, day, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(60);
+  return data ?? [];
+}
+export async function getPRs(userId: string): Promise<PR[]> {
+  const { data } = await supabase.from("personal_records").select("lift, value").eq("user_id", userId).order("lift");
+  return (data as PR[]) ?? [];
+}
+export async function setPR(userId: string, lift: string, value: number): Promise<void> {
+  await supabase.from("personal_records").upsert({ user_id: userId, lift, value }, { onConflict: "user_id,lift" });
+}
+export async function deletePR(userId: string, lift: string): Promise<void> {
+  await supabase.from("personal_records").delete().eq("user_id", userId).eq("lift", lift);
+}

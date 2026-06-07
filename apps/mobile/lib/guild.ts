@@ -16,6 +16,28 @@ export async function ensureGuild(userId: string): Promise<{ guildId: string | n
   return { guildId, channels: (ch as Channel[]) ?? [] };
 }
 
+export async function loadChannels(guildId: string): Promise<Channel[]> {
+  const { data } = await supabase.from("channels").select("id, name").eq("guild_id", guildId);
+  return (data as Channel[]) ?? [];
+}
+
+export interface ReactionInfo { counts: Record<string, number>; mine: string[] }
+export async function loadReactions(messageIds: string[], userId: string): Promise<Record<string, ReactionInfo>> {
+  if (!messageIds.length) return {};
+  const { data } = await supabase.from("reactions").select("message_id, user_id, emoji").in("message_id", messageIds);
+  const map: Record<string, ReactionInfo> = {};
+  for (const r of data ?? []) {
+    const info = (map[r.message_id] ??= { counts: {}, mine: [] });
+    info.counts[r.emoji] = (info.counts[r.emoji] ?? 0) + 1;
+    if (r.user_id === userId) info.mine.push(r.emoji);
+  }
+  return map;
+}
+export async function toggleReaction(messageId: string, userId: string, emoji: string, on: boolean): Promise<void> {
+  if (on) await supabase.from("reactions").upsert({ message_id: messageId, user_id: userId, emoji }, { onConflict: "message_id,user_id,emoji", ignoreDuplicates: true });
+  else await supabase.from("reactions").delete().eq("message_id", messageId).eq("user_id", userId).eq("emoji", emoji);
+}
+
 export async function loadMessages(channelId: string): Promise<Msg[]> {
   const { data } = await supabase.from("messages").select("id, body, author_id, created_at").eq("channel_id", channelId).order("created_at", { ascending: true }).limit(100);
   return (data as Msg[]) ?? [];

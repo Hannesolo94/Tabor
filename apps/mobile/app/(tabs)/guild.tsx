@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
-import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, type Channel, type Msg, type Member } from "@/lib/guild";
-import { blockUser } from "@/lib/social";
+import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, loadChannels, loadReactions, toggleReaction, type Channel, type Msg, type Member, type ReactionInfo } from "@/lib/guild";
+import { blockUser, myGuilds, type GuildRow } from "@/lib/social";
 import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { rankForLevel, levelFromXp } from "@/lib/game";
 import { C, F } from "@/lib/theme";
@@ -13,9 +13,12 @@ export default function Guild() {
   const userId = session?.user.id;
 
   const [guildId, setGuildId] = useState<string | null>(null);
+  const [guilds, setGuilds] = useState<GuildRow[]>([]);
+  const [guildName, setGuildName] = useState("Sons of Tabor");
   const [channels, setChannels] = useState<Channel[]>([]);
   const [active, setActive] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [reactions, setReactions] = useState<Record<string, ReactionInfo>>({});
   const [roster, setRoster] = useState<Member[]>([]);
   const [view, setView] = useState<"chat" | "roster">("chat");
   const [input, setInput] = useState("");
@@ -37,6 +40,10 @@ export default function Guild() {
       setChannels(ch);
       setActive(ch.find((c) => c.name === "war-room") ?? ch[0] ?? null);
       if (gid) setRoster(await loadRoster(gid));
+      const mine = await myGuilds(userId);
+      setGuilds(mine);
+      const cur = mine.find((g) => g.id === gid);
+      if (cur) setGuildName(cur.name);
       setLoading(false);
     })();
   }, [userId]);
@@ -45,8 +52,9 @@ export default function Guild() {
   useEffect(() => {
     if (!active) return;
     let unsub = () => {};
-    loadMessages(active.id).then((m) => {
+    loadMessages(active.id).then(async (m) => {
       setMessages(m);
+      if (userId) setReactions(await loadReactions(m.map((x) => x.id), userId));
       setTimeout(() => scroller.current?.scrollToEnd({ animated: false }), 60);
     });
     unsub = subscribeMessages(active.id, (msg) => {
@@ -69,13 +77,34 @@ export default function Guild() {
     if (msg) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Not sent", msg); }
   }
 
-  function moderate(m: Msg) {
-    if (!m.author_id || m.author_id === userId) return;
-    Alert.alert("Message options", undefined, [
-      { text: "Report", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); Alert.alert("Reported", "Thank you. Our team will review it."); } },
-      { text: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } },
-      { text: "Cancel", style: "cancel" },
-    ]);
+  async function selectGuild(g: GuildRow) {
+    if (g.id === guildId) return;
+    setGuildId(g.id); setGuildName(g.name); setMessages([]);
+    const ch = await loadChannels(g.id);
+    setChannels(ch);
+    setActive(ch.find((c) => c.name === "war-room") ?? ch[0] ?? null);
+    setRoster(await loadRoster(g.id));
+  }
+
+  async function react(m: Msg, emoji: string) {
+    if (!userId) return;
+    const mine = reactions[m.id]?.mine.includes(emoji) ?? false;
+    await toggleReaction(m.id, userId, emoji, !mine);
+    setReactions(await loadReactions(messages.map((x) => x.id), userId));
+  }
+
+  function onMessagePress(m: Msg) {
+    const opts: { text: string; style?: "cancel" | "destructive"; onPress?: () => void }[] = [
+      { text: "🔥", onPress: () => react(m, "🔥") },
+      { text: "🙏", onPress: () => react(m, "🙏") },
+      { text: "💪", onPress: () => react(m, "💪") },
+    ];
+    if (m.author_id && m.author_id !== userId) {
+      opts.push({ text: "Report", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); Alert.alert("Reported", "Thank you. Our team will review it."); } });
+      opts.push({ text: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } });
+    }
+    opts.push({ text: "Cancel", style: "cancel" });
+    Alert.alert("React or report", undefined, opts);
   }
 
   if (loading) {
@@ -87,7 +116,7 @@ export default function Guild() {
       <View style={{ paddingHorizontal: 18, paddingTop: 8, paddingBottom: 6 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ BROTHERHOOD ]</Text>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={{ color: C.ivory, fontSize: 24, fontWeight: "800", fontFamily: F.head }}>Sons of Tabor</Text>
+          <Text style={{ color: C.ivory, fontSize: 24, fontWeight: "800", fontFamily: F.head }} numberOfLines={1}>{guildName}</Text>
           <View style={{ flexDirection: "row", gap: 6 }}>
             {(["chat", "roster"] as const).map((v) => (
               <Pressable key={v} onPress={() => setView(v)} style={{ paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: view === v ? C.gold : C.line, backgroundColor: view === v ? C.gold : "transparent", borderRadius: 2 }}>
@@ -96,6 +125,15 @@ export default function Guild() {
             ))}
           </View>
         </View>
+        {guilds.length > 1 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginTop: 8 }} contentContainerStyle={{ gap: 8 }}>
+            {guilds.map((g) => (
+              <Pressable key={g.id} onPress={() => selectGuild(g)} style={{ paddingVertical: 5, paddingHorizontal: 11, borderWidth: 1, borderColor: guildId === g.id ? C.gold : C.line, backgroundColor: guildId === g.id ? "rgba(201,169,97,0.12)" : "transparent", borderRadius: 2 }}>
+                <Text style={{ color: guildId === g.id ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{g.tag ? `[${g.tag}] ` : ""}{g.name}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
       </View>
 
       {view === "chat" ? (
@@ -114,12 +152,21 @@ export default function Guild() {
             {messages.map((m) => {
               const mine = m.author_id === userId;
               return (
-                <Pressable key={m.id} onLongPress={() => moderate(m)} delayLongPress={350} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
+                <Pressable key={m.id} onLongPress={() => onMessagePress(m)} delayLongPress={300} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
                   <Text style={{ color: mine ? C.gold : C.muted, fontSize: 9, letterSpacing: 1, marginBottom: 3, textAlign: mine ? "right" : "left" }}>{mine ? "YOU" : (m.author_id ? nameMap[m.author_id] ?? "Brother" : "System").toUpperCase()}</Text>
                   <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 2 }}>
                     <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>
                   </View>
-                  {!mine && <Text style={{ color: C.muted, fontSize: 8, marginTop: 2 }}>hold to report</Text>}
+                  {reactions[m.id] && Object.keys(reactions[m.id].counts).length > 0 && (
+                    <View style={{ flexDirection: "row", gap: 6, marginTop: 4, alignSelf: mine ? "flex-end" : "flex-start" }}>
+                      {Object.entries(reactions[m.id].counts).map(([emoji, n]) => (
+                        <Pressable key={emoji} onPress={() => react(m, emoji)} style={{ flexDirection: "row", gap: 3, borderWidth: 1, borderColor: reactions[m.id].mine.includes(emoji) ? C.gold : C.line, borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2 }}>
+                          <Text style={{ fontSize: 11 }}>{emoji}</Text><Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono }}>{n}</Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  )}
+                  <Text style={{ color: C.muted, fontSize: 8, marginTop: 2, textAlign: mine ? "right" : "left" }}>hold to react</Text>
                 </Pressable>
               );
             })}

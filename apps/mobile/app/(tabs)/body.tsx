@@ -40,6 +40,9 @@ export default function Body() {
           <Pressable onPress={() => router.push("/fuel")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.gold, borderRadius: 2 }}>
             <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>FUEL ↗</Text>
           </Pressable>
+          <Pressable onPress={() => router.push("/history")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
+            <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>LOG</Text>
+          </Pressable>
         </View>
       </View>
 
