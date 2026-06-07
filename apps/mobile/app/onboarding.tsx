@@ -37,9 +37,9 @@ export default function Onboarding() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setError("Session expired. Please sign in again."); return; }
     const { error: e } = await supabase.from("profiles").update({
-      believer: faith === "believer",   // canonical flag
-      faith,                              // text record (believer | seeker)
-      cls: finalClass,                    // canonical class column
+      believer: faith === "believer" ? "yes" : "seeking",  // constrained: yes|seeking|no
+      faith,                                                 // text record (believer | seeker)
+      cls: finalClass,                                       // constrained: Sentinel|Scribe|Crusader|Pilgrim
       char_class: finalClass,
       fitness_level: fitness,
       onboarded: true,

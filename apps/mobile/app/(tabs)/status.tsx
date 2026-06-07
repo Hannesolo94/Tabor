@@ -32,7 +32,7 @@ export default function Status() {
   const prog = levelProgress(xp);
   const streak = Number(profile?.streak ?? 0);
   const best = Number(profile?.best_streak ?? 0);
-  const faith = profile?.faith === "seeker" ? "Seeker" : profile?.believer ? "Believer" : "Seeker";
+  const faith = profile?.believer === "yes" ? "Believer" : profile?.believer === "seeking" || profile?.faith === "seeker" ? "Seeker" : "Believer";
 
   // last 28 days grid
   const days: string[] = [];
