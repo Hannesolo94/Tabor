@@ -30,7 +30,7 @@ export default function Friends() {
   }
   async function dm(f: FriendRow) {
     const tid = await openDm(f.other_id);
-    if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(f.name || "Brother")}`);
+    if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(f.name || "Brother")}&uid=${f.other_id}`);
   }
   function confirmBlock(f: FriendRow) {
     Alert.alert("Block this brother?", "They will be removed and can no longer reach you.", [
