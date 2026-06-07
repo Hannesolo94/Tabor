@@ -72,15 +72,15 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   // include the whole `to` day
   const toIso = new Date(to.getTime() + DAY).toISOString();
 
-  const [eventsRes, ordersRes, allOrdersRes, productsRes] = await Promise.all([
-    sb.from("analytics_events").select("type, session_id, visitor_id, referrer, created_at").gte("created_at", fromIso).lt("created_at", toIso),
+  const [statsRes, ordersRes, allOrdersRes, productsRes] = await Promise.all([
+    sb.rpc("dashboard_event_stats", { p_from: fromIso, p_to: toIso }), // aggregated in Postgres
     sb.from("orders").select("total, items, user_id, created_at, status, region").gte("created_at", fromIso).lt("created_at", toIso),
     sb.from("orders").select("total, user_id").limit(10000), // safety cap for all-time LTV
 
     sb.from("products").select("sku, name, category, cost, inventory, track_inventory"),
   ]);
 
-  const events = eventsRes.data ?? [];
+  const stats = (statsRes.data ?? {}) as { pageviews?: number; add_to_cart?: number; begin_checkout?: number; app_click?: number; sessions?: number; visitors?: number; sessions_by_day?: { day: string; n: number }[]; sources?: { source: string; count: number }[] };
   const orders = (ordersRes.data ?? []).filter((o) => o.status !== "cancelled");
   const allOrders = allOrdersRes.data ?? [];
   const products = productsRes.data ?? [];
@@ -91,7 +91,8 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   for (let i = 0; i < days; i++) labels.push(dayKey(new Date(from.getTime() + i * DAY)));
   const revByDay = new Map(labels.map((l) => [l, 0]));
   const ordByDay = new Map(labels.map((l) => [l, 0]));
-  const sessByDay = new Map<string, Set<string>>(labels.map((l) => [l, new Set()]));
+  const sessByDay = new Map<string, number>(labels.map((l) => [l, 0]));
+  for (const s of stats.sessions_by_day ?? []) if (sessByDay.has(s.day)) sessByDay.set(s.day, s.n);
 
   // sales
   let revenue = 0;
@@ -123,30 +124,19 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
     }
   }
 
-  // traffic / funnel
-  const sessions = new Set<string>();
-  const visitors = new Set<string>();
-  let pageviews = 0, addToCart = 0, checkout = 0, appClicks = 0;
-  const sourceCount = new Map<string, number>();
-  for (const e of events) {
-    if (e.session_id) sessions.add(e.session_id);
-    if (e.visitor_id) visitors.add(e.visitor_id);
-    if (e.type === "pageview") {
-      pageviews++;
-      const day = dayKey(new Date(e.created_at));
-      if (e.session_id && sessByDay.has(day)) sessByDay.get(day)!.add(e.session_id);
-      const src = sourceFromReferrer(e.referrer);
-      sourceCount.set(src, (sourceCount.get(src) ?? 0) + 1);
-    } else if (e.type === "add_to_cart") addToCart++;
-    else if (e.type === "begin_checkout") checkout++;
-    else if (e.type === "app_click") appClicks++;
-  }
+  // traffic / funnel (aggregated in SQL via dashboard_event_stats)
+  const pageviews = stats.pageviews ?? 0;
+  const addToCart = stats.add_to_cart ?? 0;
+  const checkout = stats.begin_checkout ?? 0;
+  const appClicks = stats.app_click ?? 0;
+  const sessionsCount = stats.sessions ?? 0;
+  const visitorsCount = stats.visitors ?? 0;
 
   const orderCount = orders.length;
   const aov = orderCount ? revenue / orderCount : 0;
   const margin = revenue - cogs;
   const marginPct = revenue ? (margin / revenue) * 100 : 0;
-  const conversion = sessions.size ? (orderCount / sessions.size) * 100 : 0;
+  const conversion = sessionsCount ? (orderCount / sessionsCount) * 100 : 0;
   const cartAbandon = addToCart ? (1 - orderCount / addToCart) * 100 : 0;
 
   // LTV + repeat (all-time)
@@ -164,7 +154,7 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
     .map(([sku, v]) => ({ sku, name: prodMap.get(sku)?.name ?? sku, ...v }))
     .sort((a, b) => b.revenue - a.revenue).slice(0, 5);
   const topCategories = [...catAgg.entries()].map(([category, v]) => ({ category, ...v })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
-  const sources = [...sourceCount.entries()].map(([source, count]) => ({ source, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+  const sources = (stats.sources ?? []).slice(0, 6);
   const lowStock = products.filter((p) => p.track_inventory && (p.inventory ?? 0) <= 3).map((p) => ({ sku: p.sku, name: p.name, inventory: p.inventory ?? 0 }));
 
   return {
@@ -172,29 +162,16 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
     fromLabel: labels[0]!,
     toLabel: labels[labels.length - 1]!,
     revenue, orderCount, aov, cogs, margin, marginPct, ltv, repeatRate,
-    pageviews, sessions: sessions.size, visitors: visitors.size, conversion, appClicks,
+    pageviews, sessions: sessionsCount, visitors: visitorsCount, conversion, appClicks,
     funnel: { pageviews, addToCart, checkout, purchase: orderCount },
     cartAbandon,
     series: {
       labels,
       revenue: labels.map((l) => revByDay.get(l) ?? 0),
       orders: labels.map((l) => ordByDay.get(l) ?? 0),
-      sessions: labels.map((l) => sessByDay.get(l)?.size ?? 0),
+      sessions: labels.map((l) => sessByDay.get(l) ?? 0),
     },
     topProducts, topCategories, sources, lowStock,
     regions: [...regionAgg.entries()].map(([region, v]) => ({ region, ...v })).sort((a, b) => b.revenue - a.revenue),
   };
-}
-
-function sourceFromReferrer(ref: string | null): string {
-  if (!ref) return "direct";
-  try {
-    const host = new URL(ref).hostname.replace(/^www\./, "");
-    if (/google\./.test(host)) return "google";
-    if (/(facebook|fb|instagram|t\.co|twitter|x\.com|tiktok)/.test(host)) return "social";
-    if (host.includes("tabor.quest")) return "direct";
-    return host;
-  } catch {
-    return "direct";
-  }
 }
