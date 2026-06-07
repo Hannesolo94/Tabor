@@ -10,7 +10,10 @@
     "backgroundColor": "#0A0A0A",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "quest.tabor.app"
+      "bundleIdentifier": "quest.tabor.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "quest.tabor.app"

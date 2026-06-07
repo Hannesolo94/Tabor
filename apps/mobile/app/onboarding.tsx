@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator, TextInput, Switch, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
@@ -8,6 +8,8 @@ import { Seal } from "@/components/Seal";
 import { C, F } from "@/lib/theme";
 
 type Faith = "believer" | "seeker" | null;
+const SITE = "https://tabor.quest";
+const MIN_AGE = 16;
 
 const FITNESS = [
   { v: "beginner", l: "Beginner", d: "Just starting. I need a foothold." },
@@ -33,11 +35,17 @@ const CLASSES = [
   { v: "Pilgrim", d: "The journeyer. Humble, seeking, climbing daily." },
 ];
 
+// step keys in order (gate + underage + saving are special)
+type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | "fitness" | "equipment" | "goal" | "days" | "class" | "saving";
+
 export default function Onboarding() {
   const router = useRouter();
   const { refresh, signOut } = useAuth();
-  // 0 intro,1 faith,2 gate,3 fitness,4 equipment,5 goal,6 days,7 class,8 saving
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState<Step>("intro");
+  const [year, setYear] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [analytics, setAnalytics] = useState(false);
+  const [marketing, setMarketing] = useState(false);
   const [faith, setFaith] = useState<Faith>(null);
   const [fitness, setFitness] = useState<string | null>(null);
   const [equipment, setEquipment] = useState<string | null>(null);
@@ -45,112 +53,154 @@ export default function Onboarding() {
   const [days, setDays] = useState(3);
   const [error, setError] = useState("");
 
+  function checkAge() {
+    const y = parseInt(year, 10);
+    const age = new Date().getUTCFullYear() - y;
+    if (!y || y < 1900 || age > 120) { setError("Enter a valid birth year."); return; }
+    setError("");
+    if (age < MIN_AGE) setStep("underage");
+    else setStep("covenant");
+  }
+
   async function finish(finalClass: string) {
-    setStep(8); setError("");
+    setStep("saving"); setError("");
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setError("Session expired. Please sign in again."); return; }
     const { error: e } = await supabase.from("profiles").update({
       believer: faith === "believer" ? "yes" : "seeking",
       faith,
-      cls: finalClass,
-      char_class: finalClass,
-      fitness_level: fitness,
-      equipment,
-      goals: goal ? [goal] : [],
-      days_per_week: days,
+      cls: finalClass, char_class: finalClass,
+      fitness_level: fitness, equipment, goals: goal ? [goal] : [], days_per_week: days,
+      dob: year ? `${year}-01-01` : null,
+      tos_accepted_at: new Date().toISOString(),
+      consent: { analytics, marketing },
       onboarded: true,
     }).eq("user_id", user.id);
-    if (e) { setError(e.message); setStep(7); return; }
+    if (e) { setError(e.message); setStep("class"); return; }
     await refresh();
     router.replace("/(tabs)");
   }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 26, justifyContent: "center" }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 26, justifyContent: "center" }} keyboardShouldPersistTaps="handled">
 
-        {step === 0 && (
+        {step === "intro" && (
           <View style={{ alignItems: "center" }}>
             <Seal size={80} />
-            <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 5, fontFamily: F.mono, marginTop: 20 }}>[ THE AWAKENING ]</Text>
+            <Text style={tag}>[ THE AWAKENING ]</Text>
             <Text style={{ color: C.ivory, fontSize: 30, fontWeight: "800", fontFamily: F.head, marginTop: 12, textAlign: "center" }}>Before you climb</Text>
-            <Text style={{ color: C.muted, fontSize: 15, lineHeight: 23, textAlign: "center", marginTop: 14, fontFamily: F.body }}>The System must know where you stand. A few questions. Answer honestly. This shapes your path.</Text>
-            <Btn label="Begin" onPress={() => setStep(1)} />
+            <Text style={body}>The System must know where you stand. A few questions. Answer honestly. This shapes your path.</Text>
+            <Btn label="Begin" onPress={() => setStep("age")} />
           </View>
         )}
 
-        {step === 1 && (
+        {step === "age" && (
           <View>
-            <Step n={1} />
-            <Text style={title}>Do you believe in Jesus Christ?</Text>
-            <Choice label="Yes. He is Lord." onPress={() => { setFaith("believer"); setStep(3); }} />
-            <Choice label="I'm seeking. Open to learn." onPress={() => { setFaith("seeker"); setStep(3); }} />
-            <Choice label="No, and I'm not seeking." muted onPress={() => { setFaith(null); setStep(2); }} />
+            <Text style={tag}>[ THE GATE ]</Text>
+            <Text style={title}>What year were you born?</Text>
+            <Text style={body}>TABOR is for ages {MIN_AGE} and up.</Text>
+            <TextInput value={year} onChangeText={setYear} placeholder="e.g. 1996" placeholderTextColor={C.muted} keyboardType="number-pad" maxLength={4} style={inp} />
+            {!!error && <Text style={errStyle}>{error}</Text>}
+            <Btn label="Continue" onPress={checkAge} />
           </View>
         )}
 
-        {step === 2 && (
+        {step === "underage" && (
+          <View style={{ alignItems: "center" }}>
+            <Seal size={64} />
+            <Text style={[title, { textAlign: "center", marginTop: 18 }]}>Not yet, young one.</Text>
+            <Text style={body}>TABOR is built for {MIN_AGE} and older. Keep training, keep seeking. The door will be open when the time comes.</Text>
+            <Pressable onPress={signOut} style={{ marginTop: 22 }}><Text style={{ color: C.gold, fontFamily: F.bodyMid }}>Sign out</Text></Pressable>
+          </View>
+        )}
+
+        {step === "covenant" && (
+          <View>
+            <Text style={tag}>[ THE COVENANT ]</Text>
+            <Text style={title}>Walk in honor.</Text>
+            <Text style={body}>TABOR has zero tolerance for hate, harassment, or objectionable content. Treat every brother with respect.</Text>
+            <View style={{ flexDirection: "row", gap: 14, marginVertical: 14 }}>
+              <Pressable onPress={() => Linking.openURL(`${SITE}/terms`)}><Text style={link}>Terms</Text></Pressable>
+              <Pressable onPress={() => Linking.openURL(`${SITE}/privacy`)}><Text style={link}>Privacy</Text></Pressable>
+            </View>
+            <Pressable onPress={() => setAgree((a) => !a)} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 }}>
+              <View style={{ width: 24, height: 24, borderRadius: 4, borderWidth: 2, borderColor: agree ? C.gold : C.muted, backgroundColor: agree ? C.gold : "transparent", alignItems: "center", justifyContent: "center" }}>{agree ? <Text style={{ color: C.black, fontWeight: "900" }}>✓</Text> : null}</View>
+              <Text style={{ color: C.ivory, fontSize: 14, fontFamily: F.body, flex: 1 }}>I agree to the Terms and Community Guidelines.</Text>
+            </Pressable>
+            <Row label="Allow anonymous analytics" on={analytics} onChange={setAnalytics} />
+            <Row label="Email me about drops & news" on={marketing} onChange={setMarketing} />
+            <Btn label="Enter" disabled={!agree} onPress={() => agree && setStep("faith")} />
+          </View>
+        )}
+
+        {step === "faith" && (
+          <View>
+            <Text style={tag}>[ THE QUESTION ]</Text>
+            <Text style={title}>Do you believe in Jesus Christ?</Text>
+            <Choice label="Yes. He is Lord." onPress={() => { setFaith("believer"); setStep("fitness"); }} />
+            <Choice label="I'm seeking. Open to learn." onPress={() => { setFaith("seeker"); setStep("fitness"); }} />
+            <Choice label="No, and I'm not seeking." muted onPress={() => { setFaith(null); setStep("faithgate"); }} />
+          </View>
+        )}
+
+        {step === "faithgate" && (
           <View style={{ alignItems: "center" }}>
             <Seal size={64} />
             <Text style={[title, { textAlign: "center", marginTop: 18 }]}>The door stays open.</Text>
-            <Text style={{ color: C.muted, fontSize: 15, lineHeight: 23, textAlign: "center", marginTop: 10, fontFamily: F.body }}>TABOR is a brotherhood built on Christ. We honor your honesty. If you ever grow curious, you are welcome to walk in and learn. No pressure, no judgment.</Text>
-            <Btn label="I'm open to learning" onPress={() => { setFaith("seeker"); setStep(3); }} />
+            <Text style={body}>TABOR is a brotherhood built on Christ. We honor your honesty. If you ever grow curious, you are welcome to walk in and learn.</Text>
+            <Btn label="I'm open to learning" onPress={() => { setFaith("seeker"); setStep("fitness"); }} />
             <Pressable onPress={signOut} style={{ marginTop: 16 }}><Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body }}>Not now — sign out</Text></Pressable>
           </View>
         )}
 
-        {step === 3 && (
+        {step === "fitness" && (
           <View>
-            <Step n={2} />
+            <Text style={tag}>[ THE BODY ]</Text>
             <Text style={title}>Where are you in your training?</Text>
-            {FITNESS.map((f) => <Choice key={f.v} label={f.l} sub={f.d} selected={fitness === f.v} onPress={() => { setFitness(f.v); setStep(4); }} />)}
+            {FITNESS.map((f) => <Choice key={f.v} label={f.l} sub={f.d} selected={fitness === f.v} onPress={() => { setFitness(f.v); setStep("equipment"); }} />)}
           </View>
         )}
-
-        {step === 4 && (
+        {step === "equipment" && (
           <View>
-            <Step n={3} />
+            <Text style={tag}>[ THE ARMORY ]</Text>
             <Text style={title}>What can you train with?</Text>
-            {EQUIPMENT.map((x) => <Choice key={x.v} label={x.l} sub={x.d} selected={equipment === x.v} onPress={() => { setEquipment(x.v); setStep(5); }} />)}
+            {EQUIPMENT.map((x) => <Choice key={x.v} label={x.l} sub={x.d} selected={equipment === x.v} onPress={() => { setEquipment(x.v); setStep("goal"); }} />)}
           </View>
         )}
-
-        {step === 5 && (
+        {step === "goal" && (
           <View>
-            <Step n={4} />
+            <Text style={tag}>[ THE AIM ]</Text>
             <Text style={title}>What's your main goal?</Text>
-            {GOALS.map((x) => <Choice key={x.v} label={x.l} sub={x.d} selected={goal === x.v} onPress={() => { setGoal(x.v); setStep(6); }} />)}
+            {GOALS.map((x) => <Choice key={x.v} label={x.l} sub={x.d} selected={goal === x.v} onPress={() => { setGoal(x.v); setStep("days"); }} />)}
           </View>
         )}
-
-        {step === 6 && (
+        {step === "days" && (
           <View>
-            <Step n={5} />
+            <Text style={tag}>[ THE RHYTHM ]</Text>
             <Text style={title}>How many days a week?</Text>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 30, marginVertical: 20 }}>
               <Pressable onPress={() => setDays((d) => Math.max(2, d - 1))}><Text style={{ color: C.gold, fontSize: 40 }}>−</Text></Pressable>
               <Text style={{ color: C.ivory, fontSize: 56, fontFamily: F.head, width: 80, textAlign: "center" }}>{days}</Text>
               <Pressable onPress={() => setDays((d) => Math.min(6, d + 1))}><Text style={{ color: C.gold, fontSize: 40 }}>+</Text></Pressable>
             </View>
-            <Btn label="Continue" onPress={() => setStep(7)} />
+            <Btn label="Continue" onPress={() => setStep("class")} />
           </View>
         )}
-
-        {step === 7 && (
+        {step === "class" && (
           <View>
-            <Step n={6} />
+            <Text style={tag}>[ THE CALLING ]</Text>
             <Text style={title}>Choose your class.</Text>
             <Text style={{ color: C.muted, fontSize: 13, marginBottom: 12, fontFamily: F.body }}>This sets your tone. You can change it later.</Text>
             {CLASSES.map((c) => <Choice key={c.v} label={c.v} sub={c.d} onPress={() => finish(c.v)} />)}
-            {!!error && <Text style={{ color: C.red, fontSize: 13, marginTop: 10 }}>{error}</Text>}
+            {!!error && <Text style={errStyle}>{error}</Text>}
           </View>
         )}
-
-        {step === 8 && (
+        {step === "saving" && (
           <View style={{ alignItems: "center" }}>
             <Seal size={72} />
             <ActivityIndicator color={C.gold} style={{ marginTop: 24 }} />
-            <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 4, fontFamily: F.mono, marginTop: 18 }}>[ FORGING YOUR PATH ]</Text>
+            <Text style={tag}>[ FORGING YOUR PATH ]</Text>
           </View>
         )}
 
@@ -159,11 +209,8 @@ export default function Onboarding() {
   );
 }
 
-function Step({ n }: { n: number }) {
-  return <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono, marginBottom: 14 }}>STEP {n} OF 6</Text>;
-}
-function Btn({ label, onPress }: { label: string; onPress: () => void }) {
-  return <Pressable onPress={onPress} style={{ marginTop: 26, backgroundColor: C.gold, paddingVertical: 15, paddingHorizontal: 40, borderRadius: 2, alignSelf: "center" }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{label.toUpperCase()}</Text></Pressable>;
+function Btn({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
+  return <Pressable onPress={onPress} disabled={disabled} style={{ marginTop: 26, backgroundColor: C.gold, paddingVertical: 15, paddingHorizontal: 40, borderRadius: 2, alignSelf: "center", opacity: disabled ? 0.4 : 1 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{label.toUpperCase()}</Text></Pressable>;
 }
 function Choice({ label, sub, onPress, selected, muted }: { label: string; sub?: string; onPress: () => void; selected?: boolean; muted?: boolean }) {
   return (
@@ -173,4 +220,17 @@ function Choice({ label, sub, onPress, selected, muted }: { label: string; sub?:
     </Pressable>
   );
 }
-const title = { color: C.ivory, fontSize: 23, fontWeight: "800" as const, fontFamily: F.head, marginBottom: 16, lineHeight: 30 };
+function Row({ label, on, onChange }: { label: string; on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 10 }}>
+      <Text style={{ color: C.text, fontSize: 14, fontFamily: F.body, flex: 1 }}>{label}</Text>
+      <Switch value={on} onValueChange={onChange} trackColor={{ false: C.surface, true: C.gold }} thumbColor={C.ivory} />
+    </View>
+  );
+}
+const tag = { color: C.gold, fontSize: 11, letterSpacing: 4, fontFamily: F.mono, marginBottom: 12, marginTop: 8 } as const;
+const title = { color: C.ivory, fontSize: 23, fontWeight: "800" as const, fontFamily: F.head, marginBottom: 12, lineHeight: 30 };
+const body = { color: C.muted, fontSize: 15, lineHeight: 23, fontFamily: F.body, marginBottom: 4 } as const;
+const link = { color: C.gold, fontSize: 14, fontFamily: F.bodyMid, textDecorationLine: "underline" } as const;
+const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 13, fontSize: 18, marginTop: 12, borderRadius: 2, fontFamily: F.body } as const;
+const errStyle = { color: C.red, fontSize: 13, marginTop: 10, fontFamily: F.body } as const;

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Switch, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Switch, Alert, Linking, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { C, F } from "@/lib/theme";
+
+const SITE = "https://tabor.quest";
 
 interface Prefs { push: { quests: boolean; guild: boolean; dm: boolean }; email: { quests: boolean } }
 const DEFAULTS: Prefs = { push: { quests: true, guild: true, dm: true }, email: { quests: false } };
@@ -13,6 +15,13 @@ export default function Settings() {
   const router = useRouter();
   const { session, signOut } = useAuth();
   const userId = session?.user.id;
+
+  async function exportData() {
+    try {
+      const { data } = await supabase.rpc("export_my_data");
+      await Share.share({ message: JSON.stringify(data, null, 2) });
+    } catch { Alert.alert("Could not export", "Please try again."); }
+  }
 
   function confirmDelete() {
     Alert.alert(
@@ -68,6 +77,15 @@ export default function Settings() {
         </Text>
         {!loaded ? null : null}
 
+        <Text style={sec}>PRIVACY & DATA</Text>
+        <LinkRow label="Download my data" onPress={exportData} />
+        <LinkRow label="Privacy Policy" onPress={() => Linking.openURL(`${SITE}/privacy`)} />
+        <LinkRow label="Terms & Community Guidelines" onPress={() => Linking.openURL(`${SITE}/terms`)} />
+
+        <Text style={sec}>SAFETY & SUPPORT</Text>
+        <LinkRow label="Safety Center" onPress={() => router.push("/safety")} />
+        <LinkRow label="Contact support" onPress={() => Linking.openURL("mailto:support@tabor.quest")} />
+
         <Text style={[sec, { color: C.red }]}>DANGER ZONE</Text>
         <Pressable onPress={confirmDelete} style={{ borderWidth: 1, borderColor: "rgba(192,58,58,0.5)", paddingVertical: 14, alignItems: "center", borderRadius: 2 }}>
           <Text style={{ color: C.red, fontSize: 13, letterSpacing: 1, fontFamily: F.mono }}>DELETE MY ACCOUNT</Text>
@@ -84,6 +102,14 @@ function Row({ label, on, onChange }: { label: string; on: boolean; onChange: (v
       <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.body }}>{label}</Text>
       <Switch value={on} onValueChange={onChange} trackColor={{ false: C.surface, true: C.gold }} thumbColor={C.ivory} />
     </View>
+  );
+}
+function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}>
+      <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.body }}>{label}</Text>
+      <Text style={{ color: C.gold, fontSize: 16 }}>›</Text>
+    </Pressable>
   );
 }
 function Locked({ label }: { label: string }) {
