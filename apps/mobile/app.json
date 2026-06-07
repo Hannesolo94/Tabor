@@ -22,7 +22,11 @@
       "expo-router",
       "expo-asset",
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        { "cameraPermission": "TABOR uses the camera to scan food barcodes for your nutrition log." }
+      ]
     ]
   }
 }

@@ -37,6 +37,9 @@ export default function Body() {
               <Text style={{ color: tab === t ? C.black : C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>{t === "program" ? "PROGRAM" : t === "library" ? "LIBRARY" : "TABATA"}</Text>
             </Pressable>
           ))}
+          <Pressable onPress={() => router.push("/fuel")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.gold, borderRadius: 2 }}>
+            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>FUEL ↗</Text>
+          </Pressable>
         </View>
       </View>
 
