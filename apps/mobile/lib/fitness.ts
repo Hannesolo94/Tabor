@@ -161,3 +161,15 @@ export async function setPR(userId: string, lift: string, value: number): Promis
 export async function deletePR(userId: string, lift: string): Promise<void> {
   await supabase.from("personal_records").delete().eq("user_id", userId).eq("lift", lift);
 }
+
+export interface TabataPreset { id: string; name: string; work: number; rest: number; rounds: number }
+export async function getTabataPresets(userId: string): Promise<TabataPreset[]> {
+  const { data } = await supabase.from("tabata_presets").select("id, name, work, rest, rounds").eq("user_id", userId).order("name");
+  return (data as TabataPreset[]) ?? [];
+}
+export async function saveTabataPreset(userId: string, p: { name: string; work: number; rest: number; rounds: number }): Promise<void> {
+  await supabase.from("tabata_presets").insert({ user_id: userId, ...p });
+}
+export async function deleteTabataPreset(id: string): Promise<void> {
+  await supabase.from("tabata_presets").delete().eq("id", id);
+}

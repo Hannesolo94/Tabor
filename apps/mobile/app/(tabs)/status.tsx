@@ -62,6 +62,17 @@ export default function Status() {
           <Stat label="BEST" value={`${best}d`} />
         </View>
 
+        <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+          {(() => { const s = (profile?.stats ?? {}) as Record<string, number>; return (
+            <>
+              <Stat label="STR" value={String(s.STR ?? 0)} />
+              <Stat label="AGI" value={String(s.AGI ?? 0)} />
+              <Stat label="WIS" value={String(s.WIS ?? 0)} />
+              <Stat label="MANA" value={String(s.MANA ?? 0)} />
+            </>
+          ); })()}
+        </View>
+
         {/* identity */}
         <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
           <Tag label="FAITH" value={faith} />

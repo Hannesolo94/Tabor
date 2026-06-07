@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
 import { loadToday, toggleQuest, sealDay, type Quest } from "@/lib/quests";
 import { levelProgress } from "@/lib/game";
+import { Seal } from "@/components/Seal";
 import { C, F } from "@/lib/theme";
 import { useTabBar } from "@/lib/tabbar";
 
@@ -21,6 +22,8 @@ export default function Quests() {
 
   const barW = useRef(new Animated.Value(0)).current;
   const sealAnim = useRef(new Animated.Value(0)).current;
+  const prevLevel = useRef<number | null>(null);
+  const [rankUp, setRankUp] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -39,6 +42,13 @@ export default function Quests() {
   useEffect(() => {
     Animated.timing(barW, { toValue: prog.pct, duration: 600, useNativeDriver: false }).start();
   }, [prog.pct, barW]);
+
+  // detect rank/level up (skip the first render so it doesn't fire on load)
+  useEffect(() => {
+    if (loading) return;
+    if (prevLevel.current !== null && prog.level > prevLevel.current) setRankUp(true);
+    prevLevel.current = prog.level;
+  }, [prog.level, loading]);
 
   useEffect(() => {
     if (allDone && !sealed) {
@@ -104,6 +114,16 @@ export default function Quests() {
           </Animated.View>
         )}
       </ScrollView>
+
+      <Modal visible={rankUp} transparent animationType="fade" onRequestClose={() => setRankUp(false)}>
+        <Pressable onPress={() => setRankUp(false)} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.92)", alignItems: "center", justifyContent: "center", padding: 30 }}>
+          <Seal size={110} />
+          <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 6, fontFamily: F.mono, marginTop: 24 }}>[ RANK ATTAINED ]</Text>
+          <Text style={{ color: C.ivory, fontSize: 40, fontFamily: F.head, marginTop: 10, textAlign: "center" }}>{prog.rank}</Text>
+          <Text style={{ color: C.text, fontSize: 15, fontFamily: F.body, marginTop: 14, textAlign: "center", lineHeight: 22 }}>Level {prog.level}. The fire grows, Son of Fire. Keep climbing.</Text>
+          <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 28 }}>TAP TO CONTINUE</Text>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }

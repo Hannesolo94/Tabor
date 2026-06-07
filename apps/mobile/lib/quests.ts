@@ -33,16 +33,29 @@ export async function loadToday(userId: string): Promise<Quest[]> {
   return (ins.data as Quest[]) ?? [];
 }
 
+// quest pillar -> RPG stat (data-model: STR/AGI/WIS/MANA)
+const STAT_BY_KEY: Record<string, string> = { body: "STR", word: "WIS", brother: "MANA" };
+
 async function setXp(userId: string, delta: number): Promise<void> {
   const { data } = await supabase.from("profiles").select("xp").eq("user_id", userId).maybeSingle();
   const xp = Math.max(0, (Number(data?.xp) || 0) + delta);
   await supabase.from("profiles").update({ xp }).eq("user_id", userId);
 }
 
-/** Toggle a quest done/undone and award/remove its XP. */
+async function bumpStat(userId: string, questKey: string, delta: number): Promise<void> {
+  const key = STAT_BY_KEY[questKey];
+  if (!key) return;
+  const { data } = await supabase.from("profiles").select("stats").eq("user_id", userId).maybeSingle();
+  const stats: Record<string, number> = { STR: 0, AGI: 0, WIS: 0, MANA: 0, ...((data?.stats as Record<string, number>) ?? {}) };
+  stats[key] = Math.max(0, (stats[key] || 0) + delta);
+  await supabase.from("profiles").update({ stats }).eq("user_id", userId);
+}
+
+/** Toggle a quest done/undone and award/remove its XP + stat. */
 export async function toggleQuest(userId: string, quest: Quest, done: boolean): Promise<void> {
   await supabase.from("quests").update({ done, progress: done ? 1 : 0 }).eq("id", quest.id);
   await setXp(userId, done ? quest.xp : -quest.xp);
+  await bumpStat(userId, quest.quest_key, done ? 1 : -1);
 }
 
 /** Seal the day when all quests are done. Idempotent per day; bumps streak once. */

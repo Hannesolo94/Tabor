@@ -35,8 +35,10 @@ const CLASSES = [
   { v: "Pilgrim", d: "The journeyer. Humble, seeking, climbing daily." },
 ];
 
+const DENOMINATIONS = ["Catholic", "Protestant", "Orthodox", "Non-denominational", "Other"];
+
 // step keys in order (gate + underage + saving are special)
-type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | "fitness" | "equipment" | "goal" | "days" | "class" | "saving";
+type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | "denomination" | "fitness" | "equipment" | "goal" | "days" | "class" | "saving";
 
 export default function Onboarding() {
   const router = useRouter();
@@ -47,6 +49,7 @@ export default function Onboarding() {
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [faith, setFaith] = useState<Faith>(null);
+  const [denomination, setDenomination] = useState<string | null>(null);
   const [fitness, setFitness] = useState<string | null>(null);
   const [equipment, setEquipment] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export default function Onboarding() {
     const { error: e } = await supabase.from("profiles").update({
       believer: faith === "believer" ? "yes" : "seeking",
       faith,
+      denomination,
       cls: finalClass, char_class: finalClass,
       fitness_level: fitness, equipment, goals: goal ? [goal] : [], days_per_week: days,
       dob: year ? `${year}-01-01` : null,
@@ -138,8 +142,8 @@ export default function Onboarding() {
           <View>
             <Text style={tag}>[ THE QUESTION ]</Text>
             <Text style={title}>Do you believe in Jesus Christ?</Text>
-            <Choice label="Yes. He is Lord." onPress={() => { setFaith("believer"); setStep("fitness"); }} />
-            <Choice label="I'm seeking. Open to learn." onPress={() => { setFaith("seeker"); setStep("fitness"); }} />
+            <Choice label="Yes. He is Lord." onPress={() => { setFaith("believer"); setStep("denomination"); }} />
+            <Choice label="I'm seeking. Open to learn." onPress={() => { setFaith("seeker"); setStep("denomination"); }} />
             <Choice label="No, and I'm not seeking." muted onPress={() => { setFaith(null); setStep("faithgate"); }} />
           </View>
         )}
@@ -149,8 +153,18 @@ export default function Onboarding() {
             <Seal size={64} />
             <Text style={[title, { textAlign: "center", marginTop: 18 }]}>The door stays open.</Text>
             <Text style={body}>TABOR is a brotherhood built on Christ. We honor your honesty. If you ever grow curious, you are welcome to walk in and learn.</Text>
-            <Btn label="I'm open to learning" onPress={() => { setFaith("seeker"); setStep("fitness"); }} />
+            <Btn label="I'm open to learning" onPress={() => { setFaith("seeker"); setStep("denomination"); }} />
             <Pressable onPress={signOut} style={{ marginTop: 16 }}><Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body }}>Not now — sign out</Text></Pressable>
+          </View>
+        )}
+
+        {step === "denomination" && (
+          <View>
+            <Text style={tag}>[ YOUR TRADITION ]</Text>
+            <Text style={title}>Where do you worship?</Text>
+            <Text style={body}>This helps us tailor prayers and lessons. Optional.</Text>
+            {DENOMINATIONS.map((d) => <Choice key={d} label={d} selected={denomination === d} onPress={() => { setDenomination(d); setStep("fitness"); }} />)}
+            <Pressable onPress={() => { setDenomination(null); setStep("fitness"); }} style={{ marginTop: 6, alignItems: "center" }}><Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body }}>Skip</Text></Pressable>
           </View>
         )}
 
