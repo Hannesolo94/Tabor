@@ -21,6 +21,7 @@ const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Donations", href: "/admin/donations" },
   { label: "Giveaways", href: "/admin/giveaways" },
   { label: "Moderation", href: "/admin/moderation" },
+  { label: "Tickets", href: "/admin/tickets" },
   { label: "Marketing", href: "/admin/marketing" },
   { label: "Suppliers", href: "/admin/suppliers" },
   { label: "Settings", href: "/admin/settings" },

@@ -92,6 +92,7 @@ export default function Settings() {
         <LinkRow label="Terms & Community Guidelines" onPress={() => Linking.openURL(`${SITE}/terms`)} />
 
         <Text style={sec}>SAFETY & SUPPORT</Text>
+        <LinkRow label="Report a problem" onPress={() => router.push("/report")} />
         <LinkRow label="Safety Center" onPress={() => router.push("/safety")} />
         <LinkRow label="Contact support" onPress={() => Linking.openURL("mailto:support@tabor.quest")} />
 

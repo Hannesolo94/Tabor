@@ -26,6 +26,10 @@
       [
         "expo-camera",
         { "cameraPermission": "TABOR uses the camera to scan food barcodes for your nutrition log." }
+      ],
+      [
+        "expo-image-picker",
+        { "photosPermission": "TABOR uses your photos so you can attach screenshots to a bug or feature report." }
       ]
     ]
   }
