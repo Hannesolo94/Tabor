@@ -28,9 +28,14 @@ export default function Store() {
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>Gear</Text>
         <Text style={{ color: C.muted, fontSize: 13, marginTop: 4, lineHeight: 19 }}>Wear the climb. Tap any piece to view and buy on tabor.quest.</Text>
 
-        <Pressable onPress={() => Linking.openURL(`${SITE}/shop`)} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2, marginTop: 16, marginBottom: 20 }}>
-          <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2, fontWeight: "700" }}>SHOP ALL ON WEB ↗</Text>
-        </Pressable>
+        <View style={{ flexDirection: "row", gap: 10, marginTop: 16, marginBottom: 20 }}>
+          <Pressable onPress={() => Linking.openURL(`${SITE}/shop`)} style={{ flex: 1, borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2 }}>
+            <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 1, fontWeight: "700", fontFamily: F.head }}>SHOP ON WEB ↗</Text>
+          </Pressable>
+          <Pressable onPress={() => Linking.openURL(`${SITE}/give`)} style={{ flex: 1, backgroundColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2 }}>
+            <Text style={{ color: C.black, fontSize: 11, letterSpacing: 1, fontWeight: "700", fontFamily: F.head }}>SUPPORT ↗</Text>
+          </Pressable>
+        </View>
 
         {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 30 }} /> : (
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14 }}>

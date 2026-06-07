@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Switch, Alert, Linking, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { C, F } from "@/lib/theme";
 
 const SITE = "https://tabor.quest";
+const DONATE_OFF = "tabor.donate.off";
 
 interface Prefs { push: { quests: boolean; guild: boolean; dm: boolean }; email: { quests: boolean } }
 const DEFAULTS: Prefs = { push: { quests: true, guild: true, dm: true }, email: { quests: false } };
@@ -38,6 +40,10 @@ export default function Settings() {
   }
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [loaded, setLoaded] = useState(false);
+  const [supportReminder, setSupportReminder] = useState(true);
+
+  useEffect(() => { AsyncStorage.getItem(DONATE_OFF).then((v) => setSupportReminder(v !== "1")); }, []);
+  const toggleSupportReminder = (v: boolean) => { setSupportReminder(v); AsyncStorage.setItem(DONATE_OFF, v ? "0" : "1"); };
 
   useEffect(() => {
     if (!userId) return;
@@ -76,6 +82,9 @@ export default function Settings() {
           Announcements from the brotherhood are always delivered. Phone push activates with the published app; email reminders send once the email provider is connected.
         </Text>
         {!loaded ? null : null}
+
+        <Text style={sec}>SUPPORT</Text>
+        <Row label="Monthly support reminder" on={supportReminder} onChange={toggleSupportReminder} />
 
         <Text style={sec}>PRIVACY & DATA</Text>
         <LinkRow label="Download my data" onPress={exportData} />

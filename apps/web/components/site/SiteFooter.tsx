@@ -65,6 +65,7 @@ export async function SiteFooter() {
           <Link href="/shop" style={col}>Shop All</Link>
           <Link href="/blog" style={col}>The Scroll</Link>
           <Link href="/#app" style={col}>The App</Link>
+          <Link href="/give" style={col}>Give</Link>
           <Link href="/#creed" style={col}>The Creed</Link>
         </div>
       </div>

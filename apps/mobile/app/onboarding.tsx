@@ -9,7 +9,7 @@ import { C, F } from "@/lib/theme";
 
 type Faith = "believer" | "seeker" | null;
 const SITE = "https://tabor.quest";
-const MIN_AGE = 16;
+const MIN_AGE = 18;
 
 const FITNESS = [
   { v: "beginner", l: "Beginner", d: "Just starting. I need a foothold." },

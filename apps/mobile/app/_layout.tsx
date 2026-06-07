@@ -10,6 +10,7 @@ import { JetBrainsMono_400Regular } from "@expo-google-fonts/jetbrains-mono";
 import { CormorantGaramond_500Medium_Italic } from "@expo-google-fonts/cormorant-garamond";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { ensureKeys } from "@/lib/crypto";
+import { DonationPrompt } from "@/components/DonationPrompt";
 import { C, F } from "@/lib/theme";
 
 function useAuthGate(session: unknown, loading: boolean, onboarded: boolean | null) {
@@ -42,6 +43,7 @@ function RootNav() {
     <>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.black } }} />
+      <DonationPrompt enabled={!!session && onboarded === true} />
     </>
   );
 }

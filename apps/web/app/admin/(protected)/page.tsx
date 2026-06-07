@@ -3,6 +3,7 @@
 // checkout is live); traffic/conversion collect from day one.
 import Link from "next/link";
 import { getDashboard, type RangeKey } from "@/lib/analytics-db";
+import { supabaseServer } from "@/lib/supabase/server";
 import { BarList, Funnel, LineChart } from "@/components/admin/Charts";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
@@ -44,6 +45,10 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
   const rangeKey = (isCustom ? "custom" : ["today", "7d", "30d", "90d"].includes(sp.range ?? "") ? sp.range : "30d") as RangeKey;
   const d = await getDashboard(rangeKey, isCustom ? { from: sp.from, to: sp.to } : undefined);
   const regionSym = (r: string) => (r === "ZA" ? "R" : "$");
+  // donations (completed) — alongside apparel revenue
+  const sbDash = await supabaseServer();
+  const { data: donRows } = await sbDash.from("donations").select("amount").eq("status", "completed");
+  const donations = (donRows ?? []).reduce((s, r) => s + Number(r.amount), 0);
 
   return (
     <div>
@@ -83,6 +88,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
         <Stat label="Cart abandon" value={`${d.cartAbandon.toFixed(0)}%`} sub="added but not bought" />
         <Stat label="COGS" value={money(d.cogs)} sub="supplier cost" />
         <Stat label="App clicks" value={String(d.appClicks)} sub="store-button taps" />
+        <Stat label="Donations" value={`R${donations.toLocaleString()}`} sub="completed gifts" />
       </div>
 
       {/* charts */}
