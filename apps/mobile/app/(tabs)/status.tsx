@@ -78,6 +78,11 @@ export default function Status() {
           <Action label="INBOX" onPress={() => router.push("/notifications")} />
           <Action label="SETTINGS" onPress={() => router.push("/settings")} />
         </View>
+        <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+          <Action label="HONORS" onPress={() => router.push("/honors")} />
+          <Action label="GIVEAWAY" onPress={() => router.push("/giveaway")} />
+          <Action label="NOTES" onPress={() => router.push("/notes")} />
+        </View>
 
         {/* history */}
         <Text style={sec}>LAST 28 DAYS</Text>
