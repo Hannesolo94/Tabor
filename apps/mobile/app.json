@@ -16,7 +16,11 @@
       }
     },
     "android": {
-      "package": "quest.tabor.app"
+      "package": "quest.tabor.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -25,12 +29,23 @@
       "expo-secure-store",
       [
         "expo-camera",
-        { "cameraPermission": "TABOR uses the camera to scan food barcodes for your nutrition log." }
+        {
+          "cameraPermission": "TABOR uses the camera to scan food barcodes for your nutrition log."
+        }
       ],
       [
         "expo-image-picker",
-        { "photosPermission": "TABOR uses your photos so you can attach screenshots to a bug or feature report." }
+        {
+          "photosPermission": "TABOR uses your photos so you can attach screenshots to a bug or feature report."
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "42908972-b333-4944-a9d3-3a1ad532d6f9"
+      }
+    },
+    "owner": "burg.er"
   }
 }
