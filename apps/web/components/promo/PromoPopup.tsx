@@ -68,8 +68,8 @@ export function PromoPopup() {
   if (!show) return null;
 
   return (
-    <div onClick={dismiss} style={{ position: "fixed", inset: 0, zIndex: 400, background: "rgba(0,0,0,0.78)", display: "grid", placeItems: "center", padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", width: "min(460px, 96vw)", background: "#0E0E12", border: `1px solid ${GOLD}55`, boxShadow: "0 0 60px rgba(201,169,97,0.12)", padding: "40px 32px", textAlign: "center", overflow: "hidden" }}>
+    <div onClick={dismiss} style={{ position: "fixed", inset: 0, zIndex: 400, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", display: "grid", placeItems: "center", padding: 20 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", width: "min(460px, 96vw)", background: "linear-gradient(160deg, rgba(34,34,42,0.82), rgba(15,15,20,0.78))", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: `1px solid ${GOLD}29`, borderRadius: 20, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 50px -16px rgba(201,169,97,0.22)", padding: "40px 32px", textAlign: "center", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, opacity: 0.05, display: "grid", placeItems: "center", pointerEvents: "none" }}><TaborSeal id="promo-bg" size={360} /></div>
         <button onClick={dismiss} aria-label="Close" style={{ position: "absolute", top: 12, right: 14, background: "none", border: "none", color: "#9A948A", fontSize: 20, cursor: "pointer" }}>✕</button>
 
@@ -81,8 +81,8 @@ export function PromoPopup() {
               <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em", marginBottom: 12 }}>[ WELCOME, SON OF FIRE ]</div>
               <h2 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 24, color: "#E8E2D5", margin: "0 0 10px" }}>Your code is ready.</h2>
               <p style={{ fontFamily: BODY, fontSize: 14, color: "#9A948A", lineHeight: 1.6, margin: "0 0 18px" }}>Use this at checkout for 10% off your first order.</p>
-              <div style={{ fontFamily: MONO, fontSize: 22, letterSpacing: "0.3em", color: GOLD, border: `1px dashed ${GOLD}88`, padding: "14px", marginBottom: 18 }}>{PROMO_CODE}</div>
-              <button onClick={dismiss} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "13px 30px", cursor: "pointer" }}>Start the Climb</button>
+              <div style={{ fontFamily: MONO, fontSize: 22, letterSpacing: "0.3em", color: GOLD, border: `1px dashed ${GOLD}88`, borderRadius: 12, background: "rgba(201,169,97,0.06)", padding: "14px", marginBottom: 18 }}>{PROMO_CODE}</div>
+              <button onClick={dismiss} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "14px 32px", cursor: "pointer" }}>Start the Climb</button>
             </>
           ) : (
             <>
@@ -92,8 +92,8 @@ export function PromoPopup() {
                 Take 10% off your first order. Join the wall for drops, scripture, and the brotherhood.
               </p>
               <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required aria-label="Email address" style={{ fontFamily: MONO, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}55`, padding: "14px 16px", textAlign: "center" }} />
-                <button type="submit" disabled={state === "saving"} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "14px", cursor: "pointer" }}>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required aria-label="Email address" style={{ fontFamily: MONO, fontSize: 13, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "14px 16px", textAlign: "center" }} />
+                <button type="submit" disabled={state === "saving"} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "14px", cursor: "pointer" }}>
                   {state === "saving" ? "..." : "Claim 10% off"}
                 </button>
               </form>

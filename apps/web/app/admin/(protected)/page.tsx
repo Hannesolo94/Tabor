@@ -19,7 +19,7 @@ const RANGES: { key: RangeKey; label: string }[] = [
 
 function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
-    <div style={{ border: "1px solid rgba(201,169,97,0.18)", background: "#0E0E12", padding: "16px 18px" }}>
+    <div style={{ background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset, 0 16px 30px -22px rgba(0,0,0,0.9)", padding: "16px 18px" }}>
       <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase" }}>{label}</div>
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: accent ? GOLD : "#E8E2D5", lineHeight: 1.1, marginTop: 6 }}>{value}</div>
       {sub && <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.08em", marginTop: 2 }}>{sub}</div>}
@@ -29,7 +29,7 @@ function Stat({ label, value, sub, accent }: { label: string; value: string; sub
 
 function Card({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px" }}>
+    <div style={{ background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", border: "1px solid rgba(201,169,97,0.14)", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <span style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em" }}>{title}</span>
         {action}
@@ -60,15 +60,15 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ display: "flex", gap: 6 }}>
             {RANGES.map((r) => (
-              <Link key={r.key} href={`/admin?range=${r.key}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "8px 12px", border: `1px solid ${GOLD}44`, color: rangeKey === r.key && !isCustom ? "#0A0A0A" : "#9A948A", background: rangeKey === r.key && !isCustom ? `linear-gradient(180deg,#E8D08C,${GOLD})` : "transparent" }}>{r.label}</Link>
+              <Link key={r.key} href={`/admin?range=${r.key}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "8px 12px", borderRadius: 10, border: `1px solid ${GOLD}44`, color: rangeKey === r.key && !isCustom ? "#1a1408" : "#9A948A", fontWeight: rangeKey === r.key && !isCustom ? 700 : 400, boxShadow: rangeKey === r.key && !isCustom ? "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)" : undefined, background: rangeKey === r.key && !isCustom ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "transparent" }}>{r.label}</Link>
             ))}
           </div>
           <form action="/admin" method="get" style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <input type="hidden" name="range" value="custom" />
-            <input type="date" name="from" defaultValue={isCustom ? sp.from : d.fromLabel} aria-label="From date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "7px 8px" }} />
+            <input type="date" name="from" defaultValue={isCustom ? sp.from : d.fromLabel} aria-label="From date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "7px 8px" }} />
             <span style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A" }}>→</span>
-            <input type="date" name="to" defaultValue={isCustom ? sp.to : d.toLabel} aria-label="To date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "7px 8px" }} />
-            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: isCustom ? "#0A0A0A" : "#9A948A", background: isCustom ? `linear-gradient(180deg,#E8D08C,${GOLD})` : "transparent", border: `1px solid ${GOLD}44`, padding: "7px 12px", cursor: "pointer" }}>Apply</button>
+            <input type="date" name="to" defaultValue={isCustom ? sp.to : d.toLabel} aria-label="To date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "7px 8px" }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: isCustom ? "#1a1408" : "#9A948A", fontWeight: isCustom ? 700 : 400, boxShadow: isCustom ? "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)" : undefined, background: isCustom ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "transparent", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "7px 12px", cursor: "pointer" }}>Apply</button>
           </form>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
               {d.regions.map((r) => (
-                <div key={r.region} style={{ border: "1px solid rgba(201,169,97,0.14)", padding: "12px 14px" }}>
+                <div key={r.region} style={{ border: "1px solid rgba(255,255,255,0.06)", background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", borderRadius: 12, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset", padding: "12px 14px" }}>
                   <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em" }}>{r.region === "ZA" ? "SOUTH AFRICA" : "INTERNATIONAL"}</div>
                   <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 22, color: GOLD, marginTop: 4 }}>{regionSym(r.region)}{r.revenue.toFixed(0)}</div>
                   <div style={{ fontFamily: MONO, fontSize: 9, color: "#9A948A", letterSpacing: "0.08em", marginTop: 2 }}>{r.orders} {r.orders === 1 ? "ORDER" : "ORDERS"}</div>

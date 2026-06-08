@@ -42,8 +42,8 @@ export function BarList({ items, format = (n: number) => String(n) }: { items: {
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "70%" }}>{it.label}</span>
             <span style={{ color: GOLD }}>{format(it.value)}{it.sub ? <span style={{ color: "#8A847A" }}> · {it.sub}</span> : null}</span>
           </div>
-          <div style={{ height: 6, background: "#15151A", overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${(it.value / max) * 100}%`, background: `linear-gradient(90deg, #A8843E, ${GOLD})` }} />
+          <div style={{ height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 999, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${(it.value / max) * 100}%`, borderRadius: 999, background: `linear-gradient(90deg, #A8843E, ${GOLD})` }} />
           </div>
         </div>
       ))}
@@ -64,8 +64,8 @@ export function Funnel({ steps }: { steps: { label: string; value: number }[] })
               <span>{s.label}</span>
               <span style={{ color: GOLD }}>{s.value}{i > 0 && <span style={{ color: "#8A847A" }}> · {conv.toFixed(0)}%</span>}</span>
             </div>
-            <div style={{ height: 14, background: "#15151A" }}>
-              <div style={{ height: "100%", width: `${Math.max(2, pctOfTop)}%`, background: `linear-gradient(90deg, #A8843E, ${GOLD})` }} />
+            <div style={{ height: 14, background: "rgba(255,255,255,0.06)", borderRadius: 8, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${Math.max(2, pctOfTop)}%`, borderRadius: 8, background: `linear-gradient(90deg, #A8843E, ${GOLD})` }} />
             </div>
           </div>
         );

@@ -10,7 +10,7 @@ import type { HeroContent } from "@/lib/content-db";
 import { GOLD, MONO, BODY } from "@/lib/ui";
 
 const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 5, display: "block" };
-const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "10px 12px", width: "100%" };
+const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "10px 12px", width: "100%" };
 
 export function ContentForm({ hero }: { hero: HeroContent }) {
   const [bgUrl, setBgUrl] = useState(hero.bg_url);
@@ -43,7 +43,7 @@ export function ContentForm({ hero }: { hero: HeroContent }) {
       <div><label style={lbl}>Subcopy</label><textarea name="subcopy" defaultValue={hero.subcopy} rows={3} style={{ ...inp, resize: "vertical" }} /></div>
 
       {/* background media */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", padding: "16px 16px" }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 16px" }}>
         <label style={lbl}>Background media (optional)</label>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <select name="bg_type" value={bgType} onChange={(e) => setBgType(e.target.value as HeroContent["bg_type"])} style={{ ...inp, width: "auto" }}>
@@ -51,7 +51,7 @@ export function ContentForm({ hero }: { hero: HeroContent }) {
             <option value="image">Image</option>
             <option value="video">Video</option>
           </select>
-          <label style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "10px 14px", cursor: "pointer" }}>
+          <label style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", borderRadius: 12, padding: "10px 14px", cursor: "pointer" }}>
             {busy ? "Uploading..." : "Upload"}
             <input type="file" accept="image/*,video/*" onChange={onUpload} disabled={busy} style={{ display: "none" }} />
           </label>
@@ -59,7 +59,7 @@ export function ContentForm({ hero }: { hero: HeroContent }) {
         </div>
         <input type="hidden" name="bg_url" value={bgUrl} />
         {bgUrl && (
-          <div style={{ marginTop: 12, width: 200, aspectRatio: "16/9", overflow: "hidden", border: "1px solid rgba(201,169,97,0.2)" }}>
+          <div style={{ marginTop: 12, width: 200, aspectRatio: "16/9", overflow: "hidden", border: "1px solid rgba(201,169,97,0.2)", borderRadius: 12 }}>
             {bgType === "video" ? (
               <video src={bgUrl} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
@@ -80,7 +80,7 @@ export function ContentForm({ hero }: { hero: HeroContent }) {
       </div>
       <p style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.06em" }}>BUTTON POSITIONS ARE FIXED BY THE LAYOUT. ONLY TEXT + LINKS ARE EDITABLE, SO THE DESIGN NEVER BREAKS.</p>
 
-      <div><button type="submit" disabled={busy} style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "13px 26px", cursor: "pointer" }}>Save hero</button></div>
+      <div><button type="submit" disabled={busy} style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "13px 26px", cursor: "pointer" }}>Save hero</button></div>
     </form>
   );
 }

@@ -23,7 +23,7 @@ export default async function BlogIndex() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 22 }}>
               {posts.map((p) => (
-                <Link key={p.id} href={`/blog/${p.slug}`} style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", display: "block" }}>
+                <Link key={p.id} href={`/blog/${p.slug}`} className="tabor-lift" style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", overflow: "hidden", display: "block" }}>
                   {p.cover_image && <div style={{ aspectRatio: "16/9", background: `#15151A url(${p.cover_image}) center/cover` }} />}
                   <div style={{ padding: "18px 20px" }}>
                     <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em" }}>{p.published_at ? new Date(p.published_at).toISOString().slice(0, 10) : ""}</div>

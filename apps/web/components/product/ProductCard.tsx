@@ -17,8 +17,8 @@ export function ProductCard({ p }: { p: Product }) {
   };
   return (
     <Link href={`/product/${p.sku}`} style={{ textDecoration: "none", display: "block" }}>
-      <div style={{ border: "1px solid rgba(201,169,97,0.2)", background: "#0E0E12" }}>
-        <div style={{ borderBottom: "1px solid rgba(201,169,97,0.18)" }}>
+      <div className="tabor-lift" style={{ border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", overflow: "hidden" }}>
+        <div style={{ borderBottom: "1px solid rgba(201,169,97,0.16)" }}>
           <ProductArt p={p} />
         </div>
         <div style={{ padding: "14px 15px" }}>
@@ -32,12 +32,12 @@ export function ProductCard({ p }: { p: Product }) {
             {p.inStock ? (
               <button
                 onClick={onAdd}
-                style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "8px 13px", cursor: "pointer", textTransform: "uppercase" }}
+                style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 12, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", fontWeight: 700, padding: "9px 14px", cursor: "pointer", textTransform: "uppercase" }}
               >
                 Add to Bag
               </button>
             ) : (
-              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#7A746A", border: "1px solid #3A3A40", padding: "8px 13px", textTransform: "uppercase" }}>Sold Out</span>
+              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: "#7A746A", border: "1px solid #3A3A40", borderRadius: 10, padding: "9px 14px", textTransform: "uppercase" }}>Sold Out</span>
             )}
           </div>
         </div>

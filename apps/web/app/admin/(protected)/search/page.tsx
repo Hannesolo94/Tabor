@@ -9,7 +9,7 @@ function Group({ title, count, children }: { title: string; count: number; child
   return (
     <div style={{ marginBottom: 24 }}>
       <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.18em", marginBottom: 10 }}>{title} ({count})</div>
-      {count === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#8A847A" }}>No matches.</p> : <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>{children}</div>}
+      {count === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#8A847A" }}>No matches.</p> : <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden" }}>{children}</div>}
     </div>
   );
 }
@@ -42,8 +42,8 @@ export default async function AdminSearch({ searchParams }: { searchParams: Prom
       <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ SEARCH ]</div>
       <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 16px" }}>Search</h1>
       <form action="/admin/search" method="get" style={{ display: "flex", gap: 8, marginBottom: 28, maxWidth: 520 }}>
-        <input name="q" defaultValue={q} autoFocus placeholder="Products, customers, reviews..." style={{ flex: 1, fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "12px 14px" }} />
-        <button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "12px 20px", cursor: "pointer" }}>Search</button>
+        <input name="q" defaultValue={q} autoFocus placeholder="Products, customers, reviews..." style={{ flex: 1, fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "12px 14px" }} />
+        <button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "12px 20px", cursor: "pointer" }}>Search</button>
       </form>
 
       {!q ? (

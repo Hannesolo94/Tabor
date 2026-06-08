@@ -15,7 +15,7 @@ export default async function ReturnsPage() {
   const { data } = await sb.from("return_requests").select("*").order("created_at", { ascending: false }).limit(200);
   const rows = data ?? [];
 
-  const inp: React.CSSProperties = { fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "7px 9px" };
+  const inp: React.CSSProperties = { fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "7px 9px" };
 
   return (
     <div>
@@ -28,7 +28,7 @@ export default async function ReturnsPage() {
       ) : (
         <div style={{ display: "grid", gap: 12 }}>
           {rows.map((r) => (
-            <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "16px 18px" }}>
+            <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                 <div>
                   <span style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5" }}>{REASON[r.reason] ?? r.reason}</span>
@@ -44,7 +44,7 @@ export default async function ReturnsPage() {
                 <input type="hidden" name="id" value={r.id} />
                 <select name="status" defaultValue={r.status} style={inp}>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
                 <input name="admin_note" defaultValue={r.admin_note ?? ""} placeholder="Internal note" style={{ ...inp, flex: 1, minWidth: 160, fontFamily: BODY, fontSize: 12 }} />
-                <button type="submit" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "8px 14px", cursor: "pointer" }}>Update</button>
+                <button type="submit" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "8px 14px", cursor: "pointer" }}>Update</button>
               </form>
             </div>
           ))}

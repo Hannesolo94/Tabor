@@ -14,7 +14,7 @@ export function ProductGallery({ product, media }: { product: Product; media: Me
   if (media.length === 0) {
     // fall back to uploaded single image (ProductArt handles imageUrl) or seal art
     return (
-      <div style={{ border: "1px solid rgba(201,169,97,0.2)" }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.16)", borderRadius: 18, overflow: "hidden", boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
         <ProductArt p={product} size={150} square />
       </div>
     );
@@ -24,7 +24,7 @@ export function ProductGallery({ product, media }: { product: Product; media: Me
 
   return (
     <div>
-      <div style={{ border: "1px solid rgba(201,169,97,0.2)", background: product.tone, aspectRatio: "1 / 1", overflow: "hidden", display: "grid", placeItems: "center" }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: product.tone, aspectRatio: "1 / 1", borderRadius: 18, overflow: "hidden", display: "grid", placeItems: "center", boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
         {current.type === "video" ? (
           <video src={current.url} controls autoPlay muted loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
@@ -39,7 +39,7 @@ export function ProductGallery({ product, media }: { product: Product; media: Me
             <button
               key={m.id}
               onClick={() => setActive(i)}
-              style={{ width: 60, height: 60, padding: 0, border: `1px solid ${i === active ? GOLD : "rgba(201,169,97,0.25)"}`, background: "#15151A", cursor: "pointer", overflow: "hidden", position: "relative" }}
+              style={{ width: 60, height: 60, padding: 0, border: `1px solid ${i === active ? GOLD : "rgba(201,169,97,0.2)"}`, borderRadius: 10, background: "#15151A", cursor: "pointer", overflow: "hidden", position: "relative", boxShadow: i === active ? "0 0 0 1px rgba(201,169,97,0.4), 0 8px 18px -10px rgba(0,0,0,0.9)" : "none" }}
             >
               {m.type === "video" ? (
                 <>

@@ -11,8 +11,8 @@ export function CartDrawer() {
   if (!open) return null;
   const sym = lines[0]?.symbol ?? "$";
   return (
-    <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "flex-end" }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: "min(400px, 94vw)", height: "100%", background: "#0E0E12", borderLeft: `1px solid ${GOLD}55`, padding: "28px 22px", overflowY: "auto" }}>
+    <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", display: "flex", justifyContent: "flex-end" }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: "min(400px, 94vw)", height: "100%", background: "linear-gradient(160deg, rgba(28,28,35,0.92), rgba(12,12,17,0.94))", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderLeft: `1px solid ${GOLD}33`, borderTopLeftRadius: 20, borderBottomLeftRadius: 20, boxShadow: "-20px 0 60px -24px rgba(0,0,0,0.8), inset 1px 0 0 rgba(255,255,255,0.05)", padding: "28px 22px", overflowY: "auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <span style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 20, color: "#E8E2D5", letterSpacing: "0.08em" }}>
             YOUR BAG{count ? ` · ${count}` : ""}
@@ -32,7 +32,7 @@ export function CartDrawer() {
                     <div style={{ fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.1em", marginTop: 2 }}>SIZE {it.size.toUpperCase()}</div>
                   )}
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                    <div style={{ display: "flex", alignItems: "center", border: `1px solid ${GOLD}44` }}>
+                    <div style={{ display: "flex", alignItems: "center", border: `1px solid ${GOLD}33`, borderRadius: 10, background: "rgba(201,169,97,0.05)" }}>
                       <button onClick={() => setQty(it.sku, it.size, it.qty - 1)} style={{ background: "none", border: "none", color: GOLD, width: 26, height: 26, cursor: "pointer", fontSize: 14 }}>−</button>
                       <span style={{ fontFamily: MONO, fontSize: 12, color: "#E8E2D5", minWidth: 18, textAlign: "center" }}>{it.qty}</span>
                       <button onClick={() => setQty(it.sku, it.size, it.qty + 1)} style={{ background: "none", border: "none", color: GOLD, width: 26, height: 26, cursor: "pointer", fontSize: 14 }}>+</button>
@@ -49,7 +49,7 @@ export function CartDrawer() {
               <span style={{ color: GOLD }}>{sym}{total}</span>
             </div>
             <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginBottom: 14 }}>SHIPPING + TAX CALCULATED AT CHECKOUT</div>
-            <Link href="/checkout" onClick={() => setOpen(false)} style={{ display: "block", textAlign: "center", textDecoration: "none", fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "15px" }}>
+            <Link href="/checkout" onClick={() => setOpen(false)} style={{ display: "block", textAlign: "center", textDecoration: "none", fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "15px" }}>
               Checkout
             </Link>
             <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>

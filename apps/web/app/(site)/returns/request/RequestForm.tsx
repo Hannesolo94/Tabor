@@ -28,11 +28,11 @@ export function RequestForm() {
     setBusy(false);
   }
 
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "12px 14px", width: "100%" };
+  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "13px 15px", width: "100%" };
 
   if (done) {
     return (
-      <div style={{ border: `1px solid ${GOLD}33`, background: "#0E0E12", padding: "22px 20px" }}>
+      <div style={{ border: `1px solid ${GOLD}29`, background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "22px 20px" }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.18em", marginBottom: 8 }}>[ REQUEST RECEIVED ]</div>
         <p style={{ fontFamily: BODY, fontSize: 14, color: "#C3BDB1", margin: 0, lineHeight: 1.6 }}>We have your request and will review it within 2 business days. Check your email for the next steps. Faulty items are covered under our guarantee.</p>
       </div>
@@ -46,7 +46,7 @@ export function RequestForm() {
       <select aria-label="Reason" value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} style={inp}>{REASONS.map((r) => <option key={r.v} value={r.v}>{r.l}</option>)}</select>
       <textarea placeholder="Tell us what happened (and a photo helps for faulty items)" aria-label="Details" value={f.detail} onChange={(e) => setF({ ...f, detail: e.target.value })} rows={4} style={{ ...inp, resize: "vertical" }} />
       {error && <p style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", margin: 0 }}>{error}</p>}
-      <div><button type="submit" disabled={busy} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "13px 26px", cursor: busy ? "wait" : "pointer", opacity: busy ? 0.6 : 1 }}>{busy ? "Submitting…" : "Submit request"}</button></div>
+      <div><button type="submit" disabled={busy} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "14px 28px", cursor: busy ? "wait" : "pointer", opacity: busy ? 0.6 : 1 }}>{busy ? "Submitting…" : "Submit request"}</button></div>
     </form>
   );
 }

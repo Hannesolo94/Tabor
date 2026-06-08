@@ -50,7 +50,7 @@ export default function CheckoutPage() {
     setBusy(false);
   }
 
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "12px 14px", width: "100%" };
+  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "13px 15px", width: "100%" };
 
   if (done) {
     return (
@@ -60,7 +60,7 @@ export default function CheckoutPage() {
           <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(36px,7vw,56px)", color: "#E8E2D5", margin: "0 0 14px" }}>Forged.</h1>
           <p style={{ fontFamily: BODY, fontSize: 15, color: "#C3BDB1", lineHeight: 1.6 }}>{done.message ?? "Your order has been received."}</p>
           <p style={{ fontFamily: MONO, fontSize: 11, color: "#8A847A", letterSpacing: "0.1em", marginTop: 16 }}>ORDER REF · {done.orderId.slice(0, 8).toUpperCase()}</p>
-          <Link href="/shop" style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "13px 26px", textDecoration: "none", display: "inline-block", marginTop: 26 }}>Keep shopping</Link>
+          <Link href="/shop" style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "14px 28px", textDecoration: "none", display: "inline-block", marginTop: 26 }}>Keep shopping</Link>
         </div>
       </div>
     );
@@ -75,7 +75,7 @@ export default function CheckoutPage() {
         {lines.length === 0 ? (
           <div>
             <p style={{ fontFamily: BODY, fontSize: 15, color: "#9A948A" }}>Your bag is empty.</p>
-            <Link href="/shop" style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "13px 26px", textDecoration: "none", display: "inline-block", marginTop: 14 }}>Shop the Drop</Link>
+            <Link href="/shop" style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "14px 28px", textDecoration: "none", display: "inline-block", marginTop: 14 }}>Shop the Drop</Link>
           </div>
         ) : (
           <form onSubmit={placeOrder} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 36 }}>
@@ -104,7 +104,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* summary + pay */}
-            <div>
+            <div style={{ border: `1px solid ${GOLD}29`, background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "22px 22px", alignSelf: "start" }}>
               <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", letterSpacing: "0.06em", marginBottom: 12 }}>ORDER SUMMARY</div>
               {lines.map((it) => (
                 <div key={it.sku + (it.size ?? "")} style={{ display: "flex", justifyContent: "space-between", padding: "11px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
@@ -125,7 +125,7 @@ export default function CheckoutPage() {
 
               {error && <p style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", letterSpacing: "0.04em", marginTop: 14 }}>{error}</p>}
 
-              <button type="submit" disabled={busy} style={{ width: "100%", marginTop: 18, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "15px", cursor: busy ? "wait" : "pointer", opacity: busy ? 0.6 : 1 }}>
+              <button type="submit" disabled={busy} style={{ width: "100%", marginTop: 18, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "16px", cursor: busy ? "wait" : "pointer", opacity: busy ? 0.6 : 1 }}>
                 {busy ? "Placing order…" : `Place order · ${sym}${total}`}
               </button>
               <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>SHIPS WORLDWIDE · PRINTED ON DEMAND</div>

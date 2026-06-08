@@ -51,7 +51,7 @@ export function VersesPopup() {
       <button
         onClick={() => set("open")}
         aria-label="Open verse of the day"
-        style={{ position: "fixed", right: 0, top: 150, zIndex: 150, display: "flex", alignItems: "center", gap: 8, background: "#0E0E12", border: `1px solid ${GOLD}55`, borderRight: "none", padding: "10px 12px", cursor: "pointer", writingMode: "vertical-rl" as React.CSSProperties["writingMode"] }}
+        style={{ position: "fixed", right: 0, top: 150, zIndex: 150, display: "flex", alignItems: "center", gap: 8, background: "linear-gradient(160deg, rgba(34,34,42,0.82), rgba(15,15,20,0.72))", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: `1px solid ${GOLD}33`, borderRight: "none", borderTopLeftRadius: 14, borderBottomLeftRadius: 14, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "10px 12px", cursor: "pointer", writingMode: "vertical-rl" as React.CSSProperties["writingMode"] }}
       >
         <TaborSeal id="verse-min" size={18} />
         <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.2em", color: GOLD, textTransform: "uppercase" }}>Verse of the Day</span>
@@ -60,7 +60,7 @@ export function VersesPopup() {
   }
 
   return (
-    <div style={{ position: "fixed", right: 16, top: 130, zIndex: 150, width: "min(280px, calc(100vw - 32px))", background: "rgba(14,14,18,0.96)", border: `1px solid ${GOLD}55`, boxShadow: "0 0 40px rgba(201,169,97,0.1)", backdropFilter: "blur(8px)" }}>
+    <div style={{ position: "fixed", right: 16, top: 130, zIndex: 150, width: "min(280px, calc(100vw - 32px))", background: "linear-gradient(160deg, rgba(34,34,42,0.82), rgba(15,15,20,0.78))", border: `1px solid ${GOLD}29`, borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 50px -16px rgba(201,169,97,0.22)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px 8px 12px", borderBottom: `1px solid ${GOLD}22` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <TaborSeal id="verse-hd" size={18} />

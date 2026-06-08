@@ -12,7 +12,7 @@ export const metadata = { title: "Shop · TABOR" };
 export const dynamic = "force-dynamic";
 
 function pill(active: boolean, accent = GOLD): React.CSSProperties {
-  return { fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", color: active ? "#0A0A0A" : "#9A948A", background: active ? `linear-gradient(180deg,#E8D08C,${accent})` : "transparent", border: `1px solid ${accent}66`, padding: "9px 14px", display: "inline-block" };
+  return { fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", color: active ? "#1a1408" : "#9A948A", fontWeight: active ? 700 : 400, background: active ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "rgba(201,169,97,0.05)", border: `1px solid ${accent}${active ? "00" : "40"}`, borderRadius: 10, boxShadow: active ? "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)" : "none", padding: "9px 14px", display: "inline-block" };
 }
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<{ type?: string; persona?: string; q?: string }> }) {
@@ -51,8 +51,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       <section style={{ padding: "24px 24px 8px" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
           <form action="/shop" method="get" style={{ display: "flex", gap: 8, marginBottom: 22, maxWidth: 420 }}>
-            <input name="q" defaultValue={q ?? ""} placeholder="Search products..." style={{ flex: 1, fontFamily: MONO, fontSize: 12, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "11px 14px" }} />
-            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "11px 18px", cursor: "pointer" }}>Search</button>
+            <input name="q" defaultValue={q ?? ""} placeholder="Search products..." style={{ flex: 1, fontFamily: MONO, fontSize: 12, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "12px 14px" }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 12, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "11px 20px", cursor: "pointer" }}>Search</button>
           </form>
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.18em", marginBottom: 8 }}>COLLECTION</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>

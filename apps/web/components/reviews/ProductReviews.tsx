@@ -26,7 +26,7 @@ export function ProductReviews({ sku, reviews, summary }: { sku: string; reviews
             <p style={{ fontFamily: BODY, fontSize: 14, color: "#7A746A" }}>No reviews yet. Be the first.</p>
           ) : (
             reviews.map((r) => (
-              <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "#0E0E12", padding: "18px 20px" }}>
+              <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "18px 20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                   <Stars rating={r.rating} />
                   <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#8A847A", letterSpacing: "0.08em" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>
@@ -36,7 +36,7 @@ export function ProductReviews({ sku, reviews, summary }: { sku: string; reviews
                 {r.media.length > 0 && (
                   <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
                     {r.media.map((m, i) => (
-                      <div key={i} style={{ width: 88, height: 88, border: `1px solid ${GOLD}33`, overflow: "hidden", background: "#15151A" }}>
+                      <div key={i} style={{ width: 88, height: 88, border: `1px solid ${GOLD}33`, borderRadius: 12, overflow: "hidden", background: "#15151A" }}>
                         {m.type === "video" ? (
                           <video src={m.url} controls muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ) : (

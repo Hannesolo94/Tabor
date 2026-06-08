@@ -49,7 +49,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
         {/* profile / signup */}
-        <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px" }}>
+        <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" }}>
           <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em", marginBottom: 8 }}>DETAILS</div>
           {waitlist.data && <Row k="SIGNUP SOURCE" v={waitlist.data.source || "web"} />}
           {waitlist.data && <Row k="JOINED" v={new Date(waitlist.data.created_at).toISOString().slice(0, 10)} />}
@@ -60,7 +60,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
         </div>
 
         {/* orders */}
-        <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px" }}>
+        <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" }}>
           <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em", marginBottom: 8 }}>ORDERS</div>
           {orders.length === 0 ? (
             <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#7A746A" }}>No orders yet.</p>
@@ -76,30 +76,30 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
       </div>
 
       {/* tags */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px", marginTop: 20 }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px", marginTop: 20 }}>
         <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em", marginBottom: 12 }}>TAGS</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           {tags.map((t) => (
-            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: MONO, fontSize: 10, color: GOLD, border: `1px solid ${GOLD}44`, padding: "5px 8px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: MONO, fontSize: 10, color: GOLD, border: `1px solid ${GOLD}44`, borderRadius: 8, padding: "5px 8px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
               {t}
               <form action={removeTag} style={{ display: "inline" }}><input type="hidden" name="email" value={email} /><input type="hidden" name="tag" value={t} /><button type="submit" aria-label={`Remove tag ${t}`} style={{ background: "none", border: "none", color: "#8A847A", cursor: "pointer", padding: 0, fontSize: 12, lineHeight: 1 }}>×</button></form>
             </span>
           ))}
           <form action={addTag} style={{ display: "inline-flex", gap: 6 }}>
             <input type="hidden" name="email" value={email} />
-            <input name="tag" placeholder="add tag (e.g. vip, sa, lapsed)" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "6px 9px", width: 180 }} />
-            <button type="submit" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "none", border: "1px solid rgba(201,169,97,0.3)", padding: "6px 10px", cursor: "pointer" }}>Add</button>
+            <input name="tag" placeholder="add tag (e.g. vip, sa, lapsed)" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "6px 9px", width: 180 }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "rgba(201,169,97,0.05)", border: "1px solid rgba(201,169,97,0.3)", borderRadius: 10, padding: "6px 10px", cursor: "pointer" }}>Add</button>
           </form>
         </div>
       </div>
 
       {/* notes / requests */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px", marginTop: 20 }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px", marginTop: 20 }}>
         <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em", marginBottom: 12 }}>NOTES &amp; REQUESTS</div>
         <form action={addNote} style={{ display: "flex", gap: 8, marginBottom: 14 }}>
           <input type="hidden" name="email" value={email} />
-          <input name="body" placeholder="Add a note or log a request..." required style={{ flex: 1, fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "10px 12px" }} />
-          <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "10px 16px", cursor: "pointer" }}>Add</button>
+          <input name="body" placeholder="Add a note or log a request..." required style={{ flex: 1, fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "10px 12px" }} />
+          <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "10px 16px", cursor: "pointer" }}>Add</button>
         </form>
         {(notes.data ?? []).length === 0 ? (
           <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#7A746A" }}>No notes yet.</p>

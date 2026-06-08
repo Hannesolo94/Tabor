@@ -20,7 +20,7 @@ export default async function AdminCollections() {
   const countBy = new Map<string, number>();
   for (const r of counts.data ?? []) countBy.set(r.collection_id, (countBy.get(r.collection_id) ?? 0) + 1);
 
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "10px 12px", width: "100%" };
+  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "10px 12px", width: "100%" };
 
   return (
     <div>
@@ -28,7 +28,7 @@ export default async function AdminCollections() {
       <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 24px" }}>Collections</h1>
 
       {/* persona visibility */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px", marginBottom: 22 }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px", marginBottom: 22 }}>
         <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginBottom: 4 }}>Persona collections</div>
         <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#9A948A", margin: "0 0 14px" }}>Your four core collections. Hide one to remove it from the site nav and listings.</p>
         <div style={{ display: "grid", gap: 6 }}>
@@ -39,7 +39,7 @@ export default async function AdminCollections() {
                 <span style={{ fontFamily: BODY, fontSize: 14, color: isHidden ? "#8A847A" : "#E8E2D5" }}>{p.name} <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A" }}>· {p.tag}</span></span>
                 <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.08em", color: isHidden ? "#C03A3A" : "#7BBF7B" }}>{isHidden ? "HIDDEN" : "VISIBLE"}</span>
-                  <form action={togglePersona}><input type="hidden" name="persona" value={p.id} /><button style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "none", border: "1px solid rgba(201,169,97,0.3)", padding: "6px 12px", cursor: "pointer" }}>{isHidden ? "Show" : "Hide"}</button></form>
+                  <form action={togglePersona}><input type="hidden" name="persona" value={p.id} /><button style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "rgba(201,169,97,0.05)", border: "1px solid rgba(201,169,97,0.3)", borderRadius: 10, padding: "6px 12px", cursor: "pointer" }}>{isHidden ? "Show" : "Hide"}</button></form>
                 </span>
               </div>
             );
@@ -50,7 +50,7 @@ export default async function AdminCollections() {
       {/* custom collections */}
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginBottom: 10 }}>Custom collections</div>
       {collections.length > 0 && (
-        <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", marginBottom: 18 }}>
+        <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden", marginBottom: 18 }}>
           {collections.map((c, i) => (
             <Link key={c.id} href={`/admin/collections/${c.id}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none", textDecoration: "none" }}>
               <span style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5" }}>{c.title} <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A" }}>· /{c.slug}</span></span>
@@ -63,11 +63,11 @@ export default async function AdminCollections() {
         </div>
       )}
 
-      <form action={createCollection} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px", display: "grid", gap: 10, maxWidth: 520 }}>
+      <form action={createCollection} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px", display: "grid", gap: 10, maxWidth: 520 }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.14em" }}>+ NEW COLLECTION</div>
         <input name="title" placeholder="Collection name (e.g. Summer Drop, Best of Sentinel)" required style={inp} />
         <input name="description" placeholder="Short description (optional)" style={inp} />
-        <div><button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "11px 20px", cursor: "pointer" }}>Create &amp; add products</button></div>
+        <div><button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "11px 20px", cursor: "pointer" }}>Create &amp; add products</button></div>
       </form>
     </div>
   );

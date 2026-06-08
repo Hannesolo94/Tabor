@@ -42,7 +42,7 @@ export default async function GivePage() {
           {/* left: transparency + goal + board */}
           <div>
             {goal && (
-              <div style={{ border: "1px solid rgba(201,169,97,0.2)", background: "#0E0E12", padding: "22px" }}>
+              <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 50px -16px rgba(201,169,97,0.22)", padding: "22px" }}>
                 <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 20, color: "#E8E2D5" }}>{goal.title}</div>
                 <p style={{ fontFamily: BODY, fontSize: 13.5, color: "#9A948A", lineHeight: 1.6, marginTop: 6 }}>{goal.description}</p>
                 <div style={{ height: 10, background: "#15151A", borderRadius: 5, overflow: "hidden", marginTop: 16 }}>
@@ -56,7 +56,7 @@ export default async function GivePage() {
             )}
 
             {/* transparency split */}
-            <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "20px", marginTop: 16 }}>
+            <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "20px", marginTop: 16 }}>
               <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.16em", marginBottom: 12 }}>WHERE EVERY RAND GOES</div>
               <Split label={`Charities the community chooses`} pct={split} color={GOLD} />
               <Split label="Keeping TABOR free + running" pct={100 - split} color="#6fa8dc" />
@@ -73,7 +73,7 @@ export default async function GivePage() {
               ) : (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {board.map((d, i) => (
-                    <span key={i} style={{ fontFamily: MONO, fontSize: 11, color: "#C3BDB1", border: `1px solid ${GOLD}33`, padding: "6px 10px" }}>{d.name} · R{Number(d.amount).toLocaleString()}</span>
+                    <span key={i} style={{ fontFamily: MONO, fontSize: 11, color: "#C3BDB1", border: `1px solid ${GOLD}33`, borderRadius: 8, background: "rgba(201,169,97,0.05)", padding: "6px 10px" }}>{d.name} · R{Number(d.amount).toLocaleString()}</span>
                   ))}
                 </div>
               )}

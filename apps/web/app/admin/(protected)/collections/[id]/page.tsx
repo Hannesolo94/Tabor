@@ -20,7 +20,7 @@ export default async function EditCollection({ params }: { params: Promise<{ id:
   const products = (allProducts.data ?? []) as PickerProduct[];
   const initial = (members.data ?? []).map((m) => m.sku);
 
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "10px 12px", width: "100%" };
+  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "10px 12px", width: "100%" };
   const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4, display: "block" };
 
   return (
@@ -39,7 +39,7 @@ export default async function EditCollection({ params }: { params: Promise<{ id:
           <div><label style={lbl}>Sort</label><input name="sort" type="number" defaultValue={col.sort} style={inp} /></div>
           <label style={{ fontFamily: MONO, fontSize: 11, color: "#C3BDB1", display: "flex", gap: 8, alignItems: "center", paddingBottom: 10 }}><input type="checkbox" name="visible" defaultChecked={col.visible} /> Visible on site</label>
         </div>
-        <div><button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "11px 20px", cursor: "pointer" }}>Save details</button></div>
+        <div><button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "11px 20px", cursor: "pointer" }}>Save details</button></div>
       </form>
 
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginBottom: 4 }}>Products in this collection</div>
@@ -48,7 +48,7 @@ export default async function EditCollection({ params }: { params: Promise<{ id:
 
       <form action={deleteCollection} style={{ marginTop: 30, paddingTop: 16, borderTop: "1px solid rgba(192,58,58,0.25)" }}>
         <input type="hidden" name="id" value={col.id} />
-        <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C03A3A", background: "none", border: "1px solid rgba(192,58,58,0.4)", padding: "10px 16px", cursor: "pointer" }}>Delete collection</button>
+        <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C03A3A", background: "rgba(192,58,58,0.06)", border: "1px solid rgba(192,58,58,0.4)", borderRadius: 12, padding: "10px 16px", cursor: "pointer" }}>Delete collection</button>
       </form>
     </div>
   );

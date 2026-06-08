@@ -16,7 +16,7 @@ export default async function AdminBlog() {
       <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 22px" }}>Blog</h1>
 
       {posts.length > 0 && (
-        <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", marginBottom: 20 }}>
+        <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden", marginBottom: 20 }}>
           {posts.map((p, i) => (
             <Link key={p.id} href={`/admin/blog/${p.id}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 18px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none", textDecoration: "none" }}>
               <span style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5" }}>{p.title} <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A" }}>· /{p.slug}</span></span>
@@ -26,9 +26,9 @@ export default async function AdminBlog() {
         </div>
       )}
 
-      <form action={createPost} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px", display: "flex", gap: 10, maxWidth: 560 }}>
-        <input name="title" placeholder="New post title…" required style={{ flex: 1, fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "11px 13px" }} />
-        <button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "11px 18px", cursor: "pointer" }}>Create</button>
+      <form action={createPost} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px", display: "flex", gap: 10, maxWidth: 560 }}>
+        <input name="title" placeholder="New post title…" required style={{ flex: 1, fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "11px 13px" }} />
+        <button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "11px 18px", cursor: "pointer" }}>Create</button>
       </form>
     </div>
   );

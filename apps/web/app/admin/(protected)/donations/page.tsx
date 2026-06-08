@@ -17,7 +17,7 @@ export default async function DonationsAdmin() {
   const raised = completed.reduce((s, d) => s + Number(d.amount), 0);
   const pending = list.filter((d) => d.status === "pending").reduce((s, d) => s + Number(d.amount), 0);
 
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "9px 11px", width: "100%" };
+  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "9px 11px", width: "100%" };
   const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em", marginBottom: 4, display: "block" };
 
   return (
@@ -34,7 +34,7 @@ export default async function DonationsAdmin() {
       </div>
 
       {/* goal editor */}
-      <form action={saveGoal} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "16px 18px", display: "grid", gap: 10, maxWidth: 560, marginBottom: 22 }}>
+      <form action={saveGoal} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px", display: "grid", gap: 10, maxWidth: 560, marginBottom: 22 }}>
         <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5" }}>Active goal</div>
         <input type="hidden" name="id" value={goal?.id ?? ""} />
         <div><label style={lbl}>Title</label><input name="title" defaultValue={goal?.title ?? ""} style={inp} /></div>
@@ -48,7 +48,7 @@ export default async function DonationsAdmin() {
 
       {/* charities */}
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginBottom: 10 }}>Charities</div>
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", marginBottom: 12 }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden", marginBottom: 12 }}>
         {(charities ?? []).map((c, i) => (
           <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 16px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
             <div><span style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5" }}>{c.name}</span>{c.blurb ? <span style={{ fontFamily: BODY, fontSize: 11, color: "#8A847A" }}> · {c.blurb}</span> : null}</div>
@@ -64,7 +64,7 @@ export default async function DonationsAdmin() {
       {/* donations list */}
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginBottom: 10 }}>Gifts</div>
       {list.length === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No donations yet.</p> : (
-        <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>
+        <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden" }}>
           {list.map((d, i) => (
             <div key={d.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 16px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none", gap: 10 }}>
               <div style={{ minWidth: 0 }}>
@@ -86,11 +86,11 @@ export default async function DonationsAdmin() {
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div style={{ border: "1px solid rgba(201,169,97,0.18)", background: "#0E0E12", padding: "14px 18px", minWidth: 140 }}>
+    <div style={{ border: "1px solid rgba(255,255,255,0.06)", background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", borderRadius: 14, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset, 0 16px 30px -22px rgba(0,0,0,0.9)", padding: "14px 18px", minWidth: 140 }}>
       <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.12em" }}>{label}</div>
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 22, color: accent ? GOLD : "#E8E2D5", marginTop: 4 }}>{value}</div>
     </div>
   );
 }
-const btnGold: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "10px 16px", cursor: "pointer" };
-const btnGhost: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", background: "none", border: `1px solid ${GOLD}33`, padding: "7px 11px", cursor: "pointer" };
+const btnGold: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "10px 16px", cursor: "pointer" };
+const btnGhost: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", background: "rgba(201,169,97,0.05)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "7px 11px", cursor: "pointer" };

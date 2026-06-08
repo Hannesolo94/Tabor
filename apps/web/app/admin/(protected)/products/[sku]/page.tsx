@@ -57,7 +57,7 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
       {/* delete */}
       <form action={deleteProduct} style={{ marginTop: 36, paddingTop: 18, borderTop: "1px solid rgba(192,58,58,0.25)" }}>
         <input type="hidden" name="sku" value={data.sku} />
-        <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C03A3A", background: "none", border: "1px solid rgba(192,58,58,0.4)", padding: "10px 16px", cursor: "pointer" }}>
+        <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C03A3A", background: "rgba(192,58,58,0.06)", border: "1px solid rgba(192,58,58,0.4)", borderRadius: 12, padding: "10px 16px", cursor: "pointer" }}>
           Delete this product
         </button>
       </form>

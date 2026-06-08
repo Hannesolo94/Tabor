@@ -59,7 +59,7 @@ export function ReviewForm({ sku }: { sku: string }) {
 
   if (state === "done") {
     return (
-      <div style={{ border: `1px solid ${GOLD}44`, background: "#0E0E12", padding: "20px 22px", marginTop: 16 }}>
+      <div style={{ border: `1px solid ${GOLD}29`, background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "20px 22px", marginTop: 16 }}>
         <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.16em" }}>[ THANK YOU, BROTHER ]</div>
         <p style={{ fontFamily: BODY, fontSize: 14, color: "#9A948A", margin: "8px 0 0" }}>Your review was submitted and will appear once approved.</p>
       </div>
@@ -68,16 +68,16 @@ export function ReviewForm({ sku }: { sku: string }) {
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, background: "transparent", border: `1px solid ${GOLD}`, padding: "13px 26px", cursor: "pointer", marginTop: 10 }}>
+      <button onClick={() => setOpen(true)} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#E8D08C", background: "rgba(201,169,97,0.06)", border: `1px solid ${GOLD}59`, borderRadius: 14, padding: "13px 26px", cursor: "pointer", marginTop: 10 }}>
         Write a review
       </button>
     );
   }
 
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "11px 13px", width: "100%" };
+  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "12px 14px", width: "100%" };
 
   return (
-    <form onSubmit={submit} style={{ border: `1px solid ${GOLD}33`, background: "#0E0E12", padding: "22px 22px", marginTop: 16, display: "grid", gap: 14, maxWidth: 620 }}>
+    <form onSubmit={submit} style={{ border: `1px solid ${GOLD}29`, background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "22px 22px", marginTop: 16, display: "grid", gap: 14, maxWidth: 620 }}>
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#E8E2D5" }}>Write a review</div>
 
       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -92,14 +92,14 @@ export function ReviewForm({ sku }: { sku: string }) {
 
       {/* media + consent */}
       <div>
-        <label style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "10px 14px", cursor: "pointer", display: "inline-block" }}>
+        <label style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 12, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "11px 16px", cursor: "pointer", display: "inline-block" }}>
           {busy ? "Uploading..." : "Add photos / video"}
           <input type="file" accept="image/*,video/*" multiple onChange={onUpload} disabled={busy} style={{ display: "none" }} />
         </label>
         {media.length > 0 && (
           <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
             {media.map((m, i) => (
-              <div key={i} style={{ width: 54, height: 54, border: `1px solid ${GOLD}44`, overflow: "hidden", background: "#15151A" }}>
+              <div key={i} style={{ width: 54, height: 54, border: `1px solid ${GOLD}44`, borderRadius: 10, overflow: "hidden", background: "#15151A" }}>
                 {m.type === "video" ? <video src={m.url} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
               </div>
             ))}
@@ -113,8 +113,8 @@ export function ReviewForm({ sku }: { sku: string }) {
 
       {err && <p style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A" }}>{err}</p>}
       <div style={{ display: "flex", gap: 10 }}>
-        <button type="submit" disabled={busy} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "12px 24px", cursor: "pointer" }}>Submit review</button>
-        <button type="button" onClick={() => setOpen(false)} style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9A948A", background: "none", border: "1px solid rgba(201,169,97,0.25)", padding: "12px 18px", cursor: "pointer" }}>Cancel</button>
+        <button type="submit" disabled={busy} style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "13px 26px", cursor: "pointer" }}>Submit review</button>
+        <button type="button" onClick={() => setOpen(false)} style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9A948A", background: "rgba(201,169,97,0.04)", border: "1px solid rgba(201,169,97,0.22)", borderRadius: 14, padding: "13px 20px", cursor: "pointer" }}>Cancel</button>
       </div>
     </form>
   );

@@ -68,7 +68,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ per
           <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.2em", marginBottom: 16 }}>[ OTHER COLLECTIONS ]</div>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             {PERSONAS.filter((p) => p.id !== persona.id).map((p) => (
-              <Link key={p.id} href={`/collections/${p.id}`} style={{ textDecoration: "none", border: `1px solid ${p.accent}55`, padding: "12px 20px", fontFamily: CINZEL, fontWeight: 600, fontSize: 14, color: "#E8E2D5" }}>{p.name} ›</Link>
+              <Link key={p.id} href={`/collections/${p.id}`} style={{ textDecoration: "none", border: `1px solid ${p.accent}55`, background: "rgba(201,169,97,0.05)", borderRadius: 14, padding: "12px 20px", fontFamily: CINZEL, fontWeight: 600, fontSize: 14, color: "#E8E2D5" }}>{p.name} ›</Link>
             ))}
           </div>
         </div>

@@ -18,7 +18,7 @@ export default async function GiveawaysAdmin() {
   const nomCount = (gid: string) => (noms ?? []).filter((n) => n.giveaway_id === gid).length;
   const voteCount = (gid: string) => (votes ?? []).filter((v) => v.giveaway_id === gid).length;
 
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "9px 11px", width: "100%" };
+  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "9px 11px", width: "100%" };
   const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em", marginBottom: 4, display: "block" };
 
   return (
@@ -27,7 +27,7 @@ export default async function GiveawaysAdmin() {
       <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 6px" }}>Giveaways</h1>
       <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "0 0 22px" }}>Monthly community-voted draws. Free to enter (no purchase). The newest giveaway shows in the app.</p>
 
-      <form action={createGiveaway} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "16px 18px", display: "grid", gap: 10, maxWidth: 560, marginBottom: 26 }}>
+      <form action={createGiveaway} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px", display: "grid", gap: 10, maxWidth: 560, marginBottom: 26 }}>
         <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5" }}>New giveaway</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div><label style={lbl}>Month</label><input name="month" placeholder="2026-06" style={inp} /></div>
@@ -39,7 +39,7 @@ export default async function GiveawaysAdmin() {
       </form>
 
       {list.length === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No giveaways yet.</p> : (
-        <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>
+        <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden" }}>
           {list.map((g, i) => (
             <div key={g.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none", gap: 12 }}>
               <div style={{ minWidth: 0 }}>
@@ -55,5 +55,5 @@ export default async function GiveawaysAdmin() {
     </div>
   );
 }
-const btnGold: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "10px 16px", cursor: "pointer" };
-const btnGhost: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", color: "#C03A3A", background: "none", border: "1px solid rgba(192,58,58,0.4)", padding: "7px 11px", cursor: "pointer" };
+const btnGold: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "10px 16px", cursor: "pointer" };
+const btnGhost: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", color: "#C03A3A", background: "rgba(192,58,58,0.06)", border: "1px solid rgba(192,58,58,0.4)", borderRadius: 10, padding: "7px 11px", cursor: "pointer" };

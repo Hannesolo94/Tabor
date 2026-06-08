@@ -33,7 +33,7 @@ export default async function Tickets() {
       {list.length === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No reports yet.</p> : (
         <div style={{ display: "grid", gap: 12 }}>
           {list.map((r) => (
-            <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "14px 16px" }}>
+            <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "14px 16px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                 <div style={{ minWidth: 0 }}>
                   <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.1em", color: r.kind === "bug" ? "#C03A3A" : GOLD }}>{r.kind === "bug" ? "● BUG" : "✦ FEATURE"}</span>
@@ -42,11 +42,11 @@ export default async function Tickets() {
                   {r.body ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#B8B2A6", lineHeight: 1.6, margin: "4px 0 0" }}>{r.body}</p> : null}
                   {signed[r.id]?.length ? (
                     <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-                      {signed[r.id].map((u, i) => <a key={i} href={u} target="_blank" rel="noreferrer"><img src={u} alt="screenshot" style={{ width: 90, height: 90, objectFit: "cover", border: `1px solid ${GOLD}33`, borderRadius: 3 }} /></a>)}
+                      {signed[r.id].map((u, i) => <a key={i} href={u} target="_blank" rel="noreferrer"><img src={u} alt="screenshot" style={{ width: 90, height: 90, objectFit: "cover", border: `1px solid ${GOLD}33`, borderRadius: 10 }} /></a>)}
                     </div>
                   ) : null}
                 </div>
-                <span style={{ fontFamily: MONO, fontSize: 9, padding: "4px 8px", border: `1px solid ${GOLD}33`, color: r.status === "resolved" ? "#7BBF7B" : r.status === "triaged" ? GOLD : "#C03A3A", whiteSpace: "nowrap" }}>{r.status.toUpperCase()}</span>
+                <span style={{ fontFamily: MONO, fontSize: 9, padding: "4px 8px", border: `1px solid ${GOLD}33`, borderRadius: 8, color: r.status === "resolved" ? "#7BBF7B" : r.status === "triaged" ? GOLD : "#C03A3A", whiteSpace: "nowrap" }}>{r.status.toUpperCase()}</span>
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                 {(["open", "triaged", "resolved"] as const).filter((s) => s !== r.status).map((s) => (
@@ -60,4 +60,4 @@ export default async function Tickets() {
     </div>
   );
 }
-const btn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", color: GOLD, background: "none", border: `1px solid ${GOLD}33`, padding: "7px 11px", cursor: "pointer" };
+const btn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", color: GOLD, background: "rgba(201,169,97,0.05)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "7px 11px", cursor: "pointer" };

@@ -9,7 +9,7 @@ import { GOLD, MONO, BODY } from "@/lib/ui";
 const initial: SaveState = {};
 
 const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 5, display: "block" };
-const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "10px 12px", width: "100%" };
+const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "10px 12px", width: "100%" };
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -126,7 +126,7 @@ export function ProductForm({ product, isNew }: { product?: Partial<Product> & {
       {state.error && <p style={{ fontFamily: MONO, fontSize: 12, color: "#C03A3A" }}>{state.error}</p>}
 
       <div>
-        <button type="submit" disabled={pending} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "13px 28px", cursor: "pointer" }}>
+        <button type="submit" disabled={pending} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "13px 28px", cursor: "pointer" }}>
           {pending ? "Saving..." : isNew ? "Create Product" : "Save Changes"}
         </button>
       </div>

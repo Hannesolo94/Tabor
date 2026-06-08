@@ -38,11 +38,11 @@ export function ProductPicker({ collectionId, products, initial }: { collectionI
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10, flexWrap: "wrap" }}>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the catalog…" style={{ flex: 1, minWidth: 200, fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "9px 12px" }} />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the catalog…" style={{ flex: 1, minWidth: 200, fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "9px 12px" }} />
         <span style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.1em" }}>{sel.size} SELECTED</span>
-        <button onClick={save} disabled={saving} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "9px 16px", cursor: "pointer" }}>{saving ? "Saving…" : saved ? "Saved ✓" : "Save selection"}</button>
+        <button onClick={save} disabled={saving} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "9px 16px", cursor: "pointer" }}>{saving ? "Saving…" : saved ? "Saved ✓" : "Save selection"}</button>
       </div>
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", maxHeight: 420, overflowY: "auto" }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden", maxHeight: 420, overflowY: "auto" }}>
         {filtered.map((p, i) => (
           <label key={p.sku} style={{ display: "grid", gridTemplateColumns: "26px 1fr 1fr 70px", alignItems: "center", padding: "10px 14px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none", cursor: "pointer", background: sel.has(p.sku) ? "rgba(201,169,97,0.06)" : "transparent" }}>
             <input type="checkbox" checked={sel.has(p.sku)} onChange={() => toggle(p.sku)} />

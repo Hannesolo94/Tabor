@@ -29,7 +29,7 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
     counts[s] = count ?? 0;
   }
 
-  const btn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", border: "1px solid rgba(201,169,97,0.3)", padding: "8px 12px", cursor: "pointer", background: "none", color: "#C3BDB1" };
+  const btn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", border: "1px solid rgba(201,169,97,0.3)", borderRadius: 10, padding: "8px 12px", cursor: "pointer", background: "rgba(201,169,97,0.05)", color: "#C3BDB1" };
 
   return (
     <div>
@@ -38,12 +38,12 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
           <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ SOCIAL PROOF ]</div>
           <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Reviews</h1>
         </div>
-        <a href="/admin/reviews/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
+        <a href="/admin/reviews/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#E8D08C", border: `1px solid ${GOLD}55`, borderRadius: 12, background: "rgba(201,169,97,0.06)", padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
         {STATUSES.map((s) => (
-          <a key={s} href={`/admin/reviews?status=${s}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", padding: "8px 14px", border: `1px solid ${GOLD}44`, color: status === s ? "#0A0A0A" : "#9A948A", background: status === s ? `linear-gradient(180deg,#E8D08C,${GOLD})` : "transparent" }}>
+          <a key={s} href={`/admin/reviews?status=${s}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", padding: "8px 14px", borderRadius: 10, border: `1px solid ${GOLD}44`, color: status === s ? "#1a1408" : "#9A948A", fontWeight: status === s ? 700 : 400, boxShadow: status === s ? "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)" : undefined, background: status === s ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "transparent" }}>
             {s} ({counts[s]})
           </a>
         ))}
@@ -54,7 +54,7 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
           <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No {status} reviews.</p>
         ) : (
           (reviews ?? []).map((r) => (
-            <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "16px 18px" }}>
+            <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
                   <Stars rating={r.rating} />
@@ -67,7 +67,7 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
               {(mediaBy.get(r.id) ?? []).length > 0 && (
                 <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                   {(mediaBy.get(r.id) ?? []).map((m, i) => (
-                    <div key={i} style={{ width: 70, height: 70, border: `1px solid ${GOLD}33`, overflow: "hidden", background: "#15151A" }}>
+                    <div key={i} style={{ width: 70, height: 70, border: `1px solid ${GOLD}33`, borderRadius: 10, overflow: "hidden", background: "#15151A" }}>
                       {m.type === "video" ? <video src={m.url} muted controls style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                     </div>
                   ))}

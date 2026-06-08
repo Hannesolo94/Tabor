@@ -7,8 +7,8 @@ import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 export const dynamic = "force-dynamic";
 
 const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4, display: "block" };
-const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 12, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "8px 10px", width: "100%" };
-const btn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "9px 14px", cursor: "pointer" };
+const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 12, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "8px 10px", width: "100%" };
+const btn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "9px 14px", cursor: "pointer" };
 
 interface Row { id: string; code: string; percent: number; active: boolean; usage_limit: number | null; used_count: number; once_per_email: boolean; note: string | null }
 
@@ -43,7 +43,7 @@ export default async function AdminDiscounts() {
             <Fields d={d} />
             <div style={{ gridColumn: "1 / -1", display: "flex", gap: 10, alignItems: "center" }}>
               <button type="submit" style={btn}>Save</button>
-              <button type="submit" formAction={deleteDiscount} style={{ ...btn, color: "#C03A3A", background: "none", border: "1px solid rgba(192,58,58,0.4)" }}>Delete</button>
+              <button type="submit" formAction={deleteDiscount} style={{ ...btn, color: "#C03A3A", background: "rgba(192,58,58,0.06)", boxShadow: "none", fontWeight: 400, border: "1px solid rgba(192,58,58,0.4)" }}>Delete</button>
               <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em" }}>USED {d.used_count}{d.usage_limit ? ` / ${d.usage_limit}` : ""}</span>
             </div>
           </form>

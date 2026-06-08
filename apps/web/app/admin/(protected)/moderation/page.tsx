@@ -28,7 +28,10 @@ export default async function ModerationPage() {
   const { data: authorProfs } = authorIds.length ? await admin.from("profiles").select("user_id, name, handle, banned").in("user_id", authorIds) : { data: [] as { user_id: string; name: string; handle: string; banned: boolean }[] };
   const authorBy = new Map((authorProfs ?? []).map((p) => [p.user_id, p]));
 
-  const btn = (bg: string, color: string): React.CSSProperties => ({ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color, background: bg, border: bg === "none" ? `1px solid ${GOLD}44` : "none", padding: "8px 12px", cursor: "pointer" });
+  const btn = (bg: string, color: string): React.CSSProperties => {
+    const primary = bg !== "none";
+    return { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: primary ? "#1a1408" : color, fontWeight: primary ? 700 : 400, background: primary ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "rgba(201,169,97,0.05)", border: primary ? "none" : `1px solid ${GOLD}44`, borderRadius: 10, boxShadow: primary ? "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)" : undefined, padding: "8px 12px", cursor: "pointer" };
+  };
 
   return (
     <div>
@@ -44,12 +47,12 @@ export default async function ModerationPage() {
             const target = r.target_user ? profBy.get(r.target_user) : null;
             const reporter = r.reporter ? profBy.get(r.reporter) : null;
             return (
-              <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "16px 18px" }}>
+              <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
                   <span style={{ fontFamily: MONO, fontSize: 9.5, color: GOLD, letterSpacing: "0.1em" }}>{r.reason.toUpperCase()} · {new Date(r.created_at).toISOString().slice(0, 16).replace("T", " ")}</span>
                   <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A" }}>reported by {reporter?.name ?? "—"}</span>
                 </div>
-                {r.message_id && <div style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "#15151A", borderLeft: `3px solid ${GOLD}55`, padding: "10px 12px", margin: "10px 0" }}>{bodyBy.get(r.message_id) ?? "(message deleted)"}</div>}
+                {r.message_id && <div style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", borderLeft: `3px solid ${GOLD}55`, borderRadius: 10, padding: "10px 12px", margin: "10px 0" }}>{bodyBy.get(r.message_id) ?? "(message deleted)"}</div>}
                 {r.detail && <div style={{ fontFamily: BODY, fontSize: 12.5, color: "#9A948A", marginBottom: 8 }}>{r.detail}</div>}
                 <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", marginBottom: 10 }}>against: {target?.name ?? "—"} {target?.handle ? `@${target.handle}` : ""} {target?.banned ? "· ALREADY BANNED" : ""}</div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -67,7 +70,7 @@ export default async function ModerationPage() {
       <div style={{ marginTop: 34 }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.16em", marginBottom: 10 }}>RECENT GUILD CHAT · ACT WITHOUT A REPORT</div>
         {recentList.length === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No guild messages yet.</p> : (
-          <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>
+          <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden" }}>
             {recentList.map((m, i) => {
               const a = m.author_id ? authorBy.get(m.author_id) : null;
               return (

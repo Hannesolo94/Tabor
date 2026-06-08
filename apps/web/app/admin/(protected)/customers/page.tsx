@@ -46,23 +46,23 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <form action={syncAllToEmailPlatform}>
-            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", cursor: "pointer", background: "none" }}>Sync to Email Platform</button>
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#E8D08C", border: `1px solid ${GOLD}55`, borderRadius: 12, padding: "10px 16px", cursor: "pointer", background: "rgba(201,169,97,0.06)" }}>Sync to Email Platform</button>
           </form>
-          <a href="/admin/customers/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, border: `1px solid ${GOLD}55`, padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
+          <a href="/admin/customers/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#E8D08C", border: `1px solid ${GOLD}55`, borderRadius: 12, background: "rgba(201,169,97,0.06)", padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
         </div>
       </div>
 
       <form action="/admin/customers" method="get" style={{ marginBottom: 14, maxWidth: 360 }}>
-        <input name="q" defaultValue={q} placeholder="Search by email…" style={{ width: "100%", fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "9px 12px" }} />
+        <input name="q" defaultValue={q} placeholder="Search by email…" style={{ width: "100%", fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "9px 12px" }} />
       </form>
 
       {/* segment chips (tags) */}
       {allTags.length > 0 && (
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18, alignItems: "center" }}>
           <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em" }}>SEGMENTS:</span>
-          <Link href="/admin/customers" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "5px 10px", border: `1px solid ${GOLD}44`, color: !tag ? "#0A0A0A" : "#C3BDB1", background: !tag ? GOLD : "none" }}>All</Link>
+          <Link href="/admin/customers" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "5px 10px", borderRadius: 8, border: `1px solid ${GOLD}44`, color: !tag ? "#1a1408" : "#C3BDB1", background: !tag ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "rgba(201,169,97,0.04)" }}>All</Link>
           {allTags.map((t) => (
-            <Link key={t} href={`/admin/customers?tag=${encodeURIComponent(t)}`} style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "5px 10px", border: `1px solid ${GOLD}44`, color: tag === t ? "#0A0A0A" : "#C3BDB1", background: tag === t ? GOLD : "none" }}>{t}</Link>
+            <Link key={t} href={`/admin/customers?tag=${encodeURIComponent(t)}`} style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "5px 10px", borderRadius: 8, border: `1px solid ${GOLD}44`, color: tag === t ? "#1a1408" : "#C3BDB1", background: tag === t ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "rgba(201,169,97,0.04)" }}>{t}</Link>
           ))}
         </div>
       )}
@@ -70,7 +70,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       {/* source breakdown */}
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22 }}>
         {Object.entries(bySource).map(([src, n]) => (
-          <div key={src} style={{ border: "1px solid rgba(201,169,97,0.18)", background: "#0E0E12", padding: "10px 16px" }}>
+          <div key={src} style={{ border: "1px solid rgba(255,255,255,0.06)", background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", borderRadius: 12, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset", padding: "10px 16px" }}>
             <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.1em", textTransform: "uppercase" }}>{src}</span>
             <span style={{ fontFamily: MONO, fontSize: 14, color: "#E8E2D5", marginLeft: 10 }}>{n}</span>
           </div>
@@ -78,7 +78,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       </div>
 
       {/* list */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 110px", padding: "12px 18px", borderBottom: "1px solid rgba(201,169,97,0.12)", fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.14em" }}>
           <span>EMAIL</span><span>SOURCE</span><span>DATE</span>
         </div>
@@ -89,7 +89,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             <Link key={r.email + i} href={`/admin/customers/${encodeURIComponent(r.email)}`} style={{ textDecoration: "none", display: "grid", gridTemplateColumns: "1fr 120px 110px", alignItems: "center", padding: "11px 18px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
               <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1", wordBreak: "break-all" }}>
                 {r.email}
-                {(tagsByEmail.get(r.email) ?? []).map((t) => <span key={t} style={{ fontFamily: MONO, fontSize: 8, color: GOLD, border: `1px solid ${GOLD}44`, padding: "1px 5px", marginLeft: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{t}</span>)}
+                {(tagsByEmail.get(r.email) ?? []).map((t) => <span key={t} style={{ fontFamily: MONO, fontSize: 8, color: GOLD, border: `1px solid ${GOLD}44`, borderRadius: 8, padding: "1px 5px", marginLeft: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{t}</span>)}
               </span>
               <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.08em", textTransform: "uppercase" }}>{r.source || "web"}</span>
               <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#8A847A" }}>{new Date(r.created_at).toISOString().slice(0, 10)}</span>

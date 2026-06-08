@@ -30,14 +30,14 @@ export function ProductsTable({ rows }: { rows: Row[] }) {
   const skus = [...sel];
 
   const hidden = skus.map((sku) => <input key={sku} type="hidden" name="skus" value={sku} />);
-  const actionBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "none", border: `1px solid ${GOLD}44`, padding: "8px 10px", cursor: "pointer" };
-  const sub: React.CSSProperties = { fontFamily: BODY, fontSize: 12, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "7px 8px" };
+  const actionBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "rgba(201,169,97,0.06)", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "8px 10px", cursor: "pointer" };
+  const sub: React.CSSProperties = { fontFamily: BODY, fontSize: 12, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "7px 8px" };
 
   return (
     <div>
       {/* bulk bar */}
       {sel.size > 0 && (
-        <div style={{ border: `1px solid ${GOLD}55`, background: "#12120C", padding: "12px 16px", marginBottom: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ border: `1px solid ${GOLD}55`, background: "linear-gradient(160deg, rgba(40,36,20,0.7), rgba(18,18,12,0.6))", borderRadius: 14, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "12px 16px", marginBottom: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <span style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.1em" }}>{sel.size} SELECTED</span>
 
           <form action={bulkUpdate} style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -59,7 +59,7 @@ export function ProductsTable({ rows }: { rows: Row[] }) {
         </div>
       )}
 
-      <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden" }}>
         <div style={{ display: "grid", gridTemplateColumns: GRID, padding: "12px 18px", borderBottom: "1px solid rgba(201,169,97,0.12)", fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.12em", alignItems: "center" }}>
           <input type="checkbox" checked={allOn} onChange={toggleAll} />
           <span>NAME</span><span>COLLECTION</span><span>TYPE</span><span>PRICE</span><span>STATUS</span><span>STOCK</span>
@@ -72,7 +72,7 @@ export function ProductsTable({ rows }: { rows: Row[] }) {
               <input type="checkbox" checked={sel.has(r.sku)} onChange={() => toggle(r.sku)} />
               <Link href={`/admin/products/${r.sku}`} style={{ fontFamily: BODY, fontSize: 13, color: "#E8E2D5", textDecoration: "none" }}>
                 {r.name}
-                {r.featured && <span style={{ fontFamily: MONO, fontSize: 7.5, color: GOLD, letterSpacing: "0.1em", border: `1px solid ${GOLD}44`, padding: "1px 4px", marginLeft: 8 }}>FEATURED</span>}
+                {r.featured && <span style={{ fontFamily: MONO, fontSize: 7.5, color: GOLD, letterSpacing: "0.1em", border: `1px solid ${GOLD}44`, borderRadius: 8, padding: "1px 4px", marginLeft: 8 }}>FEATURED</span>}
               </Link>
               <span style={{ fontFamily: MONO, fontSize: 10, color: "#9A948A", textTransform: "uppercase" }}>{personaById(r.collection ?? "")?.name ?? r.collection}</span>
               <span style={{ fontFamily: MONO, fontSize: 10, color: "#9A948A", textTransform: "uppercase" }}>{categoryById(r.category ?? "")?.name ?? r.category}</span>

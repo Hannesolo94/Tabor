@@ -44,9 +44,9 @@ export default async function AuditReport() {
       <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.16em", marginBottom: 10 }}>FINDINGS · ALL RESOLVED</div>
       <div style={{ display: "grid", gap: 10, marginBottom: 28 }}>
         {FINDINGS.map((f) => (
-          <div key={f.id} style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "14px 16px" }}>
+          <div key={f.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "14px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <span style={{ fontFamily: MONO, fontSize: 9, color: sevColor(f.sev), border: `1px solid ${sevColor(f.sev)}66`, padding: "2px 6px", letterSpacing: "0.1em" }}>{f.sev}</span>
+              <span style={{ fontFamily: MONO, fontSize: 9, color: sevColor(f.sev), border: `1px solid ${sevColor(f.sev)}66`, borderRadius: 8, padding: "2px 6px", letterSpacing: "0.1em" }}>{f.sev}</span>
               <span style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A" }}>{f.id}</span>
               <span style={{ fontFamily: MONO, fontSize: 9, color: "#7BBF7B", marginLeft: "auto", letterSpacing: "0.1em" }}>● FIXED</span>
             </div>
@@ -66,7 +66,7 @@ export default async function AuditReport() {
 
 function Panel({ title, items }: { title: string; items: string[] }) {
   return (
-    <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "16px 18px" }}>
+    <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px" }}>
       <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.16em", marginBottom: 10 }}>{title}</div>
       {items.map((i, n) => <div key={n} style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1", lineHeight: 1.5, marginBottom: 6, paddingLeft: 14, position: "relative" }}><span style={{ position: "absolute", left: 0, color: "#7BBF7B" }}>✓</span>{i}</div>)}
     </div>

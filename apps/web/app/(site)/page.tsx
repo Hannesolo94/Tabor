@@ -86,7 +86,7 @@ export default async function Home() {
           <SectionHead kicker="[ COLLECTIONS ]" title="Built for who you are" sub="Every man climbs as a class. Each collection carries a full range cut for a different kind of brother. Find yours." />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 18 }}>
             {PERSONAS.map((c) => (
-              <Link key={c.id} href={`/collections/${c.id}`} style={{ textDecoration: "none", border: `1px solid ${c.accent}44`, background: "#0E0E12", padding: "26px 22px", display: "flex", flexDirection: "column" }}>
+              <Link key={c.id} href={`/collections/${c.id}`} className="tabor-lift" style={{ textDecoration: "none", border: `1px solid ${c.accent}33`, background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "26px 22px", display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "grid", placeItems: "center", padding: "8px 0 16px" }}><TaborSeal id={"col-" + c.id} size={64} /></div>
                 <div style={{ fontFamily: MONO, fontSize: 9, color: c.accent, letterSpacing: "0.18em", textTransform: "uppercase" }}>{c.tag}</div>
                 <h3 style={{ fontFamily: PIRATA, fontSize: 30, color: "#E8E2D5", margin: "6px 0 8px" }}>{c.name}</h3>
@@ -104,7 +104,7 @@ export default async function Home() {
           <SectionHead kicker="[ SHOP BY TYPE ]" title="More than merch" sub="Apparel is the start. Fly the standard, ground the floor you train on, light the dawn watch." />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 12 }}>
             {CATEGORIES.map((c) => (
-              <Link key={c.id} href={`/shop?type=${c.id}`} style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.22)", background: "#0E0E12", padding: "18px 16px", display: "block" }}>
+              <Link key={c.id} href={`/shop?type=${c.id}`} className="tabor-lift" style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "18px 16px", display: "block" }}>
                 <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5" }}>{c.name}</div>
                 <div style={{ fontFamily: MONO, fontSize: 9, color: "#7A746A", letterSpacing: "0.08em", marginTop: 6, lineHeight: 1.5 }}>{c.blurb}</div>
               </Link>
@@ -115,7 +115,7 @@ export default async function Home() {
 
       {/* giveaway */}
       <section style={{ padding: "56px 24px", background: "#0C0C10", borderTop: "1px solid rgba(201,169,97,0.12)" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center", border: `1px solid ${GOLD}44`, background: "radial-gradient(ellipse 80% 90% at 50% 0%, rgba(201,169,97,0.1), transparent 70%)", padding: "36px 28px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center", border: `1px solid ${GOLD}33`, background: "radial-gradient(ellipse 80% 90% at 50% 0%, rgba(201,169,97,0.1), transparent 70%), linear-gradient(160deg, rgba(34,34,42,0.6), rgba(15,15,20,0.5))", borderRadius: 20, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 50px -16px rgba(201,169,97,0.22)", padding: "36px 28px" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em" }}>[ THE BROTHERHOOD GIVES BACK ]</div>
           <h2 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: "clamp(24px,4vw,34px)", color: "#E8E2D5", margin: "10px 0 12px" }}>Monthly gear giveaways</h2>
           <p style={{ fontFamily: BODY, fontSize: 15, color: "#9A948A", maxWidth: 540, margin: "0 auto", lineHeight: 1.6 }}>Every month the brotherhood votes. The most consistent, hardest-working man wins TABOR gear, free. Earn it in the app, wear it in the world.</p>
@@ -132,11 +132,11 @@ export default async function Home() {
             <AppButtons />
           </div>
           <div style={{ display: "grid", placeItems: "center" }}>
-            <div style={{ width: 220, border: `1px solid ${GOLD}44`, background: "radial-gradient(ellipse 90% 70% at 50% 0%, #16140e, #0A0A0A 72%)", padding: "40px 24px", textAlign: "center" }}>
+            <div style={{ width: 220, border: `1px solid ${GOLD}33`, background: "radial-gradient(ellipse 90% 70% at 50% 0%, #16140e, #0A0A0A 72%)", borderRadius: 20, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 50px -16px rgba(201,169,97,0.22)", padding: "40px 24px", textAlign: "center" }}>
               <div style={{ display: "grid", placeItems: "center" }}><TaborSeal id="app-seal" size={110} /></div>
               <div style={{ fontFamily: PIRATA, fontSize: 34, color: GOLD, marginTop: 12 }}>Tabor</div>
               <div style={{ fontFamily: MONO, fontSize: 8, color: "#9A948A", letterSpacing: "0.2em", marginTop: 6 }}>SONS OF FIRE</div>
-              <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.14em", marginTop: 18, border: `1px solid ${GOLD}44`, padding: "8px" }}>FREE FOR LIFE</div>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.14em", marginTop: 18, border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "8px" }}>FREE FOR LIFE</div>
             </div>
           </div>
         </div>
@@ -168,10 +168,10 @@ export default async function Home() {
             <SectionHead kicker="[ FROM THE BROTHERHOOD ]" title="What they're saying" sub="Real words from real brothers in the gear." />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
               {reviews.map((r) => (
-                <Link key={r.id} href={r.sku ? `/product/${r.sku}` : "/shop"} style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "20px 20px", display: "flex", flexDirection: "column" }}>
+                <Link key={r.id} href={r.sku ? `/product/${r.sku}` : "/shop"} className="tabor-lift" style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "20px 20px", display: "flex", flexDirection: "column" }}>
                   <Stars rating={r.rating} />
                   {r.media.length > 0 && (
-                    <div style={{ marginTop: 12, aspectRatio: "1/1", overflow: "hidden", border: `1px solid ${GOLD}22` }}>
+                    <div style={{ marginTop: 12, aspectRatio: "1/1", overflow: "hidden", border: `1px solid ${GOLD}22`, borderRadius: 12 }}>
                       {r.media[0]!.type === "video" ? (
                         <video src={r.media[0]!.url} muted autoPlay loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (

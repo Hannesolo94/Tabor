@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12", padding: "18px 20px" }}>
+    <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" }}>
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em", marginBottom: 12 }}>{title}</div>
       {children}
     </div>
@@ -57,7 +57,7 @@ export default async function MarketingPage() {
         <Card title="On-site performance">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {[["Sessions", String(d.sessions)], ["Conversion", `${d.conversion.toFixed(1)}%`], ["Cart abandon", `${d.cartAbandon.toFixed(0)}%`], ["App clicks", String(d.appClicks)]].map(([k, v]) => (
-              <div key={k} style={{ border: "1px solid rgba(201,169,97,0.14)", padding: "10px 12px" }}>
+              <div key={k} style={{ border: "1px solid rgba(255,255,255,0.06)", background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", borderRadius: 12, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset", padding: "10px 12px" }}>
                 <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.12em" }}>{k}</div>
                 <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 20, color: GOLD }}>{v}</div>
               </div>

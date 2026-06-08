@@ -18,7 +18,7 @@ export default async function SuppliersPage() {
       </p>
 
       {/* Printful */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.18)", background: "#0E0E12", padding: "24px 24px", maxWidth: 620, marginBottom: 18 }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "24px 24px", maxWidth: 620, marginBottom: 18 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 18, color: "#E8E2D5" }}>Printful</div>
@@ -36,13 +36,13 @@ export default async function SuppliersPage() {
       </div>
 
       {/* SA PoD (planned) */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.12)", background: "#0C0C10", padding: "20px 24px", maxWidth: 620, opacity: 0.7 }}>
+      <div style={{ border: "1px solid rgba(201,169,97,0.12)", background: "linear-gradient(160deg, rgba(24,24,30,0.6), rgba(12,12,16,0.55))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.03)", padding: "20px 24px", maxWidth: 620, opacity: 0.7 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#C3BDB1" }}>South African PoD</div>
             <div style={{ fontFamily: MONO, fontSize: 10, color: "#7A746A", letterSpacing: "0.08em", marginTop: 4 }}>○ NOT CONNECTED · LOCAL (ZA)</div>
           </div>
-          <span style={{ fontFamily: MONO, fontSize: 8, color: GOLD, letterSpacing: "0.1em", border: `1px solid ${GOLD}44`, padding: "3px 6px" }}>SOON</span>
+          <span style={{ fontFamily: MONO, fontSize: 8, color: GOLD, letterSpacing: "0.1em", border: `1px solid ${GOLD}44`, borderRadius: 8, padding: "3px 6px" }}>SOON</span>
         </div>
         <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#7A746A", lineHeight: 1.6, margin: "12px 0 0" }}>
           A local supplier for South African orders (faster, no customs, ZAR pricing). Added once a provider is chosen. See <Link href="/admin/products" style={{ color: GOLD, textDecoration: "none" }}>Products</Link>.
