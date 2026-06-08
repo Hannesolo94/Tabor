@@ -12,3 +12,13 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   revalidatePath(`/admin/orders/${id}`);
   revalidatePath("/admin/orders");
 }
+
+export async function saveOrderMeta(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const tags = String(formData.get("tags") ?? "").split(",").map((t) => t.trim()).filter(Boolean);
+  const sb = await supabaseServer();
+  await sb.from("orders").update({ notes, tags }).eq("id", id);
+  revalidatePath(`/admin/orders/${id}`);
+}
