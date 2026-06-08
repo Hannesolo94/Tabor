@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal }
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
-import { loadToday, toggleQuest, sealDay, getDayFeedback, recordDayFeedback, type Quest } from "@/lib/quests";
+import { loadToday, toggleQuest, sealDay, getDayFeedback, recordDayFeedback, CORE_KEYS, type Quest } from "@/lib/quests";
 import { levelProgress } from "@/lib/game";
 import { Seal } from "@/components/Seal";
 import { C, F } from "@/lib/theme";
@@ -39,7 +39,9 @@ export default function Quests() {
   const baseXp = Number(profile?.xp ?? 0);
   const prog = useMemo(() => levelProgress(baseXp + xpOffset), [baseXp, xpOffset]);
   const streak = Number(profile?.streak ?? 0);
-  const allDone = quests.length > 0 && quests.every((q) => q.done);
+  const core = quests.filter((q) => CORE_KEYS.includes(q.quest_key));
+  const bonus = quests.filter((q) => !CORE_KEYS.includes(q.quest_key));
+  const allDone = core.length > 0 && core.every((q) => q.done); // only the core gates the seal
 
   useEffect(() => {
     Animated.timing(barW, { toValue: prog.pct, duration: 600, useNativeDriver: false }).start();
@@ -97,30 +99,17 @@ export default function Quests() {
 
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 28, marginBottom: 10 }}>
           <Text style={{ color: C.ivory, fontSize: 13, letterSpacing: 3 }}>TODAY'S QUESTS</Text>
-          <Text style={{ color: allDone ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{quests.filter((q) => q.done).length}/{quests.length} CLEARED</Text>
+          <Text style={{ color: allDone ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{core.filter((q) => q.done).length}/{core.length} CLEARED</Text>
         </View>
-        {quests.map((q) => (
-          <View key={q.id} style={{ marginBottom: 10 }}>
-          <Pressable onPress={() => onToggle(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
-            <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
-              {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{q.pillar}</Text>
-              <Text style={{ color: C.ivory, fontSize: 15, marginTop: 2, textDecorationLine: q.done ? "line-through" : "none" }}>{q.title}</Text>
-              {q.sub ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>{q.sub}</Text> : null}
-            </View>
-            <Text style={{ color: C.muted, fontSize: 12, marginLeft: 8 }}>+{q.xp}</Text>
-          </Pressable>
-          {!q.done && (q.quest_key === "body" || q.quest_key === "word") && (
-            <Pressable onPress={() => onToggle(q)} hitSlop={6} style={{ paddingTop: 7, paddingLeft: 52 }}>
-              <Text style={{ color: C.muted, fontSize: 11, textDecorationLine: "underline" }}>{q.quest_key === "body" ? "Doing your own training? Tap to log it" : "Reading your own passage? Tap to log it"}</Text>
-            </Pressable>
-          )}
-          </View>
-        ))}
-        {!allDone && quests.length > 0 && (
-          <Text style={{ color: C.muted, fontSize: 12, textAlign: "center", marginTop: 4 }}>Clear all {quests.length} to seal the day and hold your streak.</Text>
+        {core.map((q) => <QuestRow key={q.id} q={q} onToggle={onToggle} />)}
+        {!allDone && core.length > 0 && (
+          <Text style={{ color: C.muted, fontSize: 12, textAlign: "center", marginTop: 4 }}>Clear all {core.length} to seal the day and hold your streak.</Text>
+        )}
+        {bonus.length > 0 && (
+          <>
+            <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 3, fontFamily: F.mono, marginTop: 26, marginBottom: 10 }}>BONUS DISCIPLINES · OPTIONAL</Text>
+            {bonus.map((q) => <QuestRow key={q.id} q={q} onToggle={onToggle} />)}
+          </>
         )}
 
         {sealed && (
@@ -155,6 +144,29 @@ export default function Quests() {
         </Pressable>
       </Modal>
     </SafeAreaView>
+  );
+}
+
+function QuestRow({ q, onToggle }: { q: Quest; onToggle: (q: Quest) => void }) {
+  return (
+    <View style={{ marginBottom: 10 }}>
+      <Pressable onPress={() => onToggle(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
+        <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
+          {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{q.pillar}</Text>
+          <Text style={{ color: C.ivory, fontSize: 15, marginTop: 2, textDecorationLine: q.done ? "line-through" : "none" }}>{q.title}</Text>
+          {q.sub ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>{q.sub}</Text> : null}
+        </View>
+        <Text style={{ color: C.muted, fontSize: 12, marginLeft: 8 }}>+{q.xp}</Text>
+      </Pressable>
+      {!q.done && (q.quest_key === "body" || q.quest_key === "word") && (
+        <Pressable onPress={() => onToggle(q)} hitSlop={6} style={{ paddingTop: 7, paddingLeft: 52 }}>
+          <Text style={{ color: C.muted, fontSize: 11, textDecorationLine: "underline" }}>{q.quest_key === "body" ? "Doing your own training? Tap to log it" : "Reading your own passage? Tap to log it"}</Text>
+        </Pressable>
+      )}
+    </View>
   );
 }
 

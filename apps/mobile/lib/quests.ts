@@ -4,6 +4,10 @@
 // progression. Quests escalate as the user levels up ("progress pushes it").
 import { supabase } from "./supabase";
 import { levelFromXp } from "./game";
+import { generateDisciplineQuests } from "./disciplines";
+
+// core quests gate the day-seal; everything else is a bonus discipline
+export const CORE_KEYS = ["word", "body", "brother"];
 
 export interface Quest {
   id: string;
@@ -12,6 +16,7 @@ export interface Quest {
   title: string;
   sub: string | null;
   xp: number;
+  stat?: string | null;
   done: boolean;
 }
 
@@ -148,18 +153,39 @@ export function generateQuests(p: Gen, level: number, scriptureIndex: number): G
 }
 
 /** Load (or generate + seed) today's quests for a user. */
+// Backlog cap: a man clears quests at his own pace. We pause generating new ones
+// while more than this many are still pending, then resume once cleared down.
+const BACKLOG_CAP = 3;
+
 export async function loadToday(userId: string): Promise<Quest[]> {
   const day = todayKey();
-  const { data } = await supabase.from("quests").select("id, quest_key, pillar, title, sub, xp, done").eq("user_id", userId).eq("day", day);
-  if (data && data.length) return data as Quest[];
-  const { data: prof } = await supabase.from("profiles").select("fitness_level, equipment, goals, dob, baseline, difficulty, xp").eq("user_id", userId).maybeSingle();
+  const SEL = "id, quest_key, pillar, title, sub, xp, stat, done";
+  // the active list = everything still pending (may carry across days)
+  const { data: backlog } = await supabase.from("quests").select(SEL).eq("user_id", userId).eq("done", false).order("day", { ascending: true });
+  const list = (backlog as Quest[]) ?? [];
+  // one batch per day, and only if the backlog is cleared down to the cap
+  const { count: todayCount } = await supabase.from("quests").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("day", day);
+  if ((todayCount ?? 0) > 0) return list;        // already generated today -> show the list
+  if (list.length > BACKLOG_CAP) return list;    // paused: clear some before more arrive
+  const { data: prof } = await supabase.from("profiles").select("fitness_level, equipment, goals, dob, baseline, difficulty, denomination, disciplines, xp").eq("user_id", userId).maybeSingle();
   const level = levelFromXp(Number(prof?.xp) || 0);
   // scripture advances with completion: how many Word quests they've finished
   const { count } = await supabase.from("quests").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("quest_key", "word").eq("done", true);
-  const gen = generateQuests((prof as Gen) || {}, level, count || 0);
-  const rows = gen.map((q) => ({ ...q, user_id: userId, day, done: false, progress: 0 }));
-  const ins = await supabase.from("quests").insert(rows).select("id, quest_key, pillar, title, sub, xp, done");
-  return (ins.data as Quest[]) ?? [];
+  const core = generateQuests((prof as Gen) || {}, level, count || 0);
+  // bonus disciplines (opt-in packs), denomination-aware
+  let disc: { quest_key: string; pillar: string; title: string; sub: string; stat: string; xp: number; goal: number }[] = [];
+  const prefs = (prof as { disciplines?: Record<string, unknown> } | null)?.disciplines;
+  if (prefs && Object.keys(prefs).length) {
+    let weight_kg: number | null = null, protein_target: number | null = null;
+    if (prefs.fuel) {
+      const { data: ng } = await supabase.from("nutrition_goals").select("weight_kg, protein_target").eq("user_id", userId).maybeSingle();
+      weight_kg = (ng?.weight_kg as number) ?? null; protein_target = (ng?.protein_target as number) ?? null;
+    }
+    disc = generateDisciplineQuests({ denomination: (prof as { denomination?: string })?.denomination, goals: (prof as Gen)?.goals, disciplines: prefs, weight_kg, protein_target }, dayIndex());
+  }
+  const rows = [...core, ...disc].map((q) => ({ ...q, user_id: userId, day, done: false, progress: 0 }));
+  const ins = await supabase.from("quests").insert(rows).select(SEL);
+  return [...list, ...((ins.data as Quest[]) ?? [])];
 }
 
 // quest pillar -> RPG stat (STR/AGI/WIS/MANA)
@@ -168,7 +194,7 @@ const STAT_BY_KEY: Record<string, string> = { body: "STR", word: "WIS", brother:
 /** Toggle a quest done/undone and atomically award/remove its XP + stat. */
 export async function toggleQuest(userId: string, quest: Quest, done: boolean): Promise<void> {
   await supabase.from("quests").update({ done, progress: done ? 1 : 0 }).eq("id", quest.id);
-  const stat = STAT_BY_KEY[quest.quest_key] ?? null;
+  const stat = quest.stat ?? STAT_BY_KEY[quest.quest_key] ?? null;
   await supabase.rpc("apply_quest_delta", { p_xp: done ? quest.xp : -quest.xp, p_stat: stat, p_stat_delta: stat ? (done ? 1 : -1) : 0 });
 }
 
