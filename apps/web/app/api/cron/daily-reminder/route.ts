@@ -34,6 +34,7 @@ export async function GET(req: Request) {
   const html = emailShell(
     "Your daily quest awaits",
     "The day is not yet sealed, brother. Three quests stand between you and the streak. Open TABOR and take the ground.<br/><br/>Scripture. Training. Brotherhood. Win the day.",
+    { eyebrow: "[ THE SYSTEM ]", preheader: "The day is not yet sealed. Three quests stand." },
   );
   const results = await Promise.allSettled(recipients.slice(0, 2000).map((p) => sendEmail(p.email as string, "TABOR: your daily quest awaits", html)));
   const sent = results.filter((r) => r.status === "fulfilled" && (r.value as { ok: boolean }).ok).length;

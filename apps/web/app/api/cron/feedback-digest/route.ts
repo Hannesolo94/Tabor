@@ -20,8 +20,9 @@ export async function GET(req: Request) {
 
   const rows = reports.map((r) => `<tr><td style="padding:6px 10px;border-bottom:1px solid #2a2a2a"><strong>${r.kind === "bug" ? "BUG" : "FEATURE"}</strong></td><td style="padding:6px 10px;border-bottom:1px solid #2a2a2a">${escapeHtml(r.title)}<br/><span style="color:#888;font-size:12px">${escapeHtml(r.body ?? "")}</span></td><td style="padding:6px 10px;border-bottom:1px solid #2a2a2a;color:#888;font-size:12px">${r.device ?? ""}</td></tr>`).join("");
   const html = emailShell(
-    `${reports.length} new report${reports.length === 1 ? "" : "s"} in TABOR`,
-    `New bug and feature reports from the app in the last 24 hours. Review them in the admin Tickets page.<br/><br/><table style="width:100%;border-collapse:collapse">${rows}</table><br/><a href="https://tabor.quest/admin/tickets" style="color:#C9A961">Open Tickets</a>`,
+    `${reports.length} new report${reports.length === 1 ? "" : "s"}`,
+    `New bug and feature reports from the app in the last 24 hours.<br/><br/><table style="width:100%;border-collapse:collapse">${rows}</table>`,
+    { eyebrow: "[ THE QUEUE ]", cta: { label: "Open Tickets", url: "https://tabor.quest/admin/tickets" } },
   );
   const res = await sendEmail(TEAM_EMAIL, `TABOR: ${reports.length} new report${reports.length === 1 ? "" : "s"}`, html);
   return NextResponse.json({ ok: true, count: reports.length, sent: res.ok ? 1 : 0 });

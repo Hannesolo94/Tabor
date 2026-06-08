@@ -31,7 +31,7 @@ export async function sendBroadcast(formData: FormData): Promise<void> {
   // optionally email it too (requires a Resend key in Settings > Integrations)
   if (alsoEmail) {
     const emails = (profs ?? []).map((p) => p.email).filter((e): e is string => !!e);
-    const html = emailShell(title, body.replace(/\n/g, "<br/>"));
+    const html = emailShell(title, body.replace(/\n/g, "<br/>"), { eyebrow: "[ ANNOUNCEMENT ]", cta: deepLink ? { label: "Open TABOR", url: deepLink.startsWith("http") ? deepLink : `https://tabor.quest${deepLink}` } : undefined });
     await Promise.allSettled(emails.slice(0, 1000).map((to) => sendEmail(to, title, html)));
   }
 
