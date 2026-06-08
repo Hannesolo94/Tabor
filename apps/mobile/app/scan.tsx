@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { View, Text, Pressable, TextInput, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -38,7 +38,8 @@ export default function Scan() {
   }
   async function save() {
     if (!userId || !food) return;
-    await logFood(userId, meal, food, Number(qty) || 0, today);
+    const { error } = await logFood(userId, meal, food, Number(qty) || 0, today);
+    if (error) { Alert.alert("Couldn't log", error.message); return; }
     router.back();
   }
   async function saveManual() {

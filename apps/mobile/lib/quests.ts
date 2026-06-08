@@ -13,10 +13,11 @@ export interface Quest {
   done: boolean;
 }
 
+// stat must match the quests_stat_check constraint: STR / AGI / WIS / MANA
 const DAILY = [
-  { quest_key: "word", pillar: "SCRIPTURE RAID", title: "Read today's passage", sub: "Take ground in the Word", stat: "spirit", xp: 30, goal: 1 },
-  { quest_key: "body", pillar: "FITNESS GUILD", title: "Complete a training set", sub: "Train the temple", stat: "body", xp: 40, goal: 1 },
-  { quest_key: "brother", pillar: "BROTHERHOOD", title: "Check in with the guild", sub: "No man climbs alone", stat: "soul", xp: 20, goal: 1 },
+  { quest_key: "word", pillar: "SCRIPTURE RAID", title: "Read today's passage", sub: "Take ground in the Word", stat: "WIS", xp: 30, goal: 1 },
+  { quest_key: "body", pillar: "FITNESS GUILD", title: "Complete a training set", sub: "Train the temple", stat: "STR", xp: 40, goal: 1 },
+  { quest_key: "brother", pillar: "BROTHERHOOD", title: "Check in with the guild", sub: "No man climbs alone", stat: "MANA", xp: 20, goal: 1 },
 ];
 
 export function todayKey(d = new Date()): string {

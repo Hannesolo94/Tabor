@@ -11,9 +11,19 @@ export async function ensureGuild(userId: string): Promise<{ guildId: string | n
   const { data: g } = await supabase.from("guilds").select("id").eq("open", true).order("created_at", { ascending: true }).limit(1).maybeSingle();
   const guildId = g?.id ?? null;
   if (!guildId) return { guildId: null, channels: [] };
-  await supabase.from("guild_members").upsert({ guild_id: guildId, user_id: userId, role: "member" }, { onConflict: "guild_id,user_id", ignoreDuplicates: true });
+  // SECURITY DEFINER RPC — reliable join (the client upsert hit an RLS edge)
+  await supabase.rpc("join_guild", { p_guild_id: guildId });
   const { data: ch } = await supabase.from("channels").select("id, name").eq("guild_id", guildId);
   return { guildId, channels: (ch as Channel[]) ?? [] };
+}
+
+export interface ExploreGuild { id: string; name: string; tag: string | null; members: number; joined: boolean }
+export async function exploreGuilds(): Promise<ExploreGuild[]> {
+  const { data } = await supabase.rpc("explore_guilds");
+  return (data as ExploreGuild[]) ?? [];
+}
+export async function joinGuild(guildId: string): Promise<void> {
+  await supabase.rpc("join_guild", { p_guild_id: guildId });
 }
 
 export async function loadChannels(guildId: string): Promise<Channel[]> {

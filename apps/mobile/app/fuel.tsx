@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, TextInput, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { getGoals, getDiary, deleteLog, searchFoods, logFood, saveGoals, type Goals, type LogRow, type Food } from "@/lib/nutrition";
@@ -33,6 +33,8 @@ export default function Fuel() {
     setPhase(g ? "diary" : "setup");
   }
   useEffect(() => { init(); /* eslint-disable-next-line */ }, [userId]);
+  // re-pull the diary whenever this screen regains focus (e.g. returning from /scan)
+  useFocusEffect(useCallback(() => { refresh(); /* eslint-disable-next-line */ }, [userId]));
 
   async function acceptConsent() {
     if (!userId) return;
