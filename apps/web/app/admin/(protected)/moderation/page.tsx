@@ -1,6 +1,6 @@
 // Moderation queue: review reported messages/users and act (delete, ban, dismiss).
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { deleteReportedMessage, banUser, dismissReport } from "./actions";
+import { deleteReportedMessage, banUser, dismissReport, deleteMessage, silenceUser, banUserById } from "./actions";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +20,13 @@ export default async function ModerationPage() {
   const bodyBy = new Map((msgs ?? []).map((m) => [m.id, m.body]));
   const profBy = new Map((profs ?? []).map((p) => [p.user_id, p]));
   const { count: banned } = await admin.from("profiles").select("user_id", { count: "exact", head: true }).eq("banned", true);
+
+  // proactive: recent guild messages (includes auto-hidden, marked for staff)
+  const { data: recent } = await admin.from("messages").select("id, body, author_id, created_at, hidden").not("channel_id", "is", null).order("created_at", { ascending: false }).limit(40);
+  const recentList = recent ?? [];
+  const authorIds = [...new Set(recentList.map((m) => m.author_id).filter(Boolean))] as string[];
+  const { data: authorProfs } = authorIds.length ? await admin.from("profiles").select("user_id, name, handle, banned").in("user_id", authorIds) : { data: [] as { user_id: string; name: string; handle: string; banned: boolean }[] };
+  const authorBy = new Map((authorProfs ?? []).map((p) => [p.user_id, p]));
 
   const btn = (bg: string, color: string): React.CSSProperties => ({ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color, background: bg, border: bg === "none" ? `1px solid ${GOLD}44` : "none", padding: "8px 12px", cursor: "pointer" });
 
@@ -55,6 +62,31 @@ export default async function ModerationPage() {
           })}
         </div>
       )}
+
+      {/* proactive moderation: act on any recent guild message without a report */}
+      <div style={{ marginTop: 34 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.16em", marginBottom: 10 }}>RECENT GUILD CHAT · ACT WITHOUT A REPORT</div>
+        {recentList.length === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No guild messages yet.</p> : (
+          <div style={{ border: "1px solid rgba(201,169,97,0.16)", background: "#0E0E12" }}>
+            {recentList.map((m, i) => {
+              const a = m.author_id ? authorBy.get(m.author_id) : null;
+              return (
+                <div key={m.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "10px 14px", borderTop: i ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 9, color: a?.banned ? "#C03A3A" : "#8A847A" }}>{a?.name ?? "Brother"}{a?.handle ? ` @${a.handle}` : ""} · {new Date(m.created_at).toISOString().slice(11, 16)}{m.hidden ? " · AUTO-HIDDEN" : ""}</span>
+                    <div style={{ fontFamily: BODY, fontSize: 13.5, color: m.hidden ? "#8A847A" : "#E8E2D5", textDecoration: m.hidden ? "line-through" : "none" }}>{m.body}</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                    <form action={deleteMessage}><input type="hidden" name="message_id" value={m.id} /><button style={btn("none", "#9A948A")}>Delete</button></form>
+                    {m.author_id && <form action={silenceUser}><input type="hidden" name="user_id" value={m.author_id} /><button style={btn("none", GOLD)}>Silence</button></form>}
+                    {m.author_id && <form action={banUserById}><input type="hidden" name="user_id" value={m.author_id} /><button style={btn("none", "#C03A3A")}>Ban</button></form>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

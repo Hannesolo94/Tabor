@@ -32,6 +32,31 @@ export async function unbanUser(formData: FormData): Promise<void> {
   revalidatePath("/admin/moderation");
 }
 
+// --- proactive moderation (no report needed) ---
+export async function deleteMessage(formData: FormData): Promise<void> {
+  const messageId = String(formData.get("message_id") ?? "");
+  if (!messageId) return;
+  await supabaseAdmin().from("messages").delete().eq("id", messageId);
+  await logAudit("moderation.delete_message", "message", messageId, { proactive: true });
+  revalidatePath("/admin/moderation");
+}
+
+export async function silenceUser(formData: FormData): Promise<void> {
+  const userId = String(formData.get("user_id") ?? "");
+  if (!userId) return;
+  await supabaseAdmin().from("profiles").update({ silenced_until: new Date(Date.now() + 24 * 3600 * 1000).toISOString() }).eq("user_id", userId);
+  await logAudit("moderation.silence", "user", userId);
+  revalidatePath("/admin/moderation");
+}
+
+export async function banUserById(formData: FormData): Promise<void> {
+  const userId = String(formData.get("user_id") ?? "");
+  if (!userId) return;
+  await supabaseAdmin().from("profiles").update({ banned: true }).eq("user_id", userId);
+  await logAudit("moderation.ban", "user", userId, { proactive: true });
+  revalidatePath("/admin/moderation");
+}
+
 export async function dismissReport(formData: FormData): Promise<void> {
   const reportId = String(formData.get("report_id") ?? "");
   const admin = supabaseAdmin();
