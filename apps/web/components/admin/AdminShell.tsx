@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { TaborSeal } from "@/components/TaborSeal";
 import { LogoutButton } from "./LogoutButton";
+import { AdminNav } from "./AdminNav";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
 // Grouped nav (IA audit). Routes are unchanged; only labels/grouping differ.
@@ -53,7 +54,7 @@ export function AdminShell({ email, name, role, children }: { email?: string; na
     ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => MOD_HREFS.has(i.href)) })).filter((g) => g.items.length)
     : NAV_GROUPS;
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "230px 1fr", minHeight: "100vh" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "248px 1fr", minHeight: "100vh" }}>
       {/* sidebar */}
       <aside style={{ borderRight: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(20,20,26,0.92), rgba(10,10,14,0.92))", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", boxShadow: "inset -1px 0 0 rgba(255,255,255,0.03)", padding: "22px 16px", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh" }}>
         <Link href="/admin" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 26 }}>
@@ -63,18 +64,7 @@ export function AdminShell({ email, name, role, children }: { email?: string; na
         <form action="/admin/search" method="get" style={{ marginBottom: 16 }}>
           <input name="q" placeholder="Search…" aria-label="Search admin" style={{ width: "100%", fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "8px 10px" }} />
         </form>
-        <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, overflowY: "auto" }}>
-          {groups.map((g) => (
-            <div key={g.section} style={{ marginBottom: 10 }}>
-              <div style={{ fontFamily: MONO, fontSize: 8.5, color: GOLD, letterSpacing: "0.18em", textTransform: "uppercase", padding: "4px 10px 4px", opacity: 0.7 }}>{g.section}</div>
-              {g.items.map((n) => (
-                <Link key={n.href} href={n.href} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: "0.08em", color: "#C3BDB1", textDecoration: "none", padding: "7px 10px", borderRadius: 8, textTransform: "uppercase", display: "block" }}>
-                  {n.label}
-                </Link>
-              ))}
-            </div>
-          ))}
-        </nav>
+        <AdminNav groups={groups} />
         <div style={{ borderTop: "1px solid rgba(201,169,97,0.14)", paddingTop: 14, marginTop: 14 }}>
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.06em", marginBottom: 4 }}>{(name || "Admin").toUpperCase()}</div>
           <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", marginBottom: 10, wordBreak: "break-all" }}>{email}</div>
@@ -84,7 +74,7 @@ export function AdminShell({ email, name, role, children }: { email?: string; na
       </aside>
 
       {/* content */}
-      <div style={{ padding: "30px 32px", maxWidth: 1100 }}>{children}</div>
+      <div style={{ padding: "36px 44px", maxWidth: 1240, width: "100%" }}>{children}</div>
     </div>
   );
 }

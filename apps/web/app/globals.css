@@ -141,3 +141,34 @@ button {
 .tabor-lift:hover {
   transform: translateY(-3px);
 }
+
+/* admin sidebar nav links — hover + active state (kills the flat/dead feel) */
+.admin-nav-link {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #c3bdb1;
+  text-decoration: none;
+  padding: 8px 11px;
+  border-radius: 9px;
+  text-transform: uppercase;
+  display: block;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.admin-nav-link:hover {
+  background: rgba(201, 169, 97, 0.08);
+  color: #e8e2d5;
+}
+.admin-nav-link.active {
+  background: linear-gradient(180deg, rgba(201, 169, 97, 0.2), rgba(201, 169, 97, 0.07));
+  color: #e8d08c;
+  box-shadow: inset 2px 0 0 #c9a961;
+}
+/* admin card hover lift */
+.admin-card {
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.admin-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201, 169, 97, 0.28);
+}

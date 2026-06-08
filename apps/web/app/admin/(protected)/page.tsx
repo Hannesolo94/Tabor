@@ -19,7 +19,7 @@ const RANGES: { key: RangeKey; label: string }[] = [
 
 function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
-    <div style={{ background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset, 0 16px 30px -22px rgba(0,0,0,0.9)", padding: "16px 18px" }}>
+    <div className="admin-card" style={{ background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset, 0 16px 30px -22px rgba(0,0,0,0.9)", padding: "18px 20px" }}>
       <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase" }}>{label}</div>
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: accent ? GOLD : "#E8E2D5", lineHeight: 1.1, marginTop: 6 }}>{value}</div>
       {sub && <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.08em", marginTop: 2 }}>{sub}</div>}
@@ -29,8 +29,8 @@ function Stat({ label, value, sub, accent }: { label: string; value: string; sub
 
 function Card({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div style={{ background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", border: "1px solid rgba(201,169,97,0.14)", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+    <div className="admin-card" style={{ background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", border: "1px solid rgba(201,169,97,0.14)", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "20px 22px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <span style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em" }}>{title}</span>
         {action}
       </div>
