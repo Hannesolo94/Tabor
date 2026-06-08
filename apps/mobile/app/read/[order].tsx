@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";
-import { getBooks, getChapter, getBookmarks, toggleBookmark, type Verse } from "@/lib/scripture";
+import { getBooks, getChapter, getBookmarks, setBookmarks, getHighlights, setHighlights, removeHighlights, type Verse } from "@/lib/scripture";
+import { addNote } from "@/lib/notes";
 import { C, F } from "@/lib/theme";
+
+const HL_COLORS = ["#c9a961", "#6fa8dc", "#7bb274", "#c77b9e"];
 
 export default function Reader() {
   const router = useRouter();
@@ -18,19 +21,45 @@ export default function Reader() {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
   const [marks, setMarks] = useState<Set<string>>(new Set());
+  const [highlights, setHls] = useState<Map<string, string>>(new Map());
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   useEffect(() => { getBooks().then((bs) => { const b = bs.find((x) => x.book_order === bookOrder); if (b) { setBook(b.book); setChapters(b.chapters); } }); }, [bookOrder]);
-  useEffect(() => { if (userId) getBookmarks(userId).then((m) => setMarks(new Set(m))); }, [userId]);
   useEffect(() => {
-    setLoading(true);
+    if (!userId) return;
+    getBookmarks(userId).then((m) => setMarks(new Set(m)));
+    getHighlights(userId).then((hs) => setHls(new Map(hs.map((h) => [h.ref, h.color]))));
+  }, [userId]);
+  useEffect(() => {
+    setLoading(true); setSelected(new Set());
     getChapter(bookOrder, chapter).then((d) => { if (d.book) setBook(d.book); setVerses(d.verses); setLoading(false); });
   }, [bookOrder, chapter]);
 
-  async function mark(v: number) {
-    const ref = `${book} ${chapter}:${v}`;
-    const on = !marks.has(ref);
-    setMarks((s) => { const n = new Set(s); on ? n.add(ref) : n.delete(ref); return n; });
-    if (userId) toggleBookmark(userId, ref, on);
+  const refOf = (v: number) => `${book} ${chapter}:${v}`;
+  function toggleSelect(v: number) {
+    setSelected((s) => { const n = new Set(s); n.has(v) ? n.delete(v) : n.add(v); return n; });
+  }
+  const selRefs = () => [...selected].map(refOf);
+
+  async function applyHighlight(color: string | null) {
+    const refs = selRefs();
+    setHls((m) => { const n = new Map(m); refs.forEach((r) => (color ? n.set(r, color) : n.delete(r))); return n; });
+    if (userId) color ? await setHighlights(userId, refs, color) : await removeHighlights(userId, refs);
+  }
+  async function bookmarkSel() {
+    const refs = selRefs();
+    const allOn = refs.every((r) => marks.has(r));
+    setMarks((s) => { const n = new Set(s); refs.forEach((r) => (allOn ? n.delete(r) : n.add(r))); return n; });
+    if (userId) await setBookmarks(userId, refs, !allOn);
+  }
+  async function saveToNotes() {
+    const nums = [...selected].sort((a, b) => a - b);
+    if (!nums.length || !userId) return;
+    const range = nums.length === 1 ? refOf(nums[0]) : `${book} ${chapter}:${nums[0]}-${nums[nums.length - 1]}`;
+    const text = nums.map((n) => { const v = verses.find((x) => x.verse === n); return v ? `${n}. ${v.text}` : ""; }).filter(Boolean).join("\n");
+    await addNote(userId, { cat: "scripture", title: range, body: text, ref: range });
+    setSelected(new Set());
+    Alert.alert("Saved to Notes", `${range} is in your Notes (Word).`, [{ text: "View Notes", onPress: () => router.push("/notes") }, { text: "Done" }]);
   }
 
   return (
@@ -49,15 +78,17 @@ export default function Reader() {
       </ScrollView>
 
       {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 30 }} /> : (
-        <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 50 }}>
-          <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginBottom: 14, letterSpacing: 1 }}>HOLD A VERSE TO BOOKMARK ★</Text>
+        <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: selected.size > 0 ? 180 : 50 }}>
+          <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginBottom: 14, letterSpacing: 1 }}>TAP VERSES TO SELECT · HIGHLIGHT OR SAVE</Text>
           {verses.map((v) => {
-            const ref = `${book} ${chapter}:${v.verse}`;
-            const on = marks.has(ref);
+            const ref = refOf(v.verse);
+            const isSel = selected.has(v.verse);
+            const hl = highlights.get(ref);
+            const booked = marks.has(ref);
             return (
-              <Pressable key={v.verse} onLongPress={() => mark(v.verse)} delayLongPress={250} style={{ flexDirection: "row", marginBottom: 12 }}>
-                <Text style={{ color: on ? C.gold : C.muted, fontSize: 12, fontWeight: on ? "800" : "400", fontFamily: F.mono, width: 30, marginTop: 5 }}>{on ? "★" : v.verse}</Text>
-                <Text style={{ color: on ? C.gold : C.text, fontSize: 17, lineHeight: 27, fontFamily: F.scripture, flex: 1 }}>{v.text}</Text>
+              <Pressable key={v.verse} onPress={() => toggleSelect(v.verse)} style={{ flexDirection: "row", marginBottom: 4, paddingVertical: 6, paddingHorizontal: 8, borderRadius: 3, borderWidth: isSel ? 1 : 0, borderColor: C.gold, backgroundColor: isSel ? "rgba(201,169,97,0.16)" : hl ? hl + "2e" : "transparent" }}>
+                <Text style={{ color: booked ? C.gold : C.muted, fontSize: 12, fontWeight: booked ? "800" : "400", fontFamily: F.mono, width: 26, marginTop: 5 }}>{booked ? "★" : v.verse}</Text>
+                <Text style={{ color: C.text, fontSize: 17, lineHeight: 27, fontFamily: F.scripture, flex: 1 }}>{v.text}</Text>
               </Pressable>
             );
           })}
@@ -66,6 +97,25 @@ export default function Reader() {
             <Pressable disabled={chapter >= chapters} onPress={() => setChapter((n) => Math.min(chapters, n + 1))} style={{ opacity: chapter >= chapters ? 0.3 : 1, borderWidth: 1, borderColor: C.line, paddingVertical: 11, paddingHorizontal: 20, borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>NEXT ›</Text></Pressable>
           </View>
         </ScrollView>
+      )}
+
+      {selected.size > 0 && (
+        <View style={{ position: "absolute", left: 12, right: 12, bottom: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.gold, borderRadius: 6, padding: 14 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono, letterSpacing: 1 }}>{selected.size} VERSE{selected.size > 1 ? "S" : ""} SELECTED</Text>
+            <Pressable onPress={() => setSelected(new Set())} hitSlop={10}><Text style={{ color: C.muted, fontSize: 18 }}>✕</Text></Pressable>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 14 }}>
+            {HL_COLORS.map((col) => (
+              <Pressable key={col} onPress={() => applyHighlight(col)} style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: col, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" }} />
+            ))}
+            <Pressable onPress={() => applyHighlight(null)} style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: C.line, alignItems: "center", justifyContent: "center" }}><Text style={{ color: C.muted, fontSize: 15 }}>⌫</Text></Pressable>
+          </View>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable onPress={bookmarkSel} style={{ flex: 1, borderWidth: 1, borderColor: C.line, paddingVertical: 12, alignItems: "center", borderRadius: 2 }}><Text style={{ color: C.ivory, fontSize: 12, fontFamily: F.mono, letterSpacing: 1 }}>★ BOOKMARK</Text></Pressable>
+            <Pressable onPress={saveToNotes} style={{ flex: 1.5, backgroundColor: C.gold, paddingVertical: 12, alignItems: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontSize: 12, fontFamily: F.head, letterSpacing: 1 }}>SAVE TO NOTES</Text></Pressable>
+          </View>
+        </View>
       )}
     </SafeAreaView>
   );

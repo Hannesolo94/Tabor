@@ -73,3 +73,23 @@ export async function toggleBookmark(userId: string, ref: string, on: boolean): 
   if (on) await supabase.from("bookmarks").upsert({ user_id: userId, ref });
   else await supabase.from("bookmarks").delete().eq("user_id", userId).eq("ref", ref);
 }
+export async function setBookmarks(userId: string, refs: string[], on: boolean): Promise<void> {
+  if (!refs.length) return;
+  if (on) await supabase.from("bookmarks").upsert(refs.map((ref) => ({ user_id: userId, ref })), { onConflict: "user_id,ref" });
+  else await supabase.from("bookmarks").delete().eq("user_id", userId).in("ref", refs);
+}
+
+// ---- highlights (colored verse refs) ----
+export interface Highlight { ref: string; color: string }
+export async function getHighlights(userId: string): Promise<Highlight[]> {
+  const { data } = await supabase.from("highlights").select("ref, color").eq("user_id", userId);
+  return (data as Highlight[]) ?? [];
+}
+export async function setHighlights(userId: string, refs: string[], color: string): Promise<void> {
+  if (!refs.length) return;
+  await supabase.from("highlights").upsert(refs.map((ref) => ({ user_id: userId, ref, color })), { onConflict: "user_id,ref" });
+}
+export async function removeHighlights(userId: string, refs: string[]): Promise<void> {
+  if (!refs.length) return;
+  await supabase.from("highlights").delete().eq("user_id", userId).in("ref", refs);
+}
