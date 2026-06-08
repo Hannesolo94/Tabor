@@ -35,10 +35,17 @@ const CLASSES = [
   { v: "Pilgrim", d: "The journeyer. Humble, seeking, climbing daily." },
 ];
 
-const DENOMINATIONS = ["Catholic", "Protestant", "Orthodox", "Non-denominational", "Other"];
+const DENOMINATIONS = ["Catholic", "Orthodox", "Anglican", "Baptist", "Methodist", "Lutheran", "Presbyterian", "Pentecostal", "Reformed", "Seventh-day Adventist", "Non-denominational", "Other"];
+const FAST_TYPES = [
+  { v: "none", l: "Not now" },
+  { v: "intermittent", l: "Intermittent (16:8, etc.)" },
+  { v: "religious", l: "Follow my church (Lent, fasts)" },
+  { v: "custom", l: "Custom" },
+] as const;
+const FAST_WINDOWS = ["16:8", "18:6", "20:4"];
 
 // step keys in order (gate + underage + saving are special)
-type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | "denomination" | "fitness" | "equipment" | "goal" | "days" | "class" | "saving";
+type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | "denomination" | "fitness" | "equipment" | "calibration" | "goal" | "days" | "class" | "disciplines" | "saving";
 
 export default function Onboarding() {
   const router = useRouter();
@@ -54,6 +61,13 @@ export default function Onboarding() {
   const [equipment, setEquipment] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
   const [days, setDays] = useState(3);
+  const [cls, setCls] = useState<string | null>(null);
+  // calibration (equipment-specific baseline)
+  const [bPush, setBPush] = useState(""); const [bSquat, setBSquat] = useState(""); const [bPull, setBPull] = useState("");
+  const [bBenchKg, setBBenchKg] = useState(""); const [bBenchReps, setBBenchReps] = useState("");
+  // disciplines
+  const [dFuel, setDFuel] = useState(true); const [dSpirit, setDSpirit] = useState(true); const [dDiscipline, setDDiscipline] = useState(false);
+  const [fastType, setFastType] = useState<string>("none"); const [fastWindow, setFastWindow] = useState("16:8");
   const [error, setError] = useState("");
 
   function checkAge() {
@@ -65,22 +79,32 @@ export default function Onboarding() {
     else setStep("covenant");
   }
 
-  async function finish(finalClass: string) {
+  async function finish() {
     setStep("saving"); setError("");
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setError("Session expired. Please sign in again."); return; }
+    const baseline: Record<string, number> = {};
+    if (bPush) baseline.pushups = +bPush;
+    if (bSquat) baseline.squats = +bSquat;
+    if (bPull) baseline.pullups = +bPull;
+    if (bBenchKg) baseline.bench_kg = +bBenchKg;
+    if (bBenchReps) baseline.bench_reps = +bBenchReps;
+    const disciplines: Record<string, unknown> = { fuel: dFuel, spirit: dSpirit, discipline: dDiscipline };
+    if (fastType === "intermittent") disciplines.fasting = { type: "intermittent", window: fastWindow };
+    else if (fastType === "religious" || fastType === "custom") disciplines.fasting = { type: fastType };
     const { error: e } = await supabase.from("profiles").update({
       believer: faith === "believer" ? "yes" : "seeking",
-      faith,
-      denomination,
-      cls: finalClass, char_class: finalClass,
+      faith, denomination,
+      cls, char_class: cls,
       fitness_level: fitness, equipment, goals: goal ? [goal] : [], days_per_week: days,
       dob: year ? `${year}-01-01` : null,
+      baseline: Object.keys(baseline).length ? baseline : null,
+      disciplines,
       tos_accepted_at: new Date().toISOString(),
       consent: { analytics, marketing },
       onboarded: true,
     }).eq("user_id", user.id);
-    if (e) { setError(e.message); setStep("class"); return; }
+    if (e) { setError(e.message); setStep("disciplines"); return; }
     await refresh();
     router.replace("/(tabs)");
   }
@@ -179,7 +203,33 @@ export default function Onboarding() {
           <View>
             <Text style={tag}>[ THE ARMORY ]</Text>
             <Text style={title}>What can you train with?</Text>
-            {EQUIPMENT.map((x) => <Choice key={x.v} label={x.l} sub={x.d} selected={equipment === x.v} onPress={() => { setEquipment(x.v); setStep("goal"); }} />)}
+            {EQUIPMENT.map((x) => <Choice key={x.v} label={x.l} sub={x.d} selected={equipment === x.v} onPress={() => { setEquipment(x.v); setStep("calibration"); }} />)}
+          </View>
+        )}
+        {step === "calibration" && (
+          <View>
+            <Text style={tag}>[ CALIBRATION ]</Text>
+            <Text style={title}>Set your starting point.</Text>
+            <Text style={body}>So your quests match your real strength. Best honest guess. You can skip and calibrate later.</Text>
+            {equipment === "full" ? (
+              <>
+                <Field label="Bench press — working weight (kg)" value={bBenchKg} onChange={setBBenchKg} />
+                <Field label="...for how many reps" value={bBenchReps} onChange={setBBenchReps} />
+                <Field label="Max pull-ups in a row (0 if none)" value={bPull} onChange={setBPull} />
+              </>
+            ) : equipment === "dumbbells" ? (
+              <>
+                <Field label="Max push-ups in one set" value={bPush} onChange={setBPush} />
+                <Field label="Max pull-ups in a row (0 if none)" value={bPull} onChange={setBPull} />
+              </>
+            ) : (
+              <>
+                <Field label="Max push-ups in one set" value={bPush} onChange={setBPush} />
+                <Field label="Max bodyweight squats in one set" value={bSquat} onChange={setBSquat} />
+              </>
+            )}
+            <Btn label="Continue" onPress={() => setStep("goal")} />
+            <Pressable onPress={() => setStep("goal")} style={{ marginTop: 12, alignItems: "center" }}><Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body }}>Skip for now</Text></Pressable>
           </View>
         )}
         {step === "goal" && (
@@ -206,7 +256,29 @@ export default function Onboarding() {
             <Text style={tag}>[ THE CALLING ]</Text>
             <Text style={title}>Choose your class.</Text>
             <Text style={{ color: C.muted, fontSize: 13, marginBottom: 12, fontFamily: F.body }}>This sets your tone. You can change it later.</Text>
-            {CLASSES.map((c) => <Choice key={c.v} label={c.v} sub={c.d} onPress={() => finish(c.v)} />)}
+            {CLASSES.map((c) => <Choice key={c.v} label={c.v} sub={c.d} selected={cls === c.v} onPress={() => { setCls(c.v); setStep("disciplines"); }} />)}
+          </View>
+        )}
+        {step === "disciplines" && (
+          <View>
+            <Text style={tag}>[ YOUR DISCIPLINES ]</Text>
+            <Text style={title}>Add disciplines (optional).</Text>
+            <Text style={body}>Bonus daily quests beyond your core three. The core always holds your streak. Change these anytime.</Text>
+            <Row label="Fuel — water + protein targets" on={dFuel} onChange={setDFuel} />
+            <Row label="Spirit — prayer in your tradition + worship" on={dSpirit} onChange={setDSpirit} />
+            <Row label="Discipline — steps, mobility, cold, focus" on={dDiscipline} onChange={setDDiscipline} />
+            <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2, fontFamily: F.mono, marginTop: 18, marginBottom: 8 }}>FASTING</Text>
+            {FAST_TYPES.map((f) => (
+              <Pressable key={f.v} onPress={() => setFastType(f.v)} style={{ borderWidth: 1, borderColor: fastType === f.v ? C.gold : C.line, backgroundColor: C.surface2, padding: 13, marginBottom: 8, borderRadius: 2 }}>
+                <Text style={{ color: fastType === f.v ? C.gold : C.ivory, fontSize: 15, fontFamily: F.bodyMid }}>{f.l}</Text>
+              </Pressable>
+            ))}
+            {fastType === "intermittent" && (
+              <View style={{ flexDirection: "row", gap: 8, marginTop: 2 }}>
+                {FAST_WINDOWS.map((w) => <Pressable key={w} onPress={() => setFastWindow(w)} style={{ flex: 1, borderWidth: 1, borderColor: fastWindow === w ? C.gold : C.line, paddingVertical: 10, alignItems: "center", borderRadius: 2 }}><Text style={{ color: fastWindow === w ? C.gold : C.muted, fontFamily: F.mono, fontSize: 13 }}>{w}</Text></Pressable>)}
+              </View>
+            )}
+            <Btn label="Begin the climb" onPress={finish} />
             {!!error && <Text style={errStyle}>{error}</Text>}
           </View>
         )}
@@ -239,6 +311,14 @@ function Row({ label, on, onChange }: { label: string; on: boolean; onChange: (v
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 10 }}>
       <Text style={{ color: C.text, fontSize: 14, fontFamily: F.body, flex: 1 }}>{label}</Text>
       <Switch value={on} onValueChange={onChange} trackColor={{ false: C.surface, true: C.gold }} thumbColor={C.ivory} />
+    </View>
+  );
+}
+function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <View style={{ marginTop: 12 }}>
+      <Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body, marginBottom: 6 }}>{label}</Text>
+      <TextInput value={value} onChangeText={(t) => onChange(t.replace(/[^0-9]/g, ""))} keyboardType="number-pad" placeholder="0" placeholderTextColor={C.muted} style={inp} />
     </View>
   );
 }
