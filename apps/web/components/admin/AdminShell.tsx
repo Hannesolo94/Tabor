@@ -41,6 +41,7 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
     { label: "Admins", href: "/admin/admins" },
     { label: "Settings", href: "/admin/settings" },
     { label: "Audit Log", href: "/admin/audit" },
+    { label: "Audit Report", href: "/admin/audit-report" },
   ] },
 ];
 
