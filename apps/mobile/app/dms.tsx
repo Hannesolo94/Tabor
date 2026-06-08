@@ -14,7 +14,7 @@ export default function Dms() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderBottomWidth: 1, borderBottomColor: C.line }}>
-        <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 22 }}>‹</Text></Pressable>
+        <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>‹</Text></Pressable>
         <View style={{ flex: 1 }}>
           <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800", fontFamily: F.head }}>Direct Messages</Text>
           <Text style={{ color: C.muted, fontSize: 10 }}>End-to-end encrypted. Only you and the brother can read them.</Text>

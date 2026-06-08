@@ -50,10 +50,11 @@ export default function Notes() {
       <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }}>
         {composing && (
           <View style={{ borderWidth: 1, borderColor: C.gold, borderRadius: 3, padding: 14, marginBottom: 18 }}>
-            <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
+            <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginBottom: 8 }}>CATEGORY</Text>
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 14, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: C.line }}>
               {CATS.map((c) => (
-                <Pressable key={c.v} onPress={() => setCat(c.v)} style={{ borderWidth: 1, borderColor: cat === c.v ? C.gold : C.line, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 2 }}>
-                  <Text style={{ color: cat === c.v ? C.gold : C.muted, fontSize: 11, fontFamily: F.mono }}>{c.l.toUpperCase()}</Text>
+                <Pressable key={c.v} onPress={() => setCat(c.v)} style={{ borderWidth: 1, borderColor: cat === c.v ? C.gold : C.line, backgroundColor: cat === c.v ? C.gold : "transparent", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 2 }}>
+                  <Text style={{ color: cat === c.v ? C.black : C.ivory, fontSize: 11, fontFamily: F.mono }}>{c.l.toUpperCase()}</Text>
                 </Pressable>
               ))}
             </View>

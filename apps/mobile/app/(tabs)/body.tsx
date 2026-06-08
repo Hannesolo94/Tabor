@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { todayKey } from "@/lib/quests";
 import { listExercises, generateProgram, getRoutines, renameRoutine, duplicateRoutine, deleteRoutine, moveRoutine, MUSCLE_GROUPS, type Exercise, type Routine } from "@/lib/fitness";
 import { TabataTimer } from "@/components/TabataTimer";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 const GOALS = [{ v: "strength", l: "Strength" }, { v: "muscle", l: "Muscle" }, { v: "fatloss", l: "Fat loss" }, { v: "endurance", l: "Endurance" }];
@@ -67,6 +68,7 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
   const [days, setDays] = useState(3);
   const [renaming, setRenaming] = useState<Routine | null>(null);
   const [renameText, setRenameText] = useState("");
+  const sheet = useActionSheet();
 
   async function load() { if (userId) setRoutines(await getRoutines(userId)); setLoading(false); }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
@@ -89,12 +91,15 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
   }
 
   function manage(r: Routine) {
-    Alert.alert(r.name, undefined, [
-      { text: "Rename", onPress: () => { setRenameText(r.name); setRenaming(r); } },
-      { text: "Duplicate", onPress: async () => { if (userId) { await duplicateRoutine(userId, r.id); load(); } } },
-      { text: "Delete", style: "destructive", onPress: () => Alert.alert("Delete routine?", r.name, [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: async () => { await deleteRoutine(r.id); load(); } }]) },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    sheet({
+      title: r.name,
+      actions: [
+        { label: "Rename", onPress: () => { setRenameText(r.name); setRenaming(r); } },
+        { label: "Duplicate", onPress: async () => { if (userId) { await duplicateRoutine(userId, r.id); load(); } } },
+        { label: "Delete routine", style: "destructive", onPress: () => sheet({ title: "Delete routine?", message: r.name, actions: [{ label: "Delete", style: "destructive", onPress: async () => { await deleteRoutine(r.id); load(); } }, { label: "Cancel", style: "cancel" }] }) },
+        { label: "Cancel", style: "cancel" },
+      ],
+    });
   }
   async function reorder(section: Routine[], index: number, dir: -1 | 1) {
     const j = index + dir;
@@ -119,7 +124,7 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
           <Text style={{ color: C.ivory, fontSize: 16, fontFamily: F.headMid }}>{r.name}</Text>
           <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 3 }}>{(r.focus || "").toUpperCase()}</Text>
         </View>
-        <Pressable onPress={() => manage(r)} hitSlop={14} style={{ paddingHorizontal: 6, paddingVertical: 4 }}><Text style={{ color: C.gold, fontSize: 22 }}>⋯</Text></Pressable>
+        <Pressable onPress={() => manage(r)} hitSlop={14} style={{ paddingHorizontal: 10, paddingVertical: 8 }}><Text style={{ color: C.gold, fontSize: 22 }}>⋯</Text></Pressable>
       </Pressable>
       {section.length > 1 && (
         <View style={{ marginLeft: 8, alignItems: "center" }}>
@@ -241,7 +246,7 @@ function LibraryTab({ onScroll, router }: { onScroll: any; router: any }) {
 function Chips({ label, options, value, onPick }: { label: string; options: { v: string; l: string }[]; value: string; onPick: (v: string) => void }) {
   return (
     <View style={{ marginTop: 8 }}>
-      <Text style={{ color: C.muted, fontSize: 9, letterSpacing: 2, fontFamily: F.mono, marginBottom: 6 }}>{label}</Text>
+      <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginBottom: 6 }}>{label}</Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
         {options.map((o) => <Chip key={o.v} label={o.l} active={value === o.v} onPress={() => onPick(o.v)} />)}
       </View>

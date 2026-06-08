@@ -6,6 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import { uploadChatMedia, mediaBody, parseMedia } from "@/lib/media";
 import { MediaBubble } from "@/components/MediaBubble";
 import { GifPicker } from "@/components/GifPicker";
+import { useActionSheet, type SheetAction } from "@/components/ActionSheet";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, loadChannels, loadReactions, toggleReaction, getGlobalChannel, type Channel, type Msg, type Member, type ReactionInfo } from "@/lib/guild";
@@ -21,6 +22,7 @@ export default function Guild() {
   const { session } = useAuth();
   const userId = session?.user.id;
   const router = useRouter();
+  const sheet = useActionSheet();
 
   const [mode, setMode] = useState<Mode>("community");
   const [isStaff, setIsStaff] = useState(false);
@@ -125,11 +127,11 @@ export default function Guild() {
     if (effChannel && effGuild && userId && canPost) await sendMessage(effChannel, effGuild, userId, mediaBody({ t: "gif", url }));
   }
   function attach() {
-    Alert.alert("Attach", undefined, [
-      { text: "Photo / Video", onPress: pickMedia },
-      { text: "GIF", onPress: () => setGifOpen(true) },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    sheet({ title: "Attach", actions: [
+      { label: "📷  Photo / Video", onPress: pickMedia },
+      { label: "🎞  GIF", onPress: () => setGifOpen(true) },
+      { label: "Cancel", style: "cancel" },
+    ] });
   }
 
   async function selectGuild(g: GuildRow) {
@@ -159,18 +161,14 @@ export default function Guild() {
   }
 
   function onMessagePress(m: Msg) {
-    const opts: { text: string; style?: "cancel" | "destructive"; onPress?: () => void }[] = [
-      { text: "🔥", onPress: () => react(m, "🔥") },
-      { text: "🙏", onPress: () => react(m, "🙏") },
-      { text: "💪", onPress: () => react(m, "💪") },
-    ];
+    const actions: SheetAction[] = [];
     if (m.author_id && m.author_id !== userId) {
-      opts.push({ text: "View profile", onPress: () => openProfile(m.author_id!) });
-      opts.push({ text: "Report", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); Alert.alert("Reported", "Thank you. Our team will review it."); } });
-      opts.push({ text: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } });
+      actions.push({ label: "View profile", onPress: () => openProfile(m.author_id!) });
+      actions.push({ label: "Report message", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); Alert.alert("Reported", "Thank you. Our team will review it."); } });
+      actions.push({ label: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } });
     }
-    opts.push({ text: "Cancel", style: "cancel" });
-    Alert.alert("React or report", undefined, opts);
+    actions.push({ label: "Cancel", style: "cancel" });
+    sheet({ title: "Message", reactions: [{ emoji: "🔥", onPress: () => react(m, "🔥") }, { emoji: "🙏", onPress: () => react(m, "🙏") }, { emoji: "💪", onPress: () => react(m, "💪") }], actions });
   }
 
   if (loading) {
@@ -251,8 +249,8 @@ export default function Guild() {
           {mode === "guild" && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}>
               {channels.map((c) => (
-                <Pressable key={c.id} onPress={() => setActive(c)} style={{ paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: active?.id === c.id ? C.gold : C.line, borderRadius: 2 }}>
-                  <Text style={{ color: active?.id === c.id ? C.gold : C.muted, fontSize: 11 }}>#{c.name}</Text>
+                <Pressable key={c.id} onPress={() => setActive(c)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: active?.id === c.id ? C.gold : C.line, backgroundColor: active?.id === c.id ? C.gold : "transparent", borderRadius: 2 }}>
+                  <Text style={{ color: active?.id === c.id ? C.black : C.ivory, fontSize: 12, fontFamily: F.bodyMid }}>#{c.name}</Text>
                 </Pressable>
               ))}
             </ScrollView>
@@ -264,7 +262,7 @@ export default function Guild() {
               const mine = m.author_id === userId;
               return (
                 <Pressable key={m.id} onLongPress={() => onMessagePress(m)} delayLongPress={300} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
-                  <Text style={{ color: mine ? C.gold : C.muted, fontSize: 9, letterSpacing: 1, marginBottom: 3, textAlign: mine ? "right" : "left" }}>{mine ? "YOU" : (m.author_id ? nameMap[m.author_id] ?? "Brother" : "System").toUpperCase()}</Text>
+                  <Text style={{ color: mine ? C.gold : C.muted, fontSize: 10, letterSpacing: 1, marginBottom: 3, textAlign: mine ? "right" : "left" }}>{mine ? "YOU" : (m.author_id ? nameMap[m.author_id] ?? "Brother" : "System").toUpperCase()}</Text>
                   {parseMedia(m.body) ? <MediaBubble media={parseMedia(m.body)!} /> : (
                     <View style={{ backgroundColor: mode === "board" ? "rgba(201,169,97,0.10)" : mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: mode === "board" ? C.gold : C.line, padding: 11, borderRadius: 2 }}>
                       <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>

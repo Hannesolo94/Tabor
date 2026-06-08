@@ -58,11 +58,11 @@ export default function Notifications() {
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   {!n.read && <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: C.gold }} />}
-                  <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{(n.kind || "NOTICE").toUpperCase()}</Text>
+                  <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2 }}>{(n.kind || "NOTICE").toUpperCase()}</Text>
                 </View>
-                <Text style={{ color: C.muted, fontSize: 9 }}>{new Date(n.created_at).toISOString().slice(0, 10)}</Text>
+                <Text style={{ color: C.muted, fontSize: 10 }}>{new Date(n.created_at).toISOString().slice(0, 10)}</Text>
               </View>
-              <Text style={{ color: C.ivory, fontSize: 16, fontWeight: "700" }}>{n.title}</Text>
+              <Text style={{ color: C.ivory, fontSize: 17, fontWeight: "700" }}>{n.title}</Text>
               {n.body ? <Text style={{ color: C.text, fontSize: 14, lineHeight: 21, marginTop: 5 }}>{n.body}</Text> : null}
               <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginTop: 8 }}>{n.deep_link ? "TAP TO OPEN →" : n.read ? "READ" : "TAP TO MARK READ"}</Text>
             </Pressable>

@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { ensureKeys } from "@/lib/crypto";
 import { registerForPush } from "@/lib/push";
 import { DonationPrompt } from "@/components/DonationPrompt";
+import { ActionSheetProvider } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 function useAuthGate(session: unknown, loading: boolean, onboarded: boolean | null) {
@@ -62,7 +63,9 @@ export default function RootLayout() {
   }
   return (
     <AuthProvider>
-      <RootNav />
+      <ActionSheetProvider>
+        <RootNav />
+      </ActionSheetProvider>
     </AuthProvider>
   );
 }

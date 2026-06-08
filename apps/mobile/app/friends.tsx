@@ -48,7 +48,7 @@ export default function Friends() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderBottomWidth: 1, borderBottomColor: C.line }}>
-        <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 22 }}>‹</Text></Pressable>
+        <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>‹</Text></Pressable>
         <View>
           <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800", fontFamily: F.head }}>Brothers</Text>
           <Text style={{ color: C.muted, fontSize: 10 }}>your handle: <Text style={{ color: C.gold }}>@{handle}</Text> · share to be added</Text>

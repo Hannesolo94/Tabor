@@ -66,7 +66,7 @@ export default function GiveawayScreen() {
                   </View>
                   <View style={{ alignItems: "flex-end" }}>
                     <Text style={{ color: mine ? C.gold : C.text, fontSize: 14, fontFamily: F.mono }}>{n.votes} {n.votes === 1 ? "vote" : "votes"}</Text>
-                    {mine && <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 1, fontFamily: F.mono }}>YOUR VOTE</Text>}
+                    {mine && <Text style={{ color: C.gold, fontSize: 10, fontWeight: "700", letterSpacing: 1, fontFamily: F.mono }}>✓ YOUR VOTE</Text>}
                   </View>
                 </View>
               </Pressable>

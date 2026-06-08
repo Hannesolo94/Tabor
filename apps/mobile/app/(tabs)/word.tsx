@@ -80,7 +80,7 @@ function Read({ onScroll, router }: { onScroll: any; router: any }) {
       {list.map((b) => (
         <Pressable key={b.book_order} onPress={() => router.push(`/read/${b.book_order}`)} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 2 }}>
           <Text style={{ color: C.ivory, fontSize: 13, fontFamily: F.bodyMid }}>{b.book}</Text>
-          <Text style={{ color: C.muted, fontSize: 9, fontFamily: F.mono }}>{b.chapters} ch</Text>
+          <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono }}>{b.chapters} ch</Text>
         </Pressable>
       ))}
     </View>
@@ -157,7 +157,7 @@ function PrayerJournal({ onScroll, userId }: { onScroll: any; userId?: string })
       {prayers.map((p) => (
         <Pressable key={p.id} onPress={() => toggle(p)} style={{ borderWidth: 1, borderColor: p.answered ? C.green : C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 2, marginBottom: 10 }}>
           <Text style={{ color: p.answered ? C.muted : C.ivory, fontSize: 14.5, lineHeight: 21, fontFamily: F.body, textDecorationLine: p.answered ? "line-through" : "none" }}>{p.body}</Text>
-          <Text style={{ color: p.answered ? C.green : C.muted, fontSize: 9, letterSpacing: 1, fontFamily: F.mono, marginTop: 6 }}>{p.answered ? "● ANSWERED · tap to reopen" : "tap when answered"}</Text>
+          <Text style={{ color: p.answered ? C.green : C.muted, fontSize: 11, letterSpacing: 1, fontFamily: F.mono, marginTop: 6 }}>{p.answered ? "● ANSWERED · tap to reopen" : "○ tap when answered"}</Text>
         </Pressable>
       ))}
     </ScrollView>

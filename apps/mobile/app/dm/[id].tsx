@@ -10,6 +10,7 @@ import { getPublicKey, encryptDM, decryptDM } from "@/lib/crypto";
 import { uploadChatMedia, mediaBody, parseMedia, type MediaRef } from "@/lib/media";
 import { MediaBubble } from "@/components/MediaBubble";
 import { GifPicker } from "@/components/GifPicker";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 export default function DM() {
@@ -22,6 +23,7 @@ export default function DM() {
   const [input, setInput] = useState("");
   const [otherPub, setOtherPub] = useState<string | null>(null);
   const [gifOpen, setGifOpen] = useState(false);
+  const sheet = useActionSheet();
   const scroller = useRef<ScrollView>(null);
 
   useEffect(() => { if (uid) getPublicKey(uid).then(setOtherPub); }, [uid]);
@@ -95,20 +97,20 @@ export default function DM() {
     await sendMediaRef({ t: isVideo ? "video" : "image", url });
   }
   function attach() {
-    Alert.alert("Attach", undefined, [
-      { text: "Photo / Video", onPress: pickMedia },
-      { text: "GIF", onPress: () => setGifOpen(true) },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    sheet({ title: "Attach", actions: [
+      { label: "📷  Photo / Video", onPress: pickMedia },
+      { label: "🎞  GIF", onPress: () => setGifOpen(true) },
+      { label: "Cancel", style: "cancel" },
+    ] });
   }
 
   function report(m: DmMsg) {
     if (!m.author_id || m.author_id === userId || !userId) return;
-    Alert.alert("Report this message?", undefined, [
-      // include the decrypted text so moderators can act (you reveal it, not the server)
-      { text: "Report", style: "destructive", onPress: async () => { await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "dm", detail: text[m.id] }); Alert.alert("Reported", "Thank you. Our team will review it."); } },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    // include the decrypted text so moderators can act (you reveal it, not the server)
+    sheet({ title: "Report this message?", actions: [
+      { label: "Report", style: "destructive", onPress: async () => { await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "dm", detail: text[m.id] }); Alert.alert("Reported", "Thank you. Our team will review it."); } },
+      { label: "Cancel", style: "cancel" },
+    ] });
   }
 
   return (

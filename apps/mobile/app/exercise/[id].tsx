@@ -56,7 +56,7 @@ export default function ExerciseDetail() {
         <Text style={{ color: C.ivory, fontSize: 24, fontFamily: F.head }}>{ex.name}</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
           {[ex.equipment, ex.level, ex.mechanic, ...ex.primary_muscles].filter(Boolean).map((t, i) => (
-            <View key={i} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 5, paddingHorizontal: 9, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 9.5, fontFamily: F.mono, textTransform: "uppercase" }}>{t}</Text></View>
+            <View key={i} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 2 }}><Text style={{ color: C.ivory, fontSize: 11, fontFamily: F.mono, textTransform: "uppercase" }}>{t}</Text></View>
           ))}
         </View>
 

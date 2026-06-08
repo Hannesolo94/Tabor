@@ -126,7 +126,7 @@ function Locked({ label }: { label: string }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}>
       <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.body }}>{label}</Text>
-      <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>ALWAYS ON</Text>
+      <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>🔒 LOCKED ON</Text>
     </View>
   );
 }

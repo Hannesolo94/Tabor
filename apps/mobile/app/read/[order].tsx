@@ -43,20 +43,21 @@ export default function Reader() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, borderBottomWidth: 1, borderBottomColor: C.line }} contentContainerStyle={{ padding: 10, gap: 6 }}>
         {Array.from({ length: chapters }, (_, i) => i + 1).map((n) => (
           <Pressable key={n} onPress={() => setChapter(n)} style={{ width: 38, height: 38, borderRadius: 2, borderWidth: 1, borderColor: chapter === n ? C.gold : C.line, backgroundColor: chapter === n ? C.gold : "transparent", alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ color: chapter === n ? C.black : C.muted, fontFamily: F.mono, fontSize: 12 }}>{n}</Text>
+            <Text style={{ color: chapter === n ? C.black : C.ivory, fontFamily: F.mono, fontSize: 13 }}>{n}</Text>
           </Pressable>
         ))}
       </ScrollView>
 
       {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 30 }} /> : (
         <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 50 }}>
+          <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginBottom: 14, letterSpacing: 1 }}>HOLD A VERSE TO BOOKMARK ★</Text>
           {verses.map((v) => {
             const ref = `${book} ${chapter}:${v.verse}`;
             const on = marks.has(ref);
             return (
               <Pressable key={v.verse} onLongPress={() => mark(v.verse)} delayLongPress={250} style={{ flexDirection: "row", marginBottom: 12 }}>
-                <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono, width: 26, marginTop: 4 }}>{v.verse}</Text>
-                <Text style={{ color: on ? C.gold : C.text, fontSize: 17, lineHeight: 27, fontFamily: F.scripture, flex: 1 }}>{v.text}{on ? "  ★" : ""}</Text>
+                <Text style={{ color: on ? C.gold : C.muted, fontSize: 12, fontWeight: on ? "800" : "400", fontFamily: F.mono, width: 30, marginTop: 5 }}>{on ? "★" : v.verse}</Text>
+                <Text style={{ color: on ? C.gold : C.text, fontSize: 17, lineHeight: 27, fontFamily: F.scripture, flex: 1 }}>{v.text}</Text>
               </Pressable>
             );
           })}
@@ -64,7 +65,6 @@ export default function Reader() {
             <Pressable disabled={chapter <= 1} onPress={() => setChapter((n) => Math.max(1, n - 1))} style={{ opacity: chapter <= 1 ? 0.3 : 1, borderWidth: 1, borderColor: C.line, paddingVertical: 11, paddingHorizontal: 20, borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>‹ PREV</Text></Pressable>
             <Pressable disabled={chapter >= chapters} onPress={() => setChapter((n) => Math.min(chapters, n + 1))} style={{ opacity: chapter >= chapters ? 0.3 : 1, borderWidth: 1, borderColor: C.line, paddingVertical: 11, paddingHorizontal: 20, borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>NEXT ›</Text></Pressable>
           </View>
-          <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, textAlign: "center", marginTop: 16 }}>HOLD A VERSE TO BOOKMARK</Text>
         </ScrollView>
       )}
     </SafeAreaView>
