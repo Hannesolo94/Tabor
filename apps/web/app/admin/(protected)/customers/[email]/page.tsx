@@ -62,7 +62,7 @@ export default async function CustomerDetail({ params }: { params: Promise<{ ema
   const lastItems = (Array.isArray(last?.items) ? last!.items : []) as { name?: string; sku?: string; variant?: string; qty?: number; quantity?: number; price?: number }[];
   const ship = (last?.shipping ?? {}) as Record<string, string>;
   const addrName = ship.name || ship.full_name || profile?.name || "";
-  const addrLines = [ship.address1 || ship.address || ship.street, ship.address2, [ship.city, ship.state_code || ship.state, ship.zip || ship.postal_code].filter(Boolean).join(", "), ship.country_code || ship.country].filter(Boolean) as string[];
+  const addrLines = [ship.line1 || ship.address1 || ship.address || ship.street, ship.line2 || ship.address2, [ship.city, ship.state_code || ship.state || ship.province, ship.postal || ship.zip || ship.postal_code].filter(Boolean).join(", "), ship.country_code || ship.country].filter(Boolean) as string[];
   const paid = (s: string) => ["paid", "fulfilled", "shipped"].includes(s);
   const fulfilled = (s: string) => ["fulfilled", "shipped"].includes(s);
   const pill = (on: boolean, label: string): React.CSSProperties => ({ fontFamily: MONO, fontSize: 9, letterSpacing: "0.08em", padding: "3px 8px", borderRadius: 8, color: on ? GREEN : GOLD, border: `1px solid ${on ? "rgba(95,176,122,0.4)" : "rgba(201,169,97,0.4)"}`, display: "inline-block" });

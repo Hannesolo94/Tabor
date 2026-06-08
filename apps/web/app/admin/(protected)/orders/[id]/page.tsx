@@ -52,7 +52,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
   const fulfilled = ["fulfilled", "shipped"].includes(o.status);
   const ship = (o.shipping ?? {}) as Record<string, string>;
   const addrName = ship.name || ship.full_name || "";
-  const addrLines = [ship.address1 || ship.address || ship.street, ship.address2, [ship.city, ship.state_code || ship.state, ship.zip || ship.postal_code].filter(Boolean).join(", "), ship.country_code || ship.country].filter(Boolean) as string[];
+  const addrLines = [ship.line1 || ship.address1 || ship.address || ship.street, ship.line2 || ship.address2, [ship.city, ship.state_code || ship.state || ship.province, ship.postal || ship.zip || ship.postal_code].filter(Boolean).join(", "), ship.country_code || ship.country].filter(Boolean) as string[];
 
   return (
     <div>
