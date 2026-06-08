@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { View, Text, Pressable, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
@@ -17,12 +17,13 @@ export default function Status() {
   const tb = useTabBar();
   const router = useRouter();
   const { session, signOut } = useAuth();
-  const { profile } = useProfile();
+  const { profile, refresh } = useProfile();
   const userId = session?.user.id;
   const [sealedDays, setSealedDays] = useState<Set<string>>(new Set());
   const [cls, setCls] = useState<string>("");
 
   useEffect(() => { if (profile?.cls) setCls(String(profile.cls)); }, [profile?.cls]);
+  useFocusEffect(useCallback(() => { refresh(); /* eslint-disable-next-line */ }, []));
   useEffect(() => {
     if (!userId) return;
     supabase.from("day_history").select("day, status").eq("user_id", userId).then(({ data }) => {
@@ -49,16 +50,26 @@ export default function Status() {
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
       <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
         <View style={{ alignItems: "center", marginBottom: 6 }}>
-          <Seal size={64} />
+          {profile?.avatar_url ? (
+            <View style={{ width: 84, height: 84, borderRadius: 42, borderWidth: 1, borderColor: C.gold, overflow: "hidden" }}>
+              <Image source={{ uri: String(profile.avatar_url) }} style={{ width: "100%", height: "100%" }} />
+            </View>
+          ) : <Seal size={64} />}
           <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head, marginTop: 12 }}>{profile?.name || "Brother"}</Text>
           <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 3, marginTop: 2 }}>{prog.rank.toUpperCase()}</Text>
           {profile?.handle ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>@{String(profile.handle)}</Text> : null}
-          {(() => { const verified = !!session?.user.email_confirmed_at; return (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 6, borderWidth: 1, borderColor: verified ? C.green : C.line, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 }}>
-              <Text style={{ color: verified ? C.green : C.muted, fontSize: 10 }}>{verified ? "✓" : "○"}</Text>
-              <Text style={{ color: verified ? C.green : C.muted, fontSize: 9, letterSpacing: 1.5, fontFamily: F.mono }}>{verified ? "VERIFIED" : "UNVERIFIED"}</Text>
-            </View>
-          ); })()}
+          {profile?.bio ? <Text style={{ color: C.text, fontSize: 13, fontFamily: F.body, textAlign: "center", marginTop: 8, lineHeight: 19, maxWidth: 300 }}>{String(profile.bio)}</Text> : null}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 8 }}>
+            {(() => { const verified = !!session?.user.email_confirmed_at; return (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, borderWidth: 1, borderColor: verified ? C.green : C.line, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 }}>
+                <Text style={{ color: verified ? C.green : C.muted, fontSize: 10 }}>{verified ? "✓" : "○"}</Text>
+                <Text style={{ color: verified ? C.green : C.muted, fontSize: 9, letterSpacing: 1.5, fontFamily: F.mono }}>{verified ? "VERIFIED" : "UNVERIFIED"}</Text>
+              </View>
+            ); })()}
+            <Pressable onPress={() => router.push("/edit-profile")} style={{ borderWidth: 1, borderColor: C.gold, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 }}>
+              <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 1.5, fontFamily: F.mono }}>EDIT PROFILE</Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>

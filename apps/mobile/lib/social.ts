@@ -16,6 +16,10 @@ export async function respondFriend(pId: string, accept: boolean): Promise<void>
 export async function createGuild(name: string, tag: string): Promise<string | null> { const { data } = await supabase.rpc("create_guild", { p_name: name, p_tag: tag }); return (data as string) ?? null; }
 export async function openDm(other: string): Promise<string | null> { const { data } = await supabase.rpc("open_dm", { other }); return (data as string) ?? null; }
 export async function blockUser(other: string): Promise<void> { await supabase.rpc("block_user", { other }); }
+export interface DmThread { thread_id: string; other_id: string; name: string | null; handle: string | null; last_at: string | null }
+export async function listDmThreads(): Promise<DmThread[]> { const { data } = await supabase.rpc("list_dms"); return (data as DmThread[]) ?? []; }
+export interface PublicProfile { user_id: string; name: string | null; handle: string | null; bio: string | null; denomination: string | null; cls: string | null; xp: number | null }
+export async function getPublicProfile(userId: string): Promise<PublicProfile | null> { const { data } = await supabase.rpc("get_public_profile", { p_user: userId }); return ((data as PublicProfile[]) ?? [])[0] ?? null; }
 
 export async function browseGuilds(): Promise<GuildRow[]> {
   const { data } = await supabase.from("guilds").select("id, name, tag, open").eq("open", true).order("created_at", { ascending: true });

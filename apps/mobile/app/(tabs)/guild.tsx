@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, loadChannels, loadReactions, toggleReaction, getGlobalChannel, type Channel, type Msg, type Member, type ReactionInfo } from "@/lib/guild";
-import { blockUser, myGuilds, type GuildRow } from "@/lib/social";
+import { blockUser, myGuilds, openDm, getPublicProfile, type GuildRow, type PublicProfile } from "@/lib/social";
 import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { rankForLevel, levelFromXp } from "@/lib/game";
 import { C, F } from "@/lib/theme";
@@ -15,9 +16,11 @@ type Glob = { id: string; guild_id: string } | null;
 export default function Guild() {
   const { session } = useAuth();
   const userId = session?.user.id;
+  const router = useRouter();
 
   const [mode, setMode] = useState<Mode>("community");
   const [isStaff, setIsStaff] = useState(false);
+  const [profileUser, setProfileUser] = useState<PublicProfile | null>(null);
   const [communityCh, setCommunityCh] = useState<Glob>(null);
   const [announceCh, setAnnounceCh] = useState<Glob>(null);
 
@@ -121,6 +124,11 @@ export default function Guild() {
     toggleReaction(m.id, userId, emoji, !mine).catch(() => {});
   }
 
+  async function openProfile(uid: string) {
+    const p = await getPublicProfile(uid);
+    if (p) setProfileUser(p);
+  }
+
   function onMessagePress(m: Msg) {
     const opts: { text: string; style?: "cancel" | "destructive"; onPress?: () => void }[] = [
       { text: "🔥", onPress: () => react(m, "🔥") },
@@ -128,6 +136,7 @@ export default function Guild() {
       { text: "💪", onPress: () => react(m, "💪") },
     ];
     if (m.author_id && m.author_id !== userId) {
+      opts.push({ text: "View profile", onPress: () => openProfile(m.author_id!) });
       opts.push({ text: "Report", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); Alert.alert("Reported", "Thank you. Our team will review it."); } });
       opts.push({ text: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } });
     }
@@ -145,7 +154,13 @@ export default function Guild() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
       <View style={{ paddingHorizontal: 18, paddingTop: 8, paddingBottom: 6 }}>
-        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ BROTHERHOOD ]</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ BROTHERHOOD ]</Text>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable onPress={() => router.push("/dms")} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 5, paddingHorizontal: 10, borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>✉ DMS</Text></Pressable>
+            <Pressable onPress={() => router.push("/friends")} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 5, paddingHorizontal: 10, borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>＋ FRIENDS</Text></Pressable>
+          </View>
+        </View>
         <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
           {MODES.map((m) => (
             <Pressable key={m.k} onPress={() => setMode(m.k)} style={{ paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: mode === m.k ? C.gold : C.line, backgroundColor: mode === m.k ? C.gold : "transparent", borderRadius: 2 }}>
@@ -186,14 +201,14 @@ export default function Guild() {
         <ScrollView contentContainerStyle={{ padding: 18 }}>
           <Text style={{ color: C.muted, fontSize: 11, letterSpacing: 2, marginBottom: 12 }}>THE LEADERBOARD · {roster.length} {roster.length === 1 ? "BROTHER" : "BROTHERS"}</Text>
           {roster.map((m, i) => (
-            <View key={m.user_id} style={{ flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}>
+            <Pressable key={m.user_id} onPress={() => m.user_id !== userId && openProfile(m.user_id)} style={{ flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}>
               <Text style={{ color: i < 3 ? C.gold : C.muted, fontSize: 16, fontWeight: "800", fontFamily: F.head, width: 34 }}>{i + 1}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: m.user_id === userId ? C.gold : C.ivory, fontSize: 15, fontWeight: "600" }}>{m.name || "Brother"}{m.user_id === userId ? " (you)" : ""}</Text>
                 <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, marginTop: 2 }}>{(m.cls || "Pilgrim").toUpperCase()} · {rankForLevel(levelFromXp(Number(m.xp) || 0)).toUpperCase()} · {Number(m.streak) || 0}d</Text>
               </View>
               <Text style={{ color: C.gold, fontSize: 14, fontWeight: "700" }}>{Number(m.xp) || 0} XP</Text>
-            </View>
+            </Pressable>
           ))}
         </ScrollView>
       ) : (
@@ -244,6 +259,34 @@ export default function Guild() {
           )}
         </KeyboardAvoidingView>
       )}
+
+      <Modal visible={!!profileUser} transparent animationType="fade" onRequestClose={() => setProfileUser(null)}>
+        <Pressable onPress={() => setProfileUser(null)} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", padding: 30 }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: C.surface2, borderWidth: 1, borderColor: C.gold, borderRadius: 4, padding: 24, alignItems: "center" }}>
+            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: C.surface, alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+              <Text style={{ color: C.gold, fontFamily: F.head, fontSize: 26 }}>{(profileUser?.name || "B")[0].toUpperCase()}</Text>
+            </View>
+            <Text style={{ color: C.ivory, fontSize: 20, fontFamily: F.head }}>{profileUser?.name || "Brother"}</Text>
+            <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.mono, marginTop: 2 }}>@{profileUser?.handle}</Text>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 12, flexWrap: "wrap", justifyContent: "center" }}>
+              {profileUser?.cls ? <Badge text={String(profileUser.cls)} /> : null}
+              {profileUser?.denomination ? <Badge text={String(profileUser.denomination)} /> : null}
+              <Badge text={`LVL ${levelFromXp(Number(profileUser?.xp) || 0)} · ${rankForLevel(levelFromXp(Number(profileUser?.xp) || 0))}`} />
+            </View>
+            {profileUser?.bio ? <Text style={{ color: C.text, fontSize: 14, fontFamily: F.body, textAlign: "center", marginTop: 14, lineHeight: 20 }}>{profileUser.bio}</Text> : null}
+            {profileUser && profileUser.user_id !== userId && (
+              <Pressable onPress={async () => { const u = profileUser; setProfileUser(null); const tid = await openDm(u.user_id); if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(u.name || "Brother")}&uid=${u.user_id}`); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 34, borderRadius: 2, marginTop: 18 }}>
+                <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>MESSAGE</Text>
+              </Pressable>
+            )}
+            <Text style={{ color: C.muted, fontSize: 9, fontFamily: F.mono, marginTop: 16 }}>TAP OUTSIDE TO CLOSE</Text>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
+}
+
+function Badge({ text }: { text: string }) {
+  return <View style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 4, paddingHorizontal: 9, borderRadius: 10 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 0.5 }}>{text.toUpperCase()}</Text></View>;
 }
