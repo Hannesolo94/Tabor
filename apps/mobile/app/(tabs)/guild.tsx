@@ -58,7 +58,13 @@ export default function Guild() {
       setTimeout(() => scroller.current?.scrollToEnd({ animated: false }), 60);
     });
     unsub = subscribeMessages(active.id, (msg) => {
-      setMessages((prev) => (prev.some((p) => p.id === msg.id) ? prev : [...prev, msg]));
+      setMessages((prev) => {
+        if (prev.some((p) => p.id === msg.id)) return prev; // already have the real row
+        // replace our own optimistic (tmp-) bubble with the real one instead of adding a duplicate
+        const i = prev.findIndex((p) => p.id.startsWith("tmp-") && p.author_id === msg.author_id && p.body === msg.body);
+        if (i >= 0) { const next = [...prev]; next[i] = msg; return next; }
+        return [...prev, msg];
+      });
       setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 60);
     });
     return () => unsub();
