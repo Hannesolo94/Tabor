@@ -25,7 +25,7 @@ export default function Word() {
         <View style={{ flexDirection: "row", gap: 8, marginTop: 14, marginBottom: 6, flexWrap: "wrap" }}>
           {(["today", "read", "plans", "prayer"] as const).map((t) => (
             <Pressable key={t} onPress={() => setTab(t)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
-              <Text style={{ color: tab === t ? C.black : C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>{t.toUpperCase()}</Text>
+              <Text style={{ color: tab === t ? C.black : C.ivory, fontSize: 11, letterSpacing: 1, fontFamily: F.mono }}>{t.toUpperCase()}</Text>
             </Pressable>
           ))}
           <Pressable onPress={() => router.push("/bookmarks")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>

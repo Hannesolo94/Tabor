@@ -183,17 +183,15 @@ export default function Guild() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
       <View style={{ paddingHorizontal: 18, paddingTop: 8, paddingBottom: 6 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ BROTHERHOOD ]</Text>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <Pressable onPress={() => router.push("/dms")} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 5, paddingHorizontal: 10, borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>✉ DMS</Text></Pressable>
-            <Pressable onPress={() => router.push("/friends")} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 5, paddingHorizontal: 10, borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>＋ FRIENDS</Text></Pressable>
-          </View>
+        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ BROTHERHOOD ]</Text>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+          <Pressable onPress={() => router.push("/dms")} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 2 }}><Text style={{ fontSize: 15 }}>✉</Text><Text style={{ color: C.gold, fontSize: 11, fontFamily: F.headMid, letterSpacing: 1 }}>MESSAGES</Text></Pressable>
+          <Pressable onPress={() => router.push("/friends")} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}><Text style={{ fontSize: 15 }}>👥</Text><Text style={{ color: C.ivory, fontSize: 11, fontFamily: F.headMid, letterSpacing: 1 }}>FRIENDS</Text></Pressable>
         </View>
         <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
           {MODES.map((m) => (
-            <Pressable key={m.k} onPress={() => setMode(m.k)} style={{ paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: mode === m.k ? C.gold : C.line, backgroundColor: mode === m.k ? C.gold : "transparent", borderRadius: 2 }}>
-              <Text style={{ color: mode === m.k ? C.black : C.muted, fontSize: 9, letterSpacing: 1, fontWeight: "700" }}>{m.label}</Text>
+            <Pressable key={m.k} onPress={() => setMode(m.k)} style={{ flex: 1, alignItems: "center", paddingVertical: 9, borderWidth: 1, borderColor: mode === m.k ? C.gold : C.line, backgroundColor: mode === m.k ? C.gold : "transparent", borderRadius: 2 }}>
+              <Text style={{ color: mode === m.k ? C.black : C.ivory, fontSize: 11, letterSpacing: 1, fontWeight: "700" }}>{m.label}</Text>
             </Pressable>
           ))}
         </View>

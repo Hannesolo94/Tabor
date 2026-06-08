@@ -146,10 +146,10 @@ export default function Status() {
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
-  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 10, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 8, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.gold, fontSize: 15, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text></View>;
+  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 10, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.gold, fontSize: 15, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text></View>;
 }
 function Tag({ label, value }: { label: string; value: string }) {
-  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 8, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.ivory, fontSize: 14, fontWeight: "600", marginTop: 3, textTransform: "capitalize" }}>{value}</Text></View>;
+  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.ivory, fontSize: 14, fontWeight: "600", marginTop: 3, textTransform: "capitalize" }}>{value}</Text></View>;
 }
 function Action({ label, onPress }: { label: string; onPress: () => void }) {
   return <Pressable onPress={onPress} style={{ flex: 1, borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontWeight: "700" }}>{label}</Text></Pressable>;

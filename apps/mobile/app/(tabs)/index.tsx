@@ -117,7 +117,7 @@ export default function Quests() {
           <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ THE SYSTEM ]</Text>
           <Pressable onPress={() => router.push("/notifications")} hitSlop={10}>
             <Text style={{ fontSize: 20 }}>🔔</Text>
-            {unread > 0 && <View style={{ position: "absolute", top: -2, right: -3, minWidth: 15, height: 15, borderRadius: 8, backgroundColor: C.red, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 }}><Text style={{ color: "#fff", fontSize: 8, fontWeight: "800" }}>{unread > 9 ? "9+" : unread}</Text></View>}
+            {unread > 0 && <View style={{ position: "absolute", top: -3, right: -5, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: C.red, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{unread > 9 ? "9+" : unread}</Text></View>}
           </Pressable>
         </View>
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>Daily Quest</Text>
@@ -197,7 +197,7 @@ function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => voi
         {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
       </Pressable>
       <View style={{ flex: 1 }}>
-        <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{q.pillar}</Text>
+        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2 }}>{q.pillar}</Text>
         <Text style={{ color: C.ivory, fontSize: 15, marginTop: 2, textDecorationLine: q.done ? "line-through" : "none" }}>{q.title}</Text>
         {q.sub ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>{q.sub}</Text> : null}
       </View>
@@ -210,7 +210,7 @@ function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => voi
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2 }}>
-      <Text style={{ color: C.muted, fontSize: 8, letterSpacing: 2 }}>{label}</Text>
+      <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2 }}>{label}</Text>
       <Text style={{ color: C.gold, fontSize: 16, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text>
     </View>
   );
