@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, loadChannels, loadReactions, toggleReaction, getGlobalChannel, type Channel, type Msg, type Member, type ReactionInfo } from "@/lib/guild";
-import { blockUser, myGuilds, openDm, getPublicProfile, type GuildRow, type PublicProfile } from "@/lib/social";
+import { blockUser, myGuilds, openDm, getPublicProfile, sendFriendRequest, type GuildRow, type PublicProfile } from "@/lib/social";
 import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { rankForLevel, levelFromXp } from "@/lib/game";
 import { C, F } from "@/lib/theme";
@@ -283,9 +283,19 @@ export default function Guild() {
             </View>
             {profileUser?.bio ? <Text style={{ color: C.text, fontSize: 14, fontFamily: F.body, textAlign: "center", marginTop: 14, lineHeight: 20 }}>{profileUser.bio}</Text> : null}
             {profileUser && profileUser.user_id !== userId && (
-              <Pressable onPress={async () => { const u = profileUser; setProfileUser(null); const tid = await openDm(u.user_id); if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(u.name || "Brother")}&uid=${u.user_id}`); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 34, borderRadius: 2, marginTop: 18 }}>
-                <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>MESSAGE</Text>
-              </Pressable>
+              profileUser.friend_status === "accepted" ? (
+                <Pressable onPress={async () => { const u = profileUser; setProfileUser(null); const tid = await openDm(u.user_id); if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(u.name || "Brother")}&uid=${u.user_id}`); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 34, borderRadius: 2, marginTop: 18 }}>
+                  <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>MESSAGE</Text>
+                </Pressable>
+              ) : profileUser.friend_status === "pending" ? (
+                <View style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 2, marginTop: 18 }}>
+                  <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 11, letterSpacing: 1 }}>REQUEST PENDING</Text>
+                </View>
+              ) : (
+                <Pressable onPress={async () => { if (!profileUser) return; const r = await sendFriendRequest(profileUser.user_id); setProfileUser((p) => (p ? { ...p, friend_status: r === "sent" ? "pending" : p.friend_status } : p)); Alert.alert(r === "sent" ? "Request sent" : "Done", r === "sent" ? "They will see your request. Once they accept, you can message." : ""); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 2, marginTop: 18 }}>
+                  <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>＋ ADD FRIEND</Text>
+                </Pressable>
+              )
             )}
             <Text style={{ color: C.muted, fontSize: 9, fontFamily: F.mono, marginTop: 16 }}>TAP OUTSIDE TO CLOSE</Text>
           </Pressable>
