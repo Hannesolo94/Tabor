@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Image, TextInput, ActivityIndicator, FlatList } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { View, Text, Pressable, ScrollView, Animated, Image, TextInput, ActivityIndicator, FlatList, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
 import { useTabBar } from "@/lib/tabbar";
 import { supabase } from "@/lib/supabase";
 import { todayKey } from "@/lib/quests";
-import { listExercises, generateProgram, getRoutines, MUSCLE_GROUPS, getTabataPresets, saveTabataPreset, deleteTabataPreset, type Exercise, type Routine, type TabataPreset } from "@/lib/fitness";
+import { listExercises, generateProgram, getRoutines, renameRoutine, duplicateRoutine, deleteRoutine, moveRoutine, MUSCLE_GROUPS, getTabataPresets, saveTabataPreset, deleteTabataPreset, type Exercise, type Routine, type TabataPreset } from "@/lib/fitness";
 import { C, F } from "@/lib/theme";
 
 const GOALS = [{ v: "strength", l: "Strength" }, { v: "muscle", l: "Muscle" }, { v: "fatloss", l: "Fat loss" }, { v: "endurance", l: "Endurance" }];
@@ -65,9 +65,13 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
   const [goal, setGoal] = useState("muscle");
   const [equip, setEquip] = useState("full");
   const [days, setDays] = useState(3);
+  const [renaming, setRenaming] = useState<Routine | null>(null);
+  const [renameText, setRenameText] = useState("");
 
   async function load() { if (userId) setRoutines(await getRoutines(userId)); setLoading(false); }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
+  // re-pull when returning to this screen (e.g. after making a routine from an exercise)
+  useFocusEffect(useCallback(() => { if (userId) getRoutines(userId).then(setRoutines); }, [userId]));
   // pre-fill from onboarding answers
   useEffect(() => {
     if (!profile) return;
@@ -84,9 +88,50 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
     setBusy(false);
   }
 
+  function manage(r: Routine) {
+    Alert.alert(r.name, undefined, [
+      { text: "Rename", onPress: () => { setRenameText(r.name); setRenaming(r); } },
+      { text: "Duplicate", onPress: async () => { if (userId) { await duplicateRoutine(userId, r.id); load(); } } },
+      { text: "Delete", style: "destructive", onPress: () => Alert.alert("Delete routine?", r.name, [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: async () => { await deleteRoutine(r.id); load(); } }]) },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+  async function reorder(section: Routine[], index: number, dir: -1 | 1) {
+    const j = index + dir;
+    if (j < 0 || j >= section.length) return;
+    const next = [...section];
+    [next[index], next[j]] = [next[j], next[index]];
+    await moveRoutine(next.map((r) => r.id));
+    load();
+  }
+  async function saveRename() {
+    if (renaming && renameText.trim()) { await renameRoutine(renaming.id, renameText.trim()); setRenaming(null); load(); }
+  }
+
   if (loading) return <ActivityIndicator color={C.gold} style={{ marginTop: 40 }} />;
 
+  const generated = routines.filter((r) => r.generated);
+  const custom = routines.filter((r) => !r.generated);
+  const routineCard = (r: Routine, section: Routine[], index: number) => (
+    <View key={r.id} style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+      <Pressable onPress={() => router.push(`/routine/${r.id}`)} onLongPress={() => manage(r)} delayLongPress={300} style={{ flex: 1, borderWidth: 1, borderColor: r.generated ? C.line : C.gold, backgroundColor: C.surface2, padding: 16, borderRadius: 2, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: C.ivory, fontSize: 16, fontFamily: F.headMid }}>{r.name}</Text>
+          <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 3 }}>{(r.focus || "").toUpperCase()}</Text>
+        </View>
+        <Text style={{ color: C.muted, fontSize: 8, fontFamily: F.mono }}>HOLD ⋯</Text>
+      </Pressable>
+      {section.length > 1 && (
+        <View style={{ marginLeft: 8, alignItems: "center" }}>
+          <Pressable onPress={() => reorder(section, index, -1)} hitSlop={8} disabled={index === 0}><Text style={{ color: index === 0 ? C.line : C.gold, fontSize: 15 }}>▲</Text></Pressable>
+          <Pressable onPress={() => reorder(section, index, 1)} hitSlop={8} disabled={index === section.length - 1}><Text style={{ color: index === section.length - 1 ? C.line : C.gold, fontSize: 15 }}>▼</Text></Pressable>
+        </View>
+      )}
+    </View>
+  );
+
   return (
+    <>
     <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
       <View style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, borderRadius: 2, marginBottom: 18 }}>
         <Text style={{ color: C.ivory, fontSize: 14, fontFamily: F.headMid, marginBottom: 10 }}>Tune your program</Text>
@@ -105,23 +150,37 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
         </Pressable>
       </View>
 
-      {routines.length === 0 ? (
-        <Text style={{ color: C.muted, fontSize: 14, fontFamily: F.body }}>No program yet. Set your goal above and forge one. You can also build custom routines from the Library.</Text>
-      ) : (
+      {routines.length === 0 && (
+        <Text style={{ color: C.muted, fontSize: 14, fontFamily: F.body }}>No program yet. Set your goal above and forge one, or build a custom routine from the Library.</Text>
+      )}
+      {generated.length > 0 && (
         <>
-          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono, marginBottom: 10 }}>YOUR PROGRAM · {routines.length} DAYS</Text>
-          {routines.map((r) => (
-            <Pressable key={r.id} onPress={() => router.push(`/routine/${r.id}`)} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, borderRadius: 2, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <View>
-                <Text style={{ color: C.ivory, fontSize: 16, fontFamily: F.headMid }}>{r.name}</Text>
-                <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 3 }}>{(r.focus || "").toUpperCase()}{r.generated ? "" : " · CUSTOM"}</Text>
-              </View>
-              <Text style={{ color: C.gold, fontSize: 18 }}>›</Text>
-            </Pressable>
-          ))}
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono, marginBottom: 4 }}>YOUR PROGRAM · {generated.length} {generated.length === 1 ? "DAY" : "DAYS"}</Text>
+          <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.body, marginBottom: 10 }}>Generated for you. Regenerate above, or hold a card to rename/duplicate/delete.</Text>
+          {generated.map((r, i) => routineCard(r, generated, i))}
+        </>
+      )}
+      {custom.length > 0 && (
+        <>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono, marginTop: generated.length ? 24 : 0, marginBottom: 4 }}>MY ROUTINES · {custom.length}</Text>
+          <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.body, marginBottom: 10 }}>Built by you (gold border). Tap to open. Hold to rename, duplicate, or delete. Arrows reorder.</Text>
+          {custom.map((r, i) => routineCard(r, custom, i))}
         </>
       )}
     </ScrollView>
+    <Modal visible={!!renaming} transparent animationType="fade" onRequestClose={() => setRenaming(null)}>
+      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.82)", justifyContent: "center", padding: 30 }}>
+        <View style={{ backgroundColor: C.surface2, borderWidth: 1, borderColor: C.gold, padding: 20, borderRadius: 3 }}>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginBottom: 10 }}>RENAME ROUTINE</Text>
+          <TextInput value={renameText} onChangeText={setRenameText} autoFocus style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 11, borderRadius: 2, fontFamily: F.body, fontSize: 16 }} />
+          <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 18, marginTop: 16 }}>
+            <Pressable onPress={() => setRenaming(null)}><Text style={{ color: C.muted, fontFamily: F.bodyMid }}>Cancel</Text></Pressable>
+            <Pressable onPress={saveRename}><Text style={{ color: C.gold, fontFamily: F.bodyMid }}>Save</Text></Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 

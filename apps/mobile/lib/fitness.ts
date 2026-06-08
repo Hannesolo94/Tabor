@@ -143,6 +143,22 @@ export async function addExerciseToRoutine(routineId: string, exerciseId: string
 export async function deleteRoutine(routineId: string): Promise<void> {
   await supabase.from("routines").delete().eq("id", routineId);
 }
+export async function renameRoutine(routineId: string, name: string): Promise<void> {
+  await supabase.from("routines").update({ name }).eq("id", routineId);
+}
+/** Copy a routine and all its exercises into a new custom routine. */
+export async function duplicateRoutine(userId: string, routineId: string): Promise<string | null> {
+  const { data: orig } = await supabase.from("routines").select("name, focus").eq("id", routineId).maybeSingle();
+  const { data: nr } = await supabase.from("routines").insert({ user_id: userId, name: `${orig?.name ?? "Routine"} copy`, focus: orig?.focus ?? "Custom", generated: false }).select("id").single();
+  if (!nr) return null;
+  const ex = await getRoutineExercises(routineId);
+  if (ex.length) await supabase.from("routine_exercises").insert(ex.map((e, j) => ({ routine_id: nr.id, exercise_id: e.exercise_id, sets: e.sets, reps: e.reps, rest: e.rest, sort: j })));
+  return nr.id;
+}
+/** Persist a new order for a set of routines (ids in the desired order). */
+export async function moveRoutine(orderedIds: string[]): Promise<void> {
+  await Promise.all(orderedIds.map((id, i) => supabase.from("routines").update({ sort: i }).eq("id", id)));
+}
 
 export interface WorkoutRow { id: string; name: string; mins: number | null; day: string; created_at: string }
 export interface PR { lift: string; value: number }
