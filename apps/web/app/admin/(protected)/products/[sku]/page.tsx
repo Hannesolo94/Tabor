@@ -48,10 +48,14 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
         <Link href={`/product/${data.sku}`} target="_blank" style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.12em", textDecoration: "none" }}>VIEW ON SITE ↗</Link>
       </div>
       <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", margin: "16px 0 6px" }}>[ EDIT ]</div>
-      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 28, color: "#E8E2D5", margin: "0 0 24px" }}>{data.name}</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+        <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 28, color: "#E8E2D5", margin: 0 }}>{data.name}</h1>
+        <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.1em", padding: "4px 9px", borderRadius: 8, color: data.status === "live" ? "#5FB07A" : "#9A948A", border: `1px solid ${data.status === "live" ? "rgba(95,176,122,0.4)" : "rgba(255,255,255,0.12)"}`, background: data.status === "live" ? "rgba(95,176,122,0.08)" : "transparent" }}>{(data.status ?? "draft") === "live" ? "ACTIVE" : "DRAFT"}</span>
+      </div>
 
       <ProductForm product={product} />
 
+      <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#E8E2D5", margin: "30px 0 14px" }}>Media</div>
       <MediaManager sku={data.sku} printfulId={data.printful_id} media={media} />
 
       {/* delete */}
