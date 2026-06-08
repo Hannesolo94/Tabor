@@ -191,16 +191,27 @@ export async function deleteTabataPreset(id: string): Promise<void> {
 }
 
 // ---- Progress tracking: per-set logging + chart series ----
-export interface SetEntry { exercise_id: string; exercise_name: string; set_index: number; reps: number; weight: number }
+export type InputKind = "reps_weight" | "reps" | "time_distance" | "time";
+/** What to ask the user to log for an exercise: weighted strength, bodyweight reps,
+ *  cardio (time + distance), or a timed hold. */
+export function inputKind(category?: string | null, equipment?: string | null): InputKind {
+  const cat = (category || "").toLowerCase();
+  const eq = (equipment || "").toLowerCase();
+  if (cat === "cardio") return "time_distance";
+  if (cat === "stretching") return "time";
+  if (eq === "body only" || eq === "bands" || eq === "foam roll") return "reps";
+  return "reps_weight";
+}
+export interface SetEntry { exercise_id: string; exercise_name: string; set_index: number; reps: number; weight: number; duration_sec?: number; distance_m?: number }
 export interface DayPoint { day: string; value: number }
 const dayAgo = (n: number) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
 
 export async function logWorkout(userId: string, name: string, mins: number, sets: SetEntry[], day: string): Promise<void> {
-  const done = sets.filter((s) => s.reps > 0);
-  const volume = done.reduce((a, s) => a + s.reps * (s.weight || 0), 0);
+  const done = sets.filter((s) => s.reps > 0 || (s.duration_sec ?? 0) > 0 || (s.distance_m ?? 0) > 0);
+  const volume = done.reduce((a, s) => a + (s.reps || 0) * (s.weight || 0), 0);
   const { data: w } = await supabase.from("workouts").insert({ user_id: userId, name, mins, day, meta: { sets: done.length, volume } }).select("id").maybeSingle();
   if (!done.length) return;
-  await supabase.from("set_logs").insert(done.map((s) => ({ user_id: userId, workout_id: w?.id, exercise_id: s.exercise_id, exercise_name: s.exercise_name, set_index: s.set_index, reps: s.reps, weight: s.weight, day })));
+  await supabase.from("set_logs").insert(done.map((s) => ({ user_id: userId, workout_id: w?.id, exercise_id: s.exercise_id, exercise_name: s.exercise_name, set_index: s.set_index, reps: s.reps || null, weight: s.weight || null, duration_sec: s.duration_sec ?? null, distance_m: s.distance_m ?? null, day })));
   // bump PRs with best estimated 1RM (Epley) per lift this session
   const best: Record<string, number> = {};
   for (const s of done) { if (!s.weight) continue; const e = Math.round(s.weight * (1 + s.reps / 30)); if (e > (best[s.exercise_name] || 0)) best[s.exercise_name] = e; }
