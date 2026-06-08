@@ -53,6 +53,12 @@ export default function Status() {
           <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head, marginTop: 12 }}>{profile?.name || "Brother"}</Text>
           <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 3, marginTop: 2 }}>{prog.rank.toUpperCase()}</Text>
           {profile?.handle ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>@{String(profile.handle)}</Text> : null}
+          {(() => { const verified = !!session?.user.email_confirmed_at; return (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 6, borderWidth: 1, borderColor: verified ? C.green : C.line, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 }}>
+              <Text style={{ color: verified ? C.green : C.muted, fontSize: 10 }}>{verified ? "✓" : "○"}</Text>
+              <Text style={{ color: verified ? C.green : C.muted, fontSize: 9, letterSpacing: 1.5, fontFamily: F.mono }}>{verified ? "VERIFIED" : "UNVERIFIED"}</Text>
+            </View>
+          ); })()}
         </View>
 
         <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>

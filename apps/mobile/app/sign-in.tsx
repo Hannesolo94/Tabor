@@ -6,7 +6,7 @@ import { Seal } from "@/components/Seal";
 import { C, F } from "@/lib/theme";
 
 export default function SignIn() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resendConfirmation } = useAuth();
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,13 +14,27 @@ export default function SignIn() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [needsConfirm, setNeedsConfirm] = useState(false);
 
   async function submit() {
-    setBusy(true); setError(""); setNotice("");
+    setBusy(true); setError(""); setNotice(""); setNeedsConfirm(false);
     const res = mode === "in" ? await signIn(email, password) : await signUp(email, password, name);
-    if (res.error) setError(res.error);
-    else if (mode === "up") setNotice("Account forged. Check your email to confirm, then sign in.");
+    if (res.error) {
+      if (/confirm/i.test(res.error)) { setNeedsConfirm(true); setError("Confirm your email to enter. Check your inbox."); }
+      else setError(res.error);
+    } else if (mode === "up") {
+      // strict-but-warm: send them to sign-in once they've confirmed
+      setMode("in"); setPassword("");
+      setNotice("Account forged. We've sent a confirmation link to your email. Confirm it, then sign in here.");
+    }
     setBusy(false);
+  }
+
+  async function resend() {
+    setBusy(true); setError(""); setNotice("");
+    const { error: e } = await resendConfirmation(email);
+    setBusy(false);
+    if (e) setError(e); else { setNotice("Confirmation email sent. Check your inbox."); setNeedsConfirm(false); }
   }
 
   return (
@@ -45,6 +59,11 @@ export default function SignIn() {
 
           {!!error && <Text style={{ color: C.red, fontSize: 12, marginTop: 4 }}>{error}</Text>}
           {!!notice && <Text style={{ color: C.green, fontSize: 12, marginTop: 4 }}>{notice}</Text>}
+          {needsConfirm && (
+            <Pressable onPress={resend} disabled={busy} style={{ marginTop: 8, alignItems: "center" }}>
+              <Text style={{ color: C.gold, fontSize: 13, fontFamily: F.bodyMid, textDecorationLine: "underline" }}>Resend confirmation email</Text>
+            </Pressable>
+          )}
 
           <Pressable onPress={submit} disabled={busy} style={{ marginTop: 18, backgroundColor: C.gold, paddingVertical: 16, alignItems: "center", borderRadius: 2, opacity: busy ? 0.6 : 1 }}>
             {busy ? <ActivityIndicator color={C.black} /> : <Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{mode === "in" ? "ENTER" : "AWAKEN"}</Text>}

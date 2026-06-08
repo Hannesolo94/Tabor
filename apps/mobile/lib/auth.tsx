@@ -9,6 +9,7 @@ interface AuthCtx {
   refresh: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error?: string }>;
+  resendConfirmation: (email: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 }
 
@@ -50,9 +51,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: error?.message };
   };
 
+  const resendConfirmation: AuthCtx["resendConfirmation"] = async (email) => {
+    const { error } = await supabase.auth.resend({ type: "signup", email: email.trim(), options: { emailRedirectTo: "https://tabor.quest/auth/confirmed" } });
+    return { error: error?.message };
+  };
+
   const signOut = async () => { await supabase.auth.signOut(); };
 
-  return <Ctx.Provider value={{ session, loading, onboarded, refresh, signIn, signUp, signOut }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ session, loading, onboarded, refresh, signIn, signUp, resendConfirmation, signOut }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {
