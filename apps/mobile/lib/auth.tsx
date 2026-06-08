@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp: AuthCtx["signUp"] = async (email, password, name) => {
-    const { error } = await supabase.auth.signUp({ email: email.trim(), password, options: { data: { name } } });
+    const { error } = await supabase.auth.signUp({ email: email.trim(), password, options: { data: { name }, emailRedirectTo: "https://tabor.quest/auth/confirmed" } });
     return { error: error?.message };
   };
 
