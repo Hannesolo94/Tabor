@@ -40,6 +40,8 @@ export interface Dashboard {
   lowStock: { sku: string; name: string; inventory: number }[];
   // revenue + orders split by region (alongside the overall totals above)
   regions: { region: string; revenue: number; orders: number }[];
+  // period-over-period % change vs the previous equal window
+  deltas: { revenue: number; orders: number; sessions: number; conversion: number; aov: number };
 }
 
 const DAY = 86400000;
@@ -157,7 +159,28 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   const sources = (stats.sources ?? []).slice(0, 6);
   const lowStock = products.filter((p) => p.track_inventory && (p.inventory ?? 0) <= 3).map((p) => ({ sku: p.sku, name: p.name, inventory: p.inventory ?? 0 }));
 
+  // previous equal-length window -> period-over-period deltas (Shopify-style)
+  const prevFromIso = new Date(from.getTime() - days * DAY).toISOString();
+  const [prevOrdersRes, prevStatsRes] = await Promise.all([
+    sb.from("orders").select("total, status").gte("created_at", prevFromIso).lt("created_at", fromIso),
+    sb.rpc("dashboard_event_stats", { p_from: prevFromIso, p_to: fromIso }),
+  ]);
+  const prevOrders = (prevOrdersRes.data ?? []).filter((o) => o.status !== "cancelled");
+  const prevRevenue = prevOrders.reduce((a, o) => a + (Number(o.total) || 0), 0);
+  const prevOrderCount = prevOrders.length;
+  const prevSessions = ((prevStatsRes.data ?? {}) as { sessions?: number }).sessions ?? 0;
+  const prevConversion = prevSessions ? (prevOrderCount / prevSessions) * 100 : 0;
+  const pct = (cur: number, prev: number) => (prev > 0 ? ((cur - prev) / prev) * 100 : cur > 0 ? 100 : 0);
+  const deltas = {
+    revenue: pct(revenue, prevRevenue),
+    orders: pct(orderCount, prevOrderCount),
+    sessions: pct(sessionsCount, prevSessions),
+    conversion: pct(conversion, prevConversion),
+    aov: pct(aov, prevOrderCount ? prevRevenue / prevOrderCount : 0),
+  };
+
   return {
+    deltas,
     rangeKey,
     fromLabel: labels[0]!,
     toLabel: labels[labels.length - 1]!,

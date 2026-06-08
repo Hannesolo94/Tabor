@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getDashboard, type RangeKey } from "@/lib/analytics-db";
 import { supabaseServer } from "@/lib/supabase/server";
 import { BarList, Funnel, LineChart } from "@/components/admin/Charts";
+import { Greeting } from "@/components/admin/Greeting";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -17,12 +18,33 @@ const RANGES: { key: RangeKey; label: string }[] = [
   { key: "90d", label: "90 days" },
 ];
 
-function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
+const UP = "#5FB07A", DOWN = "#C97A7A";
+function Spark({ values, up }: { values: number[]; up: boolean }) {
+  const w = 60, h = 22;
+  if (values.length < 2 || values.every((v) => v === 0)) return null;
+  const max = Math.max(...values), min = Math.min(...values), range = max - min || 1;
+  const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - 2 - ((v - min) / range) * (h - 4)}`).join(" ");
+  return (
+    <svg width={w} height={h} style={{ overflow: "visible" }}>
+      <polyline points={pts} fill="none" stroke={up ? UP : DOWN} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />
+    </svg>
+  );
+}
+function Stat({ label, value, sub, accent, delta, spark }: { label: string; value: string; sub?: string; accent?: boolean; delta?: number; spark?: number[] }) {
+  const up = (delta ?? 0) >= 0;
   return (
     <div className="admin-card" style={{ background: "linear-gradient(160deg, rgba(40,40,50,0.5), rgba(16,16,22,0.42))", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, boxShadow: "0 1px 0 rgba(255,255,255,0.05) inset, 0 16px 30px -22px rgba(0,0,0,0.9)", padding: "18px 20px" }}>
-      <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase" }}>{label}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase" }}>{label}</div>
+        {spark ? <Spark values={spark} up={up} /> : null}
+      </div>
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: accent ? GOLD : "#E8E2D5", lineHeight: 1.1, marginTop: 6 }}>{value}</div>
-      {sub && <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.08em", marginTop: 2 }}>{sub}</div>}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+        {delta !== undefined && Number.isFinite(delta) ? (
+          <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, color: up ? UP : DOWN }}>{up ? "▲" : "▼"} {Math.abs(delta).toFixed(0)}%</span>
+        ) : null}
+        {sub && <span style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.08em" }}>{sub}</span>}
+      </div>
     </div>
   );
 }
@@ -56,6 +78,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
         <div>
           <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ {d.fromLabel.slice(5)} → {d.toLabel.slice(5)} ]</div>
           <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Dashboard</h1>
+          <div style={{ fontFamily: BODY, fontSize: 13.5, color: "#9A948A", marginTop: 5 }}><Greeting />. Here is how the store and the brotherhood are moving.</div>
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ display: "flex", gap: 6 }}>
@@ -75,11 +98,11 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
 
       {/* summary */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 12 }}>
-        <Stat label="Revenue" value={money(d.revenue)} sub={d.orderCount ? `${d.orderCount} orders` : "awaiting checkout"} accent />
-        <Stat label="Orders" value={String(d.orderCount)} sub={`AOV ${money(d.aov)}`} />
-        <Stat label="Conversion" value={`${d.conversion.toFixed(1)}%`} sub="orders / sessions" />
-        <Stat label="Sessions" value={String(d.sessions)} sub={`${d.visitors} visitors`} />
-        <Stat label="Pageviews" value={String(d.pageviews)} />
+        <Stat label="Revenue" value={money(d.revenue)} sub={d.orderCount ? `${d.orderCount} orders` : "awaiting checkout"} accent delta={d.deltas.revenue} spark={d.series.revenue} />
+        <Stat label="Orders" value={String(d.orderCount)} sub={`AOV ${money(d.aov)}`} delta={d.deltas.orders} spark={d.series.orders} />
+        <Stat label="Conversion" value={`${d.conversion.toFixed(1)}%`} sub="orders / sessions" delta={d.deltas.conversion} />
+        <Stat label="Sessions" value={String(d.sessions)} sub={`${d.visitors} visitors`} delta={d.deltas.sessions} spark={d.series.sessions} />
+        <Stat label="Pageviews" value={String(d.pageviews)} spark={d.series.sessions} />
         <Stat label="Gross margin" value={d.revenue ? `${d.marginPct.toFixed(0)}%` : "—"} sub={d.revenue ? money(d.margin) : "set product costs"} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 26 }}>

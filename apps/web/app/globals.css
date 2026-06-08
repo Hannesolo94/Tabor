@@ -172,3 +172,24 @@ button {
   transform: translateY(-2px);
   border-color: rgba(201, 169, 97, 0.28);
 }
+/* admin sidebar — collapsible group header (drop-expanding menus) */
+.admin-nav-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  color: #c9a961;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 7px 10px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.admin-nav-group:hover {
+  background: rgba(201, 169, 97, 0.06);
+}

@@ -73,8 +73,10 @@ export function AdminShell({ email, name, role, children }: { email?: string; na
         </div>
       </aside>
 
-      {/* content */}
-      <div style={{ padding: "36px 44px", maxWidth: 1240, width: "100%" }}>{children}</div>
+      {/* content — centered column (Shopify-style), with margin on both sides */}
+      <div style={{ padding: "36px 32px", display: "flex", justifyContent: "center" }}>
+        <div style={{ maxWidth: 1180, width: "100%" }}>{children}</div>
+      </div>
     </div>
   );
 }
