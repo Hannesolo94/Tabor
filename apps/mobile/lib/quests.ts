@@ -50,7 +50,9 @@ export async function sealDay(userId: string): Promise<void> {
   const { data } = await supabase.from("profiles").select("streak, best_streak, last_active").eq("user_id", userId).maybeSingle();
   const last = data?.last_active ? String(data.last_active).slice(0, 10) : null;
   if (last === day) return; // already counted today
-  const streak = (Number(data?.streak) || 0) + 1;
+  const yesterday = todayKey(new Date(Date.now() - 86400000));
+  // continue the streak only if yesterday was sealed; otherwise it broke -> reset to 1
+  const streak = last === yesterday ? (Number(data?.streak) || 0) + 1 : 1;
   const best = Math.max(Number(data?.best_streak) || 0, streak);
   await supabase.from("profiles").update({ streak, best_streak: best, last_active: new Date().toISOString() }).eq("user_id", userId);
 }

@@ -5,9 +5,14 @@ import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function requireAdmin(): Promise<void> {
+  if (!(await isCallerAdmin())) redirect("/admin/moderation");
+}
+
+/** Boolean check for use inside server actions (which redirect() shouldn't gate). */
+export async function isCallerAdmin(): Promise<boolean> {
   const sb = await supabaseServer();
   const { data: { user } } = await sb.auth.getUser();
-  if (!user) redirect("/admin/login");
+  if (!user) return false;
   const { data } = await sb.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
-  if (data?.role !== "admin") redirect("/admin/moderation");
+  return data?.role === "admin";
 }

@@ -45,7 +45,7 @@ export async function resolveBarcode(raw: string): Promise<Food | null> {
         salt_100g: Number(n["salt_100g"]) || null,
         image_url: p.image_front_small_url || null,
       };
-      supabase.from("foods_off_cache").upsert(row).then(() => {}); // fire-and-forget cache
+      supabase.from("foods_off_cache").upsert(row).then(() => {}, () => {}); // fire-and-forget cache
       return { source: "off", ...row };
     }
   } catch { /* offline / OFF down */ }

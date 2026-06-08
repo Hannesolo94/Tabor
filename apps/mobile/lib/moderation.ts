@@ -27,5 +27,5 @@ export function sendErrorMessage(err?: string): string | null {
   if (err.includes("rate_limited")) return "Slow down, brother. You're sending too fast.";
   if (err.includes("account_suspended")) return "Your account is suspended from posting.";
   if (err.includes("account_silenced")) return "You've been silenced pending review for breaking the guidelines.";
-  return null;
+  return "Couldn't send. Please try again."; // surface any other failure instead of failing silently
 }

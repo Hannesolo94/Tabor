@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View, Text, Pressable, TextInput, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -18,6 +18,7 @@ export default function Scan() {
   const userId = session?.user.id;
   const [permission, requestPermission] = useCameraPermissions();
   const [locked, setLocked] = useState(false);
+  const lockRef = useRef(false); // synchronous guard against multi-frame double-fire
   const [busy, setBusy] = useState(false);
   const [food, setFood] = useState<Food | null>(null);
   const [notFound, setNotFound] = useState<string | null>(null);
@@ -27,6 +28,8 @@ export default function Scan() {
   const [m, setM] = useState({ name: "", kcal: "", protein: "", carb: "", fat: "" });
 
   async function onScan(code: string) {
+    if (lockRef.current) return;
+    lockRef.current = true;
     setLocked(true); setBusy(true);
     const f = await resolveBarcode(code);
     setBusy(false);
@@ -43,7 +46,7 @@ export default function Scan() {
     const f = await addCustomFood(userId, { name: m.name, kcal_100g: Number(m.kcal) || 0, protein_100g: Number(m.protein) || undefined, carb_100g: Number(m.carb) || undefined, fat_100g: Number(m.fat) || undefined, barcode: notFound || undefined });
     if (f) { setFood(f); setQty("100"); setNotFound(null); }
   }
-  function reset() { setFood(null); setNotFound(null); setLocked(false); }
+  function reset() { setFood(null); setNotFound(null); setLocked(false); lockRef.current = false; }
 
   if (!permission) return <View style={{ flex: 1, backgroundColor: C.black }} />;
   if (!permission.granted) return (

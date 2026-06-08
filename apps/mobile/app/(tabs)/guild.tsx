@@ -72,9 +72,10 @@ export default function Guild() {
     const optimistic: Msg = { id: `tmp-${Date.now()}`, body, author_id: userId, created_at: new Date().toISOString() };
     setMessages((prev) => [...prev, optimistic]);
     setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 60);
-    const { error } = await sendMessage(active.id, guildId, userId, body);
+    const { error, hidden } = await sendMessage(active.id, guildId, userId, body);
     const msg = sendErrorMessage(error);
     if (msg) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Not sent", msg); }
+    else if (hidden) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Removed", "That message broke the guidelines and was removed. You have been silenced pending review."); }
   }
 
   async function selectGuild(g: GuildRow) {

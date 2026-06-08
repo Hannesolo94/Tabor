@@ -40,10 +40,23 @@ export async function middleware(request: NextRequest) {
       });
       const { data: { user } } = await supabase.auth.getUser();
       const isPublicAdmin = PUBLIC_ADMIN_PATHS.some((p) => path.startsWith(p));
-      if (!isPublicAdmin && !user) {
-        const redirect = request.nextUrl.clone();
-        redirect.pathname = "/admin/login";
-        return NextResponse.redirect(redirect);
+      if (!isPublicAdmin) {
+        if (!user) {
+          const redirect = request.nextUrl.clone();
+          redirect.pathname = "/admin/login";
+          return NextResponse.redirect(redirect);
+        }
+        // role-aware gating: moderators may only reach the dashboard + community tools
+        const { data: prof } = await supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
+        const role = prof?.role;
+        if (role !== "admin" && role !== "moderator") {
+          const r = request.nextUrl.clone(); r.pathname = "/admin/login"; return NextResponse.redirect(r);
+        }
+        if (role === "moderator") {
+          const MOD_PREFIXES = ["/admin/community", "/admin/moderation", "/admin/tickets", "/admin/giveaways"];
+          const allowed = path === "/admin" || MOD_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
+          if (!allowed) { const r = request.nextUrl.clone(); r.pathname = "/admin/moderation"; return NextResponse.redirect(r); }
+        }
       }
     }
   }

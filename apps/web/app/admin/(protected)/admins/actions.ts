@@ -3,11 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { isCallerAdmin } from "@/lib/admin-guard";
 import { logAudit } from "@/lib/audit";
 
 /** Grant admin to an existing account by email. The person must have signed up
  *  first (app or web) so they have a profile + a password to log in with. */
 export async function grantAdmin(formData: FormData): Promise<void> {
+  if (!(await isCallerAdmin())) return; // only admins may grant roles
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const role = String(formData.get("role") ?? "admin");
   if (!email.includes("@") || !["admin", "moderator"].includes(role)) return;
@@ -21,6 +23,7 @@ export async function grantAdmin(formData: FormData): Promise<void> {
 
 /** Revoke admin. Safeguards: cannot demote yourself, and never leave zero admins. */
 export async function revokeAdmin(formData: FormData): Promise<void> {
+  if (!(await isCallerAdmin())) return; // only admins may revoke roles
   const userId = String(formData.get("user_id") ?? "");
   if (!userId) return;
   const sb = await supabaseServer();

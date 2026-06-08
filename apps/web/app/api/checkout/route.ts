@@ -89,11 +89,12 @@ export async function POST(req: Request) {
 
   // order confirmation email (branded, best-effort — never blocks the order)
   try {
-    const itemRows = lines.map((l) => `<tr><td style="padding:6px 0;color:#C3BDB1;font-family:Georgia,serif;font-size:14px">${l.name}${l.size ? ` (${l.size})` : ""} &times; ${l.qty}</td><td align="right" style="padding:6px 0;color:#E8E2D5;font-family:Georgia,serif;font-size:14px">${cur.symbol}${(l.price * l.qty).toFixed(2)}</td></tr>`).join("");
+    const esc = (s: string) => String(s ?? "").replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch] ?? ch));
+    const itemRows = lines.map((l) => `<tr><td style="padding:6px 0;color:#C3BDB1;font-family:Georgia,serif;font-size:14px">${esc(l.name)}${l.size ? ` (${esc(l.size)})` : ""} &times; ${l.qty}</td><td align="right" style="padding:6px 0;color:#E8E2D5;font-family:Georgia,serif;font-size:14px">${cur.symbol}${(l.price * l.qty).toFixed(2)}</td></tr>`).join("");
     const summary = `<table role="presentation" width="100%" style="border-collapse:collapse;margin:6px 0">${itemRows}<tr><td style="padding-top:10px;border-top:1px solid rgba(201,169,97,0.2);color:#8A847A;font-family:Georgia,serif;font-size:13px">TOTAL</td><td align="right" style="padding-top:10px;border-top:1px solid rgba(201,169,97,0.2);color:#C9A961;font-weight:bold;font-family:Georgia,serif;font-size:15px">${cur.symbol}${total.toFixed(2)}</td></tr></table>`;
     const html = emailShell(
       "Order received",
-      `Thank you, ${shipping.name}. Your order is in.<br/><br/>${summary}<br/>${pay.message ?? "We will be in touch with the next steps."}`,
+      `Thank you, ${esc(shipping.name)}. Your order is in.<br/><br/>${summary}<br/>${pay.message ?? "We will be in touch with the next steps."}`,
       { eyebrow: "[ ORDER CONFIRMED ]", preheader: `Your TABOR order — ${cur.symbol}${total.toFixed(2)}` },
     );
     await sendEmail(email, "TABOR: order received", html);
