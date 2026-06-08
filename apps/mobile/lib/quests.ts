@@ -5,6 +5,7 @@
 import { supabase } from "./supabase";
 import { levelFromXp } from "./game";
 import { generateDisciplineQuests, traditionOf, type Tradition } from "./disciplines";
+import { liturgicalContext } from "./liturgical";
 
 // core quests gate the day-seal; everything else is a bonus discipline
 export const CORE_KEYS = ["word", "body", "brother"];
@@ -190,7 +191,9 @@ export async function loadToday(userId: string): Promise<Quest[]> {
       const { data: ng } = await supabase.from("nutrition_goals").select("weight_kg, protein_target").eq("user_id", userId).maybeSingle();
       weight_kg = (ng?.weight_kg as number) ?? null; protein_target = (ng?.protein_target as number) ?? null;
     }
-    disc = generateDisciplineQuests({ denomination: (prof as { denomination?: string })?.denomination, goals: (prof as Gen)?.goals, disciplines: prefs, weight_kg, protein_target }, dayIndex(), new Date().getDay());
+    const denom = (prof as { denomination?: string })?.denomination;
+    const lit = liturgicalContext(new Date(), traditionOf(denom));
+    disc = generateDisciplineQuests({ denomination: denom, goals: (prof as Gen)?.goals, disciplines: prefs, weight_kg, protein_target }, dayIndex(), new Date().getDay(), lit.fasting ? lit.note : null);
   }
   const rows = [...core, ...disc].map((q) => ({ ...q, user_id: userId, day, done: false, progress: 0 }));
   const ins = await supabase.from("quests").insert(rows).select(SEL);

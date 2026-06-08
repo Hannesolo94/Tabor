@@ -122,7 +122,7 @@ function hydration(weightKg?: number | null, isFat?: boolean): DQuest {
 
 /** Bonus discipline quests for the day, based on enabled packs + denomination.
  *  weekday: 0 = Sunday .. 6 = Saturday (for Sabbath-aware worship). */
-export function generateDisciplineQuests(p: DGen, dayIdx: number, weekday: number): DQuest[] {
+export function generateDisciplineQuests(p: DGen, dayIdx: number, weekday: number, fastNote?: string | null): DQuest[] {
   const prefs = (p.disciplines && typeof p.disciplines === "object" ? p.disciplines : {}) as DisciplinePrefs;
   const trad = traditionOf(p.denomination);
   const isFat = (p.goals || []).some((g) => /fat|lean|loss/.test(String(g).toLowerCase()));
@@ -139,7 +139,8 @@ export function generateDisciplineQuests(p: DGen, dayIdx: number, weekday: numbe
     let title: string;
     if (f.type === "intermittent") title = `Hold your fast — eating window ${f.window || "16:8"}`;
     else if (f.type === "custom") title = f.note ? `Fast: ${f.note}` : "Keep your fast today";
-    else { const rel = RELIGIOUS_FAST[trad]; title = rel[dayIdx % rel.length]; }
+    // religious fasters follow the liturgical calendar (Lent / Great Lent / Nativity / Dormition)
+    else title = fastNote || RELIGIOUS_FAST[trad][dayIdx % RELIGIOUS_FAST[trad].length];
     out.push({ quest_key: "fast", pillar: "FUEL", title, sub: "Deny the flesh, feed the spirit", stat: "WIS", xp: 25, goal: 1 });
   }
   if (prefs.fuel) {
