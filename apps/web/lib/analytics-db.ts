@@ -45,6 +45,11 @@ export interface Dashboard {
 }
 
 const DAY = 86400000;
+// Cross-currency dashboard aggregates are normalized to USD. ZAR orders are
+// converted at this approximate rate (region cards still show native currency).
+// TODO: make configurable via app_settings / a live FX feed.
+const ZAR_USD = 0.054;
+const toUsd = (total: number, currency?: string | null) => (currency === "ZAR" ? total * ZAR_USD : total);
 function dayKey(d: Date) {
   return d.toISOString().slice(0, 10);
 }
@@ -76,8 +81,8 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
 
   const [statsRes, ordersRes, allOrdersRes, productsRes] = await Promise.all([
     sb.rpc("dashboard_event_stats", { p_from: fromIso, p_to: toIso }), // aggregated in Postgres
-    sb.from("orders").select("total, items, user_id, created_at, status, region").gte("created_at", fromIso).lt("created_at", toIso),
-    sb.from("orders").select("total, user_id").limit(10000), // safety cap for all-time LTV
+    sb.from("orders").select("total, items, user_id, created_at, status, region, currency").gte("created_at", fromIso).lt("created_at", toIso),
+    sb.from("orders").select("total, user_id, email, currency").limit(10000), // safety cap for all-time LTV
 
     sb.from("products").select("sku, name, category, cost, inventory, track_inventory"),
   ]);
@@ -104,16 +109,18 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   const regionAgg = new Map<string, { revenue: number; orders: number }>();
   for (const o of orders) {
     const day = dayKey(new Date(o.created_at));
-    revenue += Number(o.total) || 0;
+    const cur = (o as { currency?: string }).currency;
+    const totalUsd = toUsd(Number(o.total) || 0, cur); // normalized for cross-currency aggregates
+    revenue += totalUsd;
     const reg = (o as { region?: string }).region || "INTL";
     const ra = regionAgg.get(reg) ?? { revenue: 0, orders: 0 };
-    ra.revenue += Number(o.total) || 0; ra.orders += 1; regionAgg.set(reg, ra);
-    if (revByDay.has(day)) revByDay.set(day, revByDay.get(day)! + (Number(o.total) || 0));
+    ra.revenue += Number(o.total) || 0; ra.orders += 1; regionAgg.set(reg, ra); // region stays NATIVE currency
+    if (revByDay.has(day)) revByDay.set(day, revByDay.get(day)! + totalUsd);
     if (ordByDay.has(day)) ordByDay.set(day, ordByDay.get(day)! + 1);
     const items = (Array.isArray(o.items) ? o.items : []) as OrderItem[];
     for (const it of items) {
       const qty = Number(it.qty ?? it.quantity ?? 1) || 1;
-      const price = Number(it.price ?? 0) || 0;
+      const price = toUsd(Number(it.price ?? 0) || 0, cur); // line prices are in the order's currency
       const p = it.sku ? prodMap.get(it.sku) : undefined;
       cogs += (Number(p?.cost) || 0) * qty;
       if (it.sku) {
@@ -144,9 +151,10 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   // LTV + repeat (all-time)
   const byCustomer = new Map<string, { spend: number; orders: number }>();
   for (const o of allOrders) {
-    const k = o.user_id || "guest";
+    // key by account, else by email so distinct guests are distinct customers (not one "guest")
+    const k = o.user_id || (o as { email?: string }).email || "guest";
     const c = byCustomer.get(k) ?? { spend: 0, orders: 0 };
-    c.spend += Number(o.total) || 0; c.orders += 1; byCustomer.set(k, c);
+    c.spend += toUsd(Number(o.total) || 0, (o as { currency?: string }).currency); c.orders += 1; byCustomer.set(k, c);
   }
   const customers = [...byCustomer.values()];
   const ltv = customers.length ? customers.reduce((a, c) => a + c.spend, 0) / customers.length : 0;
@@ -162,11 +170,11 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   // previous equal-length window -> period-over-period deltas (Shopify-style)
   const prevFromIso = new Date(from.getTime() - days * DAY).toISOString();
   const [prevOrdersRes, prevStatsRes] = await Promise.all([
-    sb.from("orders").select("total, status").gte("created_at", prevFromIso).lt("created_at", fromIso),
+    sb.from("orders").select("total, status, currency").gte("created_at", prevFromIso).lt("created_at", fromIso),
     sb.rpc("dashboard_event_stats", { p_from: prevFromIso, p_to: fromIso }),
   ]);
   const prevOrders = (prevOrdersRes.data ?? []).filter((o) => o.status !== "cancelled");
-  const prevRevenue = prevOrders.reduce((a, o) => a + (Number(o.total) || 0), 0);
+  const prevRevenue = prevOrders.reduce((a, o) => a + toUsd(Number(o.total) || 0, (o as { currency?: string }).currency), 0);
   const prevOrderCount = prevOrders.length;
   const prevSessions = ((prevStatsRes.data ?? {}) as { sessions?: number }).sessions ?? 0;
   const prevConversion = prevSessions ? (prevOrderCount / prevSessions) * 100 : 0;

@@ -56,8 +56,8 @@ export function Funnel({ steps }: { steps: { label: string; value: number }[] })
   return (
     <div style={{ display: "grid", gap: 8 }}>
       {steps.map((s, i) => {
-        const pctOfTop = (s.value / top) * 100;
-        const conv = i === 0 ? 100 : steps[i - 1]!.value ? (s.value / steps[i - 1]!.value) * 100 : 0;
+        const pctOfTop = Math.min(100, (s.value / top) * 100);
+        const conv = i === 0 ? 100 : steps[i - 1]!.value ? Math.min(100, (s.value / steps[i - 1]!.value) * 100) : 0;
         return (
           <div key={i}>
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 10.5, color: "#C3BDB1", marginBottom: 3 }}>

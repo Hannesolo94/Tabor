@@ -51,14 +51,25 @@ export async function POST(req: Request) {
   let discountUsed = 0;
   const code = String(body.discountCode ?? "").trim().toUpperCase();
   if (code) {
-    const { data: d } = await admin.from("discount_codes").select("code, percent, active, usage_limit, used_count").eq("code", code).maybeSingle();
-    if (d && d.active && (!d.usage_limit || d.used_count < d.usage_limit)) {
-      discountAmount = Math.round(subtotal * (Number(d.percent) / 100) * 100) / 100;
-      discountCode = d.code;
-      discountUsed = Number(d.used_count) || 0;
-    } else {
-      return NextResponse.json({ error: "That discount code is not valid." }, { status: 400 });
+    const { data: d } = await admin.from("discount_codes")
+      .select("code, value_type, percent, amount, active, usage_limit, used_count, min_subtotal, starts_at, ends_at, once_per_email")
+      .eq("code", code).maybeSingle();
+    const reject = (msg: string) => NextResponse.json({ error: msg }, { status: 400 });
+    const nowMs = Date.now();
+    if (!d || !d.active) return reject("That discount code is not valid.");
+    if (d.starts_at && new Date(d.starts_at).getTime() > nowMs) return reject("That discount code is not active yet.");
+    if (d.ends_at && new Date(d.ends_at).getTime() < nowMs) return reject("That discount code has expired.");
+    if (d.usage_limit && Number(d.used_count) >= Number(d.usage_limit)) return reject("That discount code has reached its limit.");
+    if (d.min_subtotal && subtotal < Number(d.min_subtotal)) return reject(`This code needs a minimum subtotal of ${cur.symbol}${Number(d.min_subtotal).toFixed(2)}.`);
+    if (d.once_per_email) {
+      const { count } = await admin.from("orders").select("id", { count: "exact", head: true }).eq("discount_code", d.code).eq("email", email).neq("status", "cancelled");
+      if ((count ?? 0) > 0) return reject("You have already used this code.");
     }
+    discountAmount = d.value_type === "fixed"
+      ? Math.min(subtotal, Math.max(0, Number(d.amount) || 0))
+      : Math.round(subtotal * (Number(d.percent) / 100) * 100) / 100;
+    discountCode = d.code;
+    discountUsed = Number(d.used_count) || 0;
   }
 
   const shippingAmount = 0; // flat/free for now; real rates land with the gateway + shipping zones
