@@ -9,8 +9,8 @@ import { saveHero } from "./actions";
 import type { HeroContent } from "@/lib/content-db";
 import { GOLD, MONO, BODY } from "@/lib/ui";
 
-const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, color: "#8A847A", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 5, display: "block" };
-const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "10px 12px", width: "100%" };
+const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.13em", textTransform: "uppercase", marginBottom: 5, display: "block" };
+const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: "1px solid rgba(201,169,97,0.2)", borderRadius: 10, padding: "10px 12px", width: "100%" };
 
 export function ContentForm({ hero }: { hero: HeroContent }) {
   const [bgUrl, setBgUrl] = useState(hero.bg_url);
@@ -37,13 +37,13 @@ export function ContentForm({ hero }: { hero: HeroContent }) {
   }
 
   return (
-    <form action={saveHero} style={{ display: "grid", gap: 16, maxWidth: 760 }}>
+    <form action={saveHero} style={{ display: "grid", gap: 16 }}>
       <div><label style={lbl}>Eyebrow (small label above headline)</label><input name="eyebrow" defaultValue={hero.eyebrow} style={inp} /></div>
       <div><label style={lbl}>Headline</label><input name="headline" defaultValue={hero.headline} style={inp} /></div>
       <div><label style={lbl}>Subcopy</label><textarea name="subcopy" defaultValue={hero.subcopy} rows={3} style={{ ...inp, resize: "vertical" }} /></div>
 
       {/* background media */}
-      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 16px" }}>
+      <div style={{ border: "1px solid rgba(255,255,255,0.05)", background: "rgba(15,15,20,0.4)", borderRadius: 12, padding: "16px 16px" }}>
         <label style={lbl}>Background media (optional)</label>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <select name="bg_type" value={bgType} onChange={(e) => setBgType(e.target.value as HeroContent["bg_type"])} style={{ ...inp, width: "auto" }}>

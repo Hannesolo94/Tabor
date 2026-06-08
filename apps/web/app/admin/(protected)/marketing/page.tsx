@@ -9,11 +9,14 @@ import { BarList } from "@/components/admin/Charts";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
+const GREEN = "#5FB07A";
+
+const cardStyle: React.CSSProperties = { background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", border: "1px solid rgba(201,169,97,0.14)", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" };
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" }}>
-      <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", letterSpacing: "0.04em", marginBottom: 12 }}>{title}</div>
+    <div className="admin-card" style={cardStyle}>
+      <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", marginBottom: 12 }}>{title}</div>
       {children}
     </div>
   );
@@ -22,7 +25,7 @@ function StatusRow({ name, on, detail }: { name: string; on: boolean; detail?: s
   return (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
       <span style={{ fontFamily: BODY, fontSize: 13, color: "#C3BDB1" }}>{name}</span>
-      <span style={{ fontFamily: MONO, fontSize: 9.5, color: on ? "#7BBF7B" : "#8A847A", letterSpacing: "0.08em" }}>{on ? "● LIVE" : "○ NOT SET"}{detail ? ` · ${detail}` : ""}</span>
+      <span style={{ fontFamily: MONO, fontSize: 9.5, color: on ? GREEN : "#8A847A", letterSpacing: "0.08em" }}>{on ? "● LIVE" : "○ NOT SET"}{detail ? ` · ${detail}` : ""}</span>
     </div>
   );
 }
@@ -42,9 +45,11 @@ export default async function MarketingPage() {
 
   return (
     <div>
-      <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ GROWTH ]</div>
-      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 6px" }}>Marketing</h1>
-      <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "0 0 24px" }}>Last 30 days. On-site conversion is live; ad-platform spend/ROAS connect via the Meta/Google APIs (coming).</p>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ GROWTH ]</div>
+        <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Marketing</h1>
+        <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "6px 0 0" }}>Last 30 days. On-site conversion is live; ad-platform spend/ROAS connect via the Meta/Google APIs (coming).</p>
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14, marginBottom: 14 }}>
         <Card title="Advertising pixels">

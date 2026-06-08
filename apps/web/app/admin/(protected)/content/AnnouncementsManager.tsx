@@ -4,8 +4,8 @@ import { addAnnouncement, deleteAnnouncement, saveAnnouncement } from "./announc
 import type { Announcement } from "@/lib/announcements-db";
 import { GOLD, MONO, BODY } from "@/lib/ui";
 
-const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4, display: "block" };
-const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 12, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "8px 10px", width: "100%" };
+const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.13em", textTransform: "uppercase", marginBottom: 4, display: "block" };
+const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 12, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: "1px solid rgba(201,169,97,0.2)", borderRadius: 10, padding: "8px 10px", width: "100%" };
 const btn: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "9px 14px", cursor: "pointer" };
 
 const FONTS = [["mono", "Mono (HUD)"], ["cinzel", "Cinzel"], ["inter", "Inter"], ["pirata", "Blackletter"], ["cormorant", "Scripture"]] as const;

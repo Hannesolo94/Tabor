@@ -5,8 +5,11 @@ import { approveReview, rejectReview, deleteReview } from "./actions";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
+const GREEN = "#5FB07A";
 
 const STATUSES = ["pending", "approved", "rejected"] as const;
+
+const cardStyle: React.CSSProperties = { background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", border: "1px solid rgba(201,169,97,0.14)", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px" };
 
 export default async function AdminReviews({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const sp = await searchParams;
@@ -33,15 +36,16 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 18 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
           <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ SOCIAL PROOF ]</div>
           <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Reviews</h1>
+          <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "6px 0 0" }}>Approve, reject, or delete customer reviews. Approved reviews show on the storefront.</p>
         </div>
-        <a href="/admin/reviews/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#E8D08C", border: `1px solid ${GOLD}55`, borderRadius: 12, background: "rgba(201,169,97,0.06)", padding: "10px 16px", textDecoration: "none" }}>Export CSV</a>
+        <a href="/admin/reviews/export" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "11px 20px", textDecoration: "none" }}>Export CSV</a>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
         {STATUSES.map((s) => (
           <a key={s} href={`/admin/reviews?status=${s}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none", padding: "8px 14px", borderRadius: 10, border: `1px solid ${GOLD}44`, color: status === s ? "#1a1408" : "#9A948A", fontWeight: status === s ? 700 : 400, boxShadow: status === s ? "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)" : undefined, background: status === s ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "transparent" }}>
             {s} ({counts[s]})
@@ -54,7 +58,7 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
           <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No {status} reviews.</p>
         ) : (
           (reviews ?? []).map((r) => (
-            <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px" }}>
+            <div key={r.id} className="admin-card" style={cardStyle}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
                   <Stars rating={r.rating} />
@@ -74,7 +78,7 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
                 </div>
               )}
               <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                {status !== "approved" && <form action={approveReview}><input type="hidden" name="id" value={r.id} /><button style={{ ...btn, color: "#7BBF7B", borderColor: "rgba(123,191,123,0.4)" }}>Approve</button></form>}
+                {status !== "approved" && <form action={approveReview}><input type="hidden" name="id" value={r.id} /><button style={{ ...btn, color: GREEN, borderColor: "rgba(95,176,122,0.4)" }}>Approve</button></form>}
                 {status !== "rejected" && <form action={rejectReview}><input type="hidden" name="id" value={r.id} /><button style={btn}>Reject</button></form>}
                 <form action={deleteReview}><input type="hidden" name="id" value={r.id} /><button style={{ ...btn, color: "#C03A3A", borderColor: "rgba(192,58,58,0.4)" }}>Delete</button></form>
               </div>

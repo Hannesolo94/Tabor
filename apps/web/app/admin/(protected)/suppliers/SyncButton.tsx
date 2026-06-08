@@ -10,7 +10,7 @@ export function SyncButton() {
   const [state, action, pending] = useActionState(syncPrintful, initial);
   return (
     <form action={action}>
-      <button type="submit" disabled={pending} style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "12px 22px", cursor: "pointer" }}>
+      <button type="submit" disabled={pending} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "11px 20px", cursor: "pointer", opacity: pending ? 0.6 : 1 }}>
         {pending ? "Syncing..." : "Sync from Printful"}
       </button>
       {state.ok && (

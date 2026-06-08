@@ -5,6 +5,8 @@ import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
+const cardStyle: React.CSSProperties = { background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", border: "1px solid rgba(201,169,97,0.14)", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px" };
+
 export default async function ModerationPage() {
   const admin = supabaseAdmin();
   const { data: reports } = await admin.from("reports").select("id, reporter, target_user, message_id, reason, detail, status, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(100);
@@ -35,9 +37,11 @@ export default async function ModerationPage() {
 
   return (
     <div>
-      <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ TRUST & SAFETY ]</div>
-      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: "0 0 8px" }}>Moderation</h1>
-      <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "0 0 22px" }}>{list.length} open {list.length === 1 ? "report" : "reports"} · {banned ?? 0} banned. Reports come from members holding a message and tapping report.</p>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ TRUST & SAFETY ]</div>
+        <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Moderation</h1>
+        <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "6px 0 0" }}>{list.length} open {list.length === 1 ? "report" : "reports"} · {banned ?? 0} banned. Reports come from members holding a message and tapping report.</p>
+      </div>
 
       {list.length === 0 ? (
         <p style={{ fontFamily: BODY, fontSize: 14, color: "#9A948A" }}>Nothing to review. The brotherhood is at peace.</p>
@@ -47,7 +51,7 @@ export default async function ModerationPage() {
             const target = r.target_user ? profBy.get(r.target_user) : null;
             const reporter = r.reporter ? profBy.get(r.reporter) : null;
             return (
-              <div key={r.id} style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "16px 18px" }}>
+              <div key={r.id} className="admin-card" style={cardStyle}>
                 <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
                   <span style={{ fontFamily: MONO, fontSize: 9.5, color: GOLD, letterSpacing: "0.1em" }}>{r.reason.toUpperCase()} · {new Date(r.created_at).toISOString().slice(0, 16).replace("T", " ")}</span>
                   <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A" }}>reported by {reporter?.name ?? "—"}</span>
@@ -68,9 +72,10 @@ export default async function ModerationPage() {
 
       {/* proactive moderation: act on any recent guild message without a report */}
       <div style={{ marginTop: 34 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.16em", marginBottom: 10 }}>RECENT GUILD CHAT · ACT WITHOUT A REPORT</div>
+        <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 14, color: "#E8E2D5", marginBottom: 4 }}>Recent guild chat</div>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.16em", marginBottom: 10 }}>ACT WITHOUT A REPORT</div>
         {recentList.length === 0 ? <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A" }}>No guild messages yet.</p> : (
-          <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", overflow: "hidden" }}>
+          <div className="admin-card" style={{ ...cardStyle, padding: 0, overflow: "hidden" }}>
             {recentList.map((m, i) => {
               const a = m.author_id ? authorBy.get(m.author_id) : null;
               return (
