@@ -6,17 +6,12 @@ import { getDashboard, type RangeKey } from "@/lib/analytics-db";
 import { supabaseServer } from "@/lib/supabase/server";
 import { BarList, Funnel, LineChart } from "@/components/admin/Charts";
 import { Greeting } from "@/components/admin/Greeting";
+import { DateRangePicker } from "@/components/admin/DateRangePicker";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
 const money = (n: number) => `$${n.toFixed(n < 100 ? 2 : 0)}`;
-const RANGES: { key: RangeKey; label: string }[] = [
-  { key: "today", label: "Today" },
-  { key: "7d", label: "7 days" },
-  { key: "30d", label: "30 days" },
-  { key: "90d", label: "90 days" },
-];
 
 const UP = "#5FB07A", DOWN = "#C97A7A";
 function Spark({ values, up }: { values: number[]; up: boolean }) {
@@ -80,20 +75,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
           <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Dashboard</h1>
           <div style={{ fontFamily: BODY, fontSize: 13.5, color: "#9A948A", marginTop: 5 }}><Greeting />. Here is how the store and the brotherhood are moving.</div>
         </div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: 6 }}>
-            {RANGES.map((r) => (
-              <Link key={r.key} href={`/admin?range=${r.key}`} style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none", padding: "8px 12px", borderRadius: 10, border: `1px solid ${GOLD}44`, color: rangeKey === r.key && !isCustom ? "#1a1408" : "#9A948A", fontWeight: rangeKey === r.key && !isCustom ? 700 : 400, boxShadow: rangeKey === r.key && !isCustom ? "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)" : undefined, background: rangeKey === r.key && !isCustom ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "transparent" }}>{r.label}</Link>
-            ))}
-          </div>
-          <form action="/admin" method="get" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <input type="hidden" name="range" value="custom" />
-            <input type="date" name="from" defaultValue={isCustom ? sp.from : d.fromLabel} aria-label="From date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "7px 8px" }} />
-            <span style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A" }}>→</span>
-            <input type="date" name="to" defaultValue={isCustom ? sp.to : d.toLabel} aria-label="To date" style={{ fontFamily: MONO, fontSize: 10, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "7px 8px" }} />
-            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: isCustom ? "#1a1408" : "#9A948A", fontWeight: isCustom ? 700 : 400, boxShadow: isCustom ? "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)" : undefined, background: isCustom ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "transparent", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "7px 12px", cursor: "pointer" }}>Apply</button>
-          </form>
-        </div>
+        <DateRangePicker currentLabel={isCustom ? `${d.fromLabel} → ${d.toLabel}` : rangeKey === "today" ? "Today" : `Last ${rangeKey === "7d" ? "7" : rangeKey === "30d" ? "30" : "90"} days`} />
       </div>
 
       {/* summary */}
