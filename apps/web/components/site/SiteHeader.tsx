@@ -7,12 +7,12 @@ import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { TaborSeal } from "@/components/TaborSeal";
 import { RegionSwitcher } from "./RegionSwitcher";
-import { CATEGORIES, PERSONAS, type Persona } from "@/lib/catalog";
+import { CATEGORIES, PERSONAS, type Persona, type Category } from "@/lib/catalog";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
 type Menu = null | "collections" | "gear";
 
-export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas?: Persona[]; collections?: { slug: string; title: string }[] }) {
+export function SiteHeader({ personas = PERSONAS, categories = CATEGORIES, collections = [] }: { personas?: Persona[]; categories?: Category[]; collections?: { slug: string; title: string }[] }) {
   const { count, setOpen } = useCart();
   const [menu, setMenu] = useState<Menu>(null);
   const [mobile, setMobile] = useState(false);
@@ -69,7 +69,7 @@ export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas
                     </Link>
                   )),
                 ]
-              : CATEGORIES.map((c) => (
+              : categories.map((c) => (
                   <Link key={c.id} href={`/shop?type=${c.id}`} onClick={close} style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 2 }}>
                     <span style={{ fontFamily: MONO, fontSize: 12, color: GOLD, letterSpacing: "0.12em", textTransform: "uppercase" }}>{c.name}</span>
                     <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#7A746A", lineHeight: 1.45 }}>{c.blurb}</span>
@@ -91,7 +91,7 @@ export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas
           {personas.map((p) => <Link key={p.id} href={`/collections/${p.id}`} onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "8px 0", fontSize: 12, color: "#E8E2D5" }}>{p.name}</Link>)}
           {collections.map((c) => <Link key={c.slug} href={`/collection/${c.slug}`} onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "8px 0", fontSize: 12, color: "#E8E2D5" }}>{c.title}</Link>)}
           <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.16em", margin: "10px 0 4px" }}>GEAR</div>
-          {CATEGORIES.map((c) => <Link key={c.id} href={`/shop?type=${c.id}`} onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "8px 0", fontSize: 12, color: "#E8E2D5" }}>{c.name}</Link>)}
+          {categories.map((c) => <Link key={c.id} href={`/shop?type=${c.id}`} onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "8px 0", fontSize: 12, color: "#E8E2D5" }}>{c.name}</Link>)}
           <button onClick={() => { setMobile(false); setOpen(true); }} style={{ ...linkStyle, marginTop: 12, color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", fontWeight: 700, padding: "14px", width: "100%", fontSize: 12 }}>View Bag{count ? ` · ${count}` : ""}</button>
         </div>
       )}

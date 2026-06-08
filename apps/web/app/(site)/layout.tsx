@@ -11,16 +11,16 @@ import { Pixels } from "@/components/site/Pixels";
 import { PromoPopup } from "@/components/promo/PromoPopup";
 import { getAnnouncements } from "@/lib/announcements-db";
 import { getPixels } from "@/lib/pixels-db";
-import { getVisiblePersonas, getVisibleCollections } from "@/lib/collections-db";
+import { getVisiblePersonas, getVisibleCollections, getVisibleCategories } from "@/lib/collections-db";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [announcements, pixels, personas, collections] = await Promise.all([getAnnouncements(), getPixels(), getVisiblePersonas(), getVisibleCollections()]);
+  const [announcements, pixels, personas, collections, categories] = await Promise.all([getAnnouncements(), getPixels(), getVisiblePersonas(), getVisibleCollections(), getVisibleCategories()]);
   return (
     <CartProvider>
       <Pixels ids={pixels} />
       <a href="#main" className="skip-link">Skip to content</a>
       <AnnouncementBar items={announcements} />
-      <SiteHeader personas={personas} collections={collections.map((c) => ({ slug: c.slug, title: c.title }))} />
+      <SiteHeader personas={personas} categories={categories} collections={collections.map((c) => ({ slug: c.slug, title: c.title }))} />
       <main id="main">{children}</main>
       <SiteFooter />
       <CartDrawer />

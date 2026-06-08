@@ -1,6 +1,6 @@
 // Custom collections + persona visibility (storefront reads).
 import { createClient } from "@supabase/supabase-js";
-import { PERSONAS, type Persona } from "./catalog";
+import { PERSONAS, CATEGORIES, type Persona, type Category } from "./catalog";
 import { getProducts } from "./products-db";
 import type { Product } from "./catalog";
 import type { RegionId } from "./region";
@@ -46,4 +46,16 @@ export async function getHiddenPersonas(): Promise<string[]> {
 export async function getVisiblePersonas(): Promise<Persona[]> {
   const hidden = await getHiddenPersonas();
   return PERSONAS.filter((p) => !hidden.includes(p.id));
+}
+
+/** Category (product type) ids the admin has hidden (from app_settings). */
+export async function getHiddenCategories(): Promise<string[]> {
+  const { data } = await client().from("app_settings").select("value").eq("key", "categories").maybeSingle();
+  const hidden = (data?.value as { hidden?: string[] } | undefined)?.hidden;
+  return Array.isArray(hidden) ? hidden : [];
+}
+
+export async function getVisibleCategories(): Promise<Category[]> {
+  const hidden = await getHiddenCategories();
+  return CATEGORIES.filter((c) => !hidden.includes(c.id));
 }

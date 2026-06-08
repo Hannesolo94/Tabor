@@ -2,21 +2,23 @@
 // own custom collections (curated product groups).
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { PERSONAS } from "@/lib/catalog";
-import { createCollection, togglePersona } from "./actions";
+import { PERSONAS, CATEGORIES } from "@/lib/catalog";
+import { createCollection, togglePersona, toggleCategory } from "./actions";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCollections() {
   const sb = await supabaseServer();
-  const [cols, hiddenRes, counts] = await Promise.all([
+  const [cols, hiddenRes, hiddenCatRes, counts] = await Promise.all([
     sb.from("collections").select("id, slug, title, visible, sort").order("sort", { ascending: true }),
     sb.from("app_settings").select("value").eq("key", "personas").maybeSingle(),
+    sb.from("app_settings").select("value").eq("key", "categories").maybeSingle(),
     sb.from("collection_products").select("collection_id"),
   ]);
   const collections = cols.data ?? [];
   const hidden: string[] = ((hiddenRes.data?.value as { hidden?: string[] } | undefined)?.hidden) ?? [];
+  const hiddenCats: string[] = ((hiddenCatRes.data?.value as { hidden?: string[] } | undefined)?.hidden) ?? [];
   const countBy = new Map<string, number>();
   for (const r of counts.data ?? []) countBy.set(r.collection_id, (countBy.get(r.collection_id) ?? 0) + 1);
 
@@ -40,6 +42,26 @@ export default async function AdminCollections() {
                 <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.08em", color: isHidden ? "#C03A3A" : "#7BBF7B" }}>{isHidden ? "HIDDEN" : "VISIBLE"}</span>
                   <form action={togglePersona}><input type="hidden" name="persona" value={p.id} /><button style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "rgba(201,169,97,0.05)", border: "1px solid rgba(201,169,97,0.3)", borderRadius: 10, padding: "6px 12px", cursor: "pointer" }}>{isHidden ? "Show" : "Hide"}</button></form>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* product-type visibility */}
+      <div style={{ border: "1px solid rgba(201,169,97,0.14)", background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "18px 20px", marginBottom: 22 }}>
+        <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 15, color: "#E8E2D5", marginBottom: 4 }}>Type collections</div>
+        <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#9A948A", margin: "0 0 14px" }}>Your product types. Customers browse these under Gear in the nav. Hide one to remove it from the site.</p>
+        <div style={{ display: "grid", gap: 6 }}>
+          {CATEGORIES.map((c) => {
+            const isHidden = hiddenCats.includes(c.id);
+            return (
+              <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                <span style={{ fontFamily: BODY, fontSize: 14, color: isHidden ? "#8A847A" : "#E8E2D5" }}>{c.name} <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A" }}>· /shop?type={c.id}</span></span>
+                <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.08em", color: isHidden ? "#C03A3A" : "#7BBF7B" }}>{isHidden ? "HIDDEN" : "VISIBLE"}</span>
+                  <form action={toggleCategory}><input type="hidden" name="category" value={c.id} /><button style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "rgba(201,169,97,0.05)", border: "1px solid rgba(201,169,97,0.3)", borderRadius: 10, padding: "6px 12px", cursor: "pointer" }}>{isHidden ? "Show" : "Hide"}</button></form>
                 </span>
               </div>
             );

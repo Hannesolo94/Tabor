@@ -69,3 +69,15 @@ export async function togglePersona(formData: FormData): Promise<void> {
   revalidatePath("/admin/collections");
   revalidatePath("/");
 }
+
+/** Hide/unhide a product-type (category) collection (stored in app_settings). */
+export async function toggleCategory(formData: FormData): Promise<void> {
+  const category = String(formData.get("category") ?? "");
+  const sb = await supabaseServer();
+  const { data } = await sb.from("app_settings").select("value").eq("key", "categories").maybeSingle();
+  const hidden: string[] = ((data?.value as { hidden?: string[] } | undefined)?.hidden) ?? [];
+  const next = hidden.includes(category) ? hidden.filter((h) => h !== category) : [...hidden, category];
+  await sb.from("app_settings").upsert({ key: "categories", value: { hidden: next } });
+  revalidatePath("/admin/collections");
+  revalidatePath("/");
+}
