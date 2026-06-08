@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Image, TextInput, ActivityIndicator, FlatList, Modal, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, TextInput, ActivityIndicator, FlatList, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";
@@ -7,7 +7,8 @@ import { useProfile } from "@/lib/useProfile";
 import { useTabBar } from "@/lib/tabbar";
 import { supabase } from "@/lib/supabase";
 import { todayKey } from "@/lib/quests";
-import { listExercises, generateProgram, getRoutines, renameRoutine, duplicateRoutine, deleteRoutine, moveRoutine, MUSCLE_GROUPS, getTabataPresets, saveTabataPreset, deleteTabataPreset, type Exercise, type Routine, type TabataPreset } from "@/lib/fitness";
+import { listExercises, generateProgram, getRoutines, renameRoutine, duplicateRoutine, deleteRoutine, moveRoutine, MUSCLE_GROUPS, type Exercise, type Routine } from "@/lib/fitness";
+import { TabataTimer } from "@/components/TabataTimer";
 import { C, F } from "@/lib/theme";
 
 const GOALS = [{ v: "strength", l: "Strength" }, { v: "muscle", l: "Muscle" }, { v: "fatloss", l: "Fat loss" }, { v: "endurance", l: "Endurance" }];
@@ -55,7 +56,7 @@ export default function Body() {
       {tab === "library" && <LibraryTab onScroll={tb?.onScroll} router={router} />}
       {tab === "timer" && (
         <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
-          <Tabata userId={userId} onComplete={() => logWorkout("Tabata Session", 4)} />
+          <TabataTimer userId={userId} onComplete={() => logWorkout("Tabata Session", 4)} />
         </ScrollView>
       )}
     </SafeAreaView>
@@ -255,93 +256,4 @@ function Chips({ label, options, value, onPick }: { label: string; options: { v:
 }
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return <Pressable onPress={onPress} style={{ paddingVertical: 7, paddingHorizontal: 12, borderWidth: 1, borderColor: active ? C.gold : C.line, backgroundColor: active ? C.gold : "transparent", borderRadius: 2 }}><Text style={{ color: active ? C.black : C.muted, fontSize: 11, fontFamily: F.bodyMid }}>{label}</Text></Pressable>;
-}
-
-// ---- Tabata timer ----
-type Phase = "idle" | "work" | "rest" | "done";
-function Tabata({ userId, onComplete }: { userId?: string; onComplete: () => void }) {
-  const [work, setWork] = useState(20);
-  const [rest, setRest] = useState(10);
-  const [rounds, setRounds] = useState(8);
-  const [presets, setPresets] = useState<TabataPreset[]>([]);
-  const loadPresets = () => { if (userId) getTabataPresets(userId).then(setPresets); };
-  useEffect(() => { loadPresets(); /* eslint-disable-next-line */ }, [userId]);
-  async function savePreset() { if (!userId) return; await saveTabataPreset(userId, { name: `${work}/${rest} x${rounds}`, work, rest, rounds }); loadPresets(); }
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [round, setRound] = useState(1);
-  const [left, setLeft] = useState(20);
-  const [running, setRunning] = useState(false);
-  const pulse = useRef(new Animated.Value(1)).current;
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (!running) { if (timer.current) clearInterval(timer.current); return; }
-    timer.current = setInterval(() => {
-      setLeft((l) => {
-        if (l > 1) return l - 1;
-        setPhase((p) => {
-          if (p === "work") { setLeft(rest); return "rest"; }
-          setRound((r) => { if (r >= rounds) { setRunning(false); setPhase("done"); onComplete(); return r; } setLeft(work); setPhase("work"); return r + 1; });
-          return p;
-        });
-        return l;
-      });
-    }, 1000);
-    return () => { if (timer.current) clearInterval(timer.current); };
-  }, [running, work, rest, rounds, onComplete]);
-
-  useEffect(() => { Animated.loop(Animated.sequence([Animated.timing(pulse, { toValue: 1.06, duration: 500, useNativeDriver: true }), Animated.timing(pulse, { toValue: 1, duration: 500, useNativeDriver: true })])).start(); }, [pulse]);
-
-  const start = () => { setPhase("work"); setRound(1); setLeft(work); setRunning(true); };
-  const reset = () => { setRunning(false); setPhase("idle"); setRound(1); setLeft(work); };
-  const color = phase === "work" ? C.gold : phase === "rest" ? "#6fa8dc" : phase === "done" ? C.green : C.muted;
-
-  return (
-    <View style={{ alignItems: "center" }}>
-      {phase === "idle" && (
-        <View style={{ width: "100%", marginBottom: 22 }}>
-          <Stepper label="WORK (s)" value={work} set={setWork} step={5} min={5} />
-          <Stepper label="REST (s)" value={rest} set={setRest} step={5} min={5} />
-          <Stepper label="ROUNDS" value={rounds} set={setRounds} step={1} min={1} />
-          {presets.length > 0 && (
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
-              {presets.map((p) => (
-                <Pressable key={p.id} onPress={() => { setWork(p.work); setRest(p.rest); setRounds(p.rounds); }} onLongPress={async () => { await deleteTabataPreset(p.id); loadPresets(); }} delayLongPress={350} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 2 }}>
-                  <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono }}>{p.name}</Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-          {userId && <Pressable onPress={savePreset} style={{ marginTop: 12, alignItems: "center" }}><Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body }}>Save current as preset</Text></Pressable>}
-        </View>
-      )}
-      <Animated.View style={{ transform: [{ scale: running ? pulse : 1 }], width: 220, height: 220, borderRadius: 110, borderWidth: 3, borderColor: color, alignItems: "center", justifyContent: "center", marginVertical: 10 }}>
-        <Text style={{ color, fontSize: 12, letterSpacing: 4, fontFamily: F.mono }}>{phase === "done" ? "COMPLETE" : phase.toUpperCase()}</Text>
-        <Text style={{ color: C.ivory, fontSize: 64, fontFamily: F.head }}>{phase === "done" ? "✓" : left}</Text>
-        {phase !== "idle" && phase !== "done" && <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.mono }}>ROUND {round}/{rounds}</Text>}
-      </Animated.View>
-      <View style={{ flexDirection: "row", gap: 12, marginTop: 18 }}>
-        {phase === "idle" || phase === "done" ? (
-          <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>{phase === "done" ? "GO AGAIN" : "START"}</Text></Pressable>
-        ) : (
-          <>
-            <Pressable onPress={() => setRunning((r) => !r)} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.headMid, letterSpacing: 1 }}>{running ? "PAUSE" : "RESUME"}</Text></Pressable>
-            <Pressable onPress={reset} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 2 }}><Text style={{ color: C.muted, fontFamily: F.headMid, letterSpacing: 1 }}>RESET</Text></Pressable>
-          </>
-        )}
-      </View>
-    </View>
-  );
-}
-function Stepper({ label, value, set, step, min }: { label: string; value: number; set: (n: number) => void; step: number; min: number }) {
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}>
-      <Text style={{ color: C.muted, fontSize: 12, letterSpacing: 2, fontFamily: F.mono }}>{label}</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 18 }}>
-        <Pressable onPress={() => set(Math.max(min, value - step))} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>−</Text></Pressable>
-        <Text style={{ color: C.ivory, fontSize: 18, fontFamily: F.head, width: 40, textAlign: "center" }}>{value}</Text>
-        <Pressable onPress={() => set(value + step)} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>+</Text></Pressable>
-      </View>
-    </View>
-  );
 }

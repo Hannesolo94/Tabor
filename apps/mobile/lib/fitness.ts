@@ -178,13 +178,15 @@ export async function deletePR(userId: string, lift: string): Promise<void> {
   await supabase.from("personal_records").delete().eq("user_id", userId).eq("lift", lift);
 }
 
-export interface TabataPreset { id: string; name: string; work: number; rest: number; rounds: number }
+export interface TabataConfig { prepare: number; work: number; rest: number; cycles: number; sets: number; restBetween: number; cooldown: number }
+export interface TabataPreset { id: string; name: string; config: TabataConfig; moves: string[] }
+export const DEFAULT_TABATA: TabataConfig = { prepare: 10, work: 20, rest: 10, cycles: 8, sets: 1, restBetween: 60, cooldown: 0 };
 export async function getTabataPresets(userId: string): Promise<TabataPreset[]> {
-  const { data } = await supabase.from("tabata_presets").select("id, name, work, rest, rounds").eq("user_id", userId).order("name");
-  return (data as TabataPreset[]) ?? [];
+  const { data } = await supabase.from("tabata_presets").select("id, name, config, moves, work, rest, rounds").eq("user_id", userId).order("name");
+  return (data ?? []).map((r) => ({ id: r.id as string, name: r.name as string, moves: (r.moves as string[]) ?? [], config: (r.config as TabataConfig) ?? { ...DEFAULT_TABATA, work: Number(r.work) || 20, rest: Number(r.rest) || 10, cycles: Number(r.rounds) || 8, sets: 1 } }));
 }
-export async function saveTabataPreset(userId: string, p: { name: string; work: number; rest: number; rounds: number }): Promise<void> {
-  await supabase.from("tabata_presets").insert({ user_id: userId, ...p });
+export async function saveTabataPreset(userId: string, name: string, config: TabataConfig, moves: string[]): Promise<void> {
+  await supabase.from("tabata_presets").insert({ user_id: userId, name, work: config.work, rest: config.rest, rounds: config.cycles, config, moves });
 }
 export async function deleteTabataPreset(id: string): Promise<void> {
   await supabase.from("tabata_presets").delete().eq("id", id);
