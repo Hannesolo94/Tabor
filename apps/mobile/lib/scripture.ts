@@ -93,3 +93,13 @@ export async function removeHighlights(userId: string, refs: string[]): Promise<
   if (!refs.length) return;
   await supabase.from("highlights").delete().eq("user_id", userId).in("ref", refs);
 }
+
+// ---- continue where you left off ----
+export interface LastRead { order: number; chapter: number; book: string }
+export async function setLastRead(userId: string, pos: LastRead): Promise<void> {
+  await supabase.from("profiles").update({ last_read: pos }).eq("user_id", userId);
+}
+export async function getLastRead(userId: string): Promise<LastRead | null> {
+  const { data } = await supabase.from("profiles").select("last_read").eq("user_id", userId).maybeSingle();
+  return (data?.last_read as LastRead) ?? null;
+}

@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, Animated, TextInput, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
 import { useTabBar } from "@/lib/tabbar";
 import { verseForDay } from "@/lib/verses";
-import { getBooks, getPlans, getProgress, listPrayers, addPrayer, togglePrayer, searchVerses, type BookInfo, type Plan, type Prayer } from "@/lib/scripture";
+import { getBooks, getPlans, getProgress, listPrayers, addPrayer, togglePrayer, searchVerses, getLastRead, type BookInfo, type Plan, type Prayer, type LastRead } from "@/lib/scripture";
 import { C, F } from "@/lib/theme";
 
 export default function Word() {
@@ -38,7 +38,7 @@ export default function Word() {
       </View>
 
       {tab === "today" && <Today onScroll={tb?.onScroll} />}
-      {tab === "read" && <Read onScroll={tb?.onScroll} router={router} />}
+      {tab === "read" && <Read onScroll={tb?.onScroll} router={router} userId={userId} />}
       {tab === "plans" && <Plans onScroll={tb?.onScroll} router={router} userId={userId} faith={profile?.faith ?? profile?.believer} />}
       {tab === "prayer" && <PrayerJournal onScroll={tb?.onScroll} userId={userId} />}
     </SafeAreaView>
@@ -67,11 +67,13 @@ function Today({ onScroll }: { onScroll: any }) {
   );
 }
 
-function Read({ onScroll, router }: { onScroll: any; router: any }) {
+function Read({ onScroll, router, userId }: { onScroll: any; router: any; userId?: string }) {
   const [books, setBooks] = useState<BookInfo[]>([]);
   const [q, setQ] = useState("");
   const [results, setResults] = useState<{ ref: string; book_order: number; chapter: number; text: string }[]>([]);
+  const [last, setLast] = useState<LastRead | null>(null);
   useEffect(() => { getBooks().then(setBooks); }, []);
+  useFocusEffect(useCallback(() => { if (userId) getLastRead(userId).then(setLast); }, [userId]));
   async function run() { setResults(await searchVerses(q)); }
   const ot = books.filter((b) => b.book_order <= 39);
   const nt = books.filter((b) => b.book_order >= 40);
@@ -87,6 +89,13 @@ function Read({ onScroll, router }: { onScroll: any; router: any }) {
   );
   return (
     <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+      {last && results.length === 0 && (
+        <Pressable onPress={() => router.push(`/read/${last.order}?c=${last.chapter}`)} style={{ borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 3, padding: 16, marginBottom: 18 }}>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>CONTINUE READING</Text>
+          <Text style={{ color: C.ivory, fontSize: 20, fontFamily: F.head, marginTop: 4 }}>{last.book} {last.chapter}</Text>
+          <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginTop: 2 }}>Pick up where you left off ›</Text>
+        </Pressable>
+      )}
       <View style={{ flexDirection: "row", gap: 8, marginBottom: 18 }}>
         <TextInput value={q} onChangeText={setQ} onSubmitEditing={run} placeholder="Search the Scriptures…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} />
         <Pressable onPress={run} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>GO</Text></Pressable>

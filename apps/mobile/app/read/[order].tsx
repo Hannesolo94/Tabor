@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";
-import { getBooks, getChapter, getBookmarks, setBookmarks, getHighlights, setHighlights, removeHighlights, type Verse } from "@/lib/scripture";
+import { getBooks, getChapter, getBookmarks, setBookmarks, getHighlights, setHighlights, removeHighlights, setLastRead, type Verse } from "@/lib/scripture";
 import { addNote } from "@/lib/notes";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 const HL_COLORS = ["#c9a961", "#6fa8dc", "#7bb274", "#c77b9e"];
@@ -14,6 +15,7 @@ export default function Reader() {
   const { order, c } = useLocalSearchParams<{ order: string; c?: string }>();
   const { session } = useAuth();
   const userId = session?.user.id;
+  const sheet = useActionSheet();
   const bookOrder = Number(order);
   const [chapter, setChapter] = useState(Number(c) || 1);
   const [chapters, setChapters] = useState(1);
@@ -34,6 +36,8 @@ export default function Reader() {
     setLoading(true); setSelected(new Set());
     getChapter(bookOrder, chapter).then((d) => { if (d.book) setBook(d.book); setVerses(d.verses); setLoading(false); });
   }, [bookOrder, chapter]);
+  // remember where we left off
+  useEffect(() => { if (userId && book) setLastRead(userId, { order: bookOrder, chapter, book }); }, [userId, book, bookOrder, chapter]);
 
   const refOf = (v: number) => `${book} ${chapter}:${v}`;
   function toggleSelect(v: number) {
@@ -59,7 +63,7 @@ export default function Reader() {
     const text = nums.map((n) => { const v = verses.find((x) => x.verse === n); return v ? `${n}. ${v.text}` : ""; }).filter(Boolean).join("\n");
     await addNote(userId, { cat: "scripture", title: range, body: text, ref: range });
     setSelected(new Set());
-    Alert.alert("Saved to Notes", `${range} is in your Notes (Word).`, [{ text: "View Notes", onPress: () => router.push("/notes") }, { text: "Done" }]);
+    sheet({ title: "Saved to Notes", message: `${range} is now in your Notes, under Word.`, actions: [{ label: "View Notes", onPress: () => router.push("/notes") }, { label: "Done", style: "cancel" }] });
   }
 
   return (
