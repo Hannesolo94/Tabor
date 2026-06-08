@@ -80,7 +80,7 @@ function Read({ onScroll, router, userId }: { onScroll: any; router: any; userId
   const Grid = ({ list }: { list: BookInfo[] }) => (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
       {list.map((b) => (
-        <Pressable key={b.book_order} onPress={() => router.push(`/read/${b.book_order}`)} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
+        <Pressable key={b.book_order} onPress={() => router.push(`/read/${b.book_order}`)} style={{ borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
           <Text style={{ color: C.ivory, fontSize: 13, fontFamily: F.bodyMid }}>{b.book}</Text>
           <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono }}>{b.chapters} ch</Text>
         </Pressable>

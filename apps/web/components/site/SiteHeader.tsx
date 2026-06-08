@@ -21,7 +21,7 @@ export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas
   const linkStyle: React.CSSProperties = { background: "none", border: "none", cursor: "pointer", fontFamily: MONO, fontSize: 11, letterSpacing: "0.12em", color: "#B8B2A6", textTransform: "uppercase", textDecoration: "none", padding: 0 };
 
   return (
-    <div style={{ position: "sticky", top: 0, zIndex: 200, background: "rgba(10,10,10,0.9)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(201,169,97,0.2)" }} onMouseLeave={close}>
+    <div style={{ position: "sticky", top: 0, zIndex: 200, background: "rgba(10,10,10,0.72)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(201,169,97,0.16)" }} onMouseLeave={close}>
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "13px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Link href="/" onClick={close} style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <TaborSeal id="nav-seal" size={28} />
@@ -35,10 +35,10 @@ export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas
           <button style={linkStyle} onClick={() => setMenu(menu === "gear" ? null : "gear")}>Gear ▾</button>
           <Link href="/#creed" style={linkStyle} onClick={close}>The Creed</Link>
           <form action="/shop" method="get" style={{ display: "flex" }}>
-            <input name="q" placeholder="Search..." aria-label="Search products" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "7px 10px", width: 120 }} />
+            <input name="q" placeholder="Search..." aria-label="Search products" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "8px 12px", width: 120 }} />
           </form>
           <RegionSwitcher />
-          <button onClick={() => setOpen(true)} style={{ ...linkStyle, color: GOLD, border: `1px solid ${GOLD}88`, padding: "8px 14px" }}>
+          <button onClick={() => setOpen(true)} style={{ ...linkStyle, color: GOLD, border: `1px solid ${GOLD}59`, background: "rgba(201,169,97,0.06)", borderRadius: 12, padding: "9px 16px" }}>
             Bag{count ? ` · ${count}` : ""}
           </button>
         </div>
@@ -51,7 +51,7 @@ export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas
 
       {/* desktop dropdown panel */}
       {menu && (
-        <div style={{ borderTop: "1px solid rgba(201,169,97,0.18)", background: "rgba(12,12,16,0.98)" }}>
+        <div style={{ borderTop: "1px solid rgba(201,169,97,0.18)", background: "rgba(12,12,16,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
           <div style={{ maxWidth: 1240, margin: "0 auto", padding: "18px 24px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
             {menu === "collections"
               ? [
@@ -83,8 +83,8 @@ export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas
       {mobile && (
         <div className="tabor-mobile-menu" style={{ borderTop: "1px solid rgba(201,169,97,0.18)", padding: "10px 24px 18px" }}>
           <form action="/shop" method="get" style={{ display: "flex", gap: 6, margin: "8px 0 12px" }}>
-            <input name="q" placeholder="Search products..." style={{ flex: 1, fontFamily: MONO, fontSize: 12, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}44`, padding: "10px 12px" }} />
-            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "0 14px", cursor: "pointer", textTransform: "uppercase" }}>Go</button>
+            <input name="q" placeholder="Search products..." style={{ flex: 1, fontFamily: MONO, fontSize: 12, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "11px 13px" }} />
+            <button type="submit" style={{ fontFamily: MONO, fontSize: 10, color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 12, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", fontWeight: 700, padding: "0 16px", cursor: "pointer", textTransform: "uppercase" }}>Go</button>
           </form>
           <Link href="/shop" onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "12px 0", fontSize: 13 }}>Shop All</Link>
           <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.16em", margin: "8px 0 4px" }}>COLLECTIONS</div>
@@ -92,7 +92,7 @@ export function SiteHeader({ personas = PERSONAS, collections = [] }: { personas
           {collections.map((c) => <Link key={c.slug} href={`/collection/${c.slug}`} onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "8px 0", fontSize: 12, color: "#E8E2D5" }}>{c.title}</Link>)}
           <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.16em", margin: "10px 0 4px" }}>GEAR</div>
           {CATEGORIES.map((c) => <Link key={c.id} href={`/shop?type=${c.id}`} onClick={() => setMobile(false)} style={{ ...linkStyle, display: "block", padding: "8px 0", fontSize: 12, color: "#E8E2D5" }}>{c.name}</Link>)}
-          <button onClick={() => { setMobile(false); setOpen(true); }} style={{ ...linkStyle, marginTop: 12, color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "13px", width: "100%", fontSize: 12 }}>View Bag{count ? ` · ${count}` : ""}</button>
+          <button onClick={() => { setMobile(false); setOpen(true); }} style={{ ...linkStyle, marginTop: 12, color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", fontWeight: 700, padding: "14px", width: "100%", fontSize: 12 }}>View Bag{count ? ` · ${count}` : ""}</button>
         </div>
       )}
     </div>

@@ -209,7 +209,7 @@ function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => voi
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 12 }}>
+    <View style={{ flex: 1, borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, padding: 12, borderRadius: 12 }}>
       <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2 }}>{label}</Text>
       <Text style={{ color: C.gold, fontSize: 16, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text>
     </View>

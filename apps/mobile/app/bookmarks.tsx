@@ -37,7 +37,7 @@ export default function Bookmarks() {
         {refs.length === 0 ? (
           <Text style={{ color: C.muted, fontSize: 14, fontFamily: F.body, textAlign: "center", marginTop: 30 }}>No saved verses yet. Long-press a verse in the reader to save it.</Text>
         ) : refs.map((ref) => (
-          <Pressable key={ref} onPress={() => open(ref)} onLongPress={() => remove(ref)} delayLongPress={350} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, borderRadius: 12, padding: 14, marginBottom: 10 }}>
+          <Pressable key={ref} onPress={() => open(ref)} onLongPress={() => remove(ref)} delayLongPress={350} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, borderRadius: 12, padding: 14, marginBottom: 10 }}>
             <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.scripture }}>{ref}</Text>
             <Text style={{ color: C.gold, fontSize: 16 }}>›</Text>
           </Pressable>

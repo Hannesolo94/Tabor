@@ -138,7 +138,7 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
   return (
     <>
     <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
-      <View style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, borderRadius: 12, marginBottom: 18 }}>
+      <View style={{ borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, padding: 16, borderRadius: 12, marginBottom: 18 }}>
         <Text style={{ color: C.ivory, fontSize: 14, fontFamily: F.headMid, marginBottom: 10 }}>Tune your program</Text>
         <Chips label="GOAL" options={GOALS} value={goal} onPick={setGoal} />
         <Chips label="EQUIPMENT" options={EQUIP} value={equip} onPick={setEquip} />

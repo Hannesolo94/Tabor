@@ -89,7 +89,7 @@ export default function Progress() {
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <View style={{ marginBottom: 22, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, borderRadius: 12, padding: 14 }}>
+    <View style={{ marginBottom: 22, borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, borderRadius: 12, padding: 14 }}>
       <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>{title}</Text>
       {hint ? <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.body, marginTop: 2, marginBottom: 10 }}>{hint}</Text> : <View style={{ height: 10 }} />}
       {children}

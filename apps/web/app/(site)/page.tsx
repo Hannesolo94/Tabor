@@ -11,7 +11,7 @@ import { getHomeReviews } from "@/lib/reviews-db";
 import { Stars } from "@/components/reviews/Stars";
 import { AppButtons } from "@/components/site/AppButtons";
 import { getRegion } from "@/lib/region";
-import { GOLD, MONO, PIRATA, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
+import { GOLD, GOLD_LIGHT, MONO, PIRATA, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +25,8 @@ function SectionHead({ kicker, title, sub }: { kicker: string; title: string; su
   );
 }
 
-const btnGold: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, padding: "16px 34px", textDecoration: "none" };
-const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD, background: "transparent", border: `1px solid ${GOLD}`, padding: "16px 34px", textDecoration: "none" };
+const btnGold: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "16px 34px", textDecoration: "none" };
+const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD_LIGHT, background: "rgba(201,169,97,0.06)", border: `1px solid ${GOLD}59`, borderRadius: 14, padding: "16px 34px", textDecoration: "none" };
 
 export default async function Home() {
   const region = await getRegion();

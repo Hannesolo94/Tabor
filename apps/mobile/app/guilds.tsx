@@ -52,7 +52,7 @@ export default function Guilds() {
         {all.map((g) => {
           const joined = mine.includes(g.id);
           return (
-            <View key={g.id} style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, padding: 14, marginBottom: 8, borderRadius: 12 }}>
+            <View key={g.id} style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.glassBorder, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, padding: 14, marginBottom: 8, borderRadius: 12 }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: C.ivory, fontSize: 16, fontWeight: "700" }}>{g.name} <Text style={{ color: C.muted, fontSize: 11 }}>· {g.tag}</Text></Text>
                 <Text style={{ color: C.muted, fontSize: 11 }}>Open guild</Text>

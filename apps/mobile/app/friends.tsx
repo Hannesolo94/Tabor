@@ -103,6 +103,6 @@ function Row({ title, sub, action, onAction }: { title: string; sub: string; act
 }
 
 const sec = { color: C.gold, fontSize: 10, letterSpacing: 3, marginTop: 22, marginBottom: 10 } as const;
-const card = { flexDirection: "row" as const, alignItems: "center" as const, gap: 8, backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, padding: 12, marginBottom: 8, borderRadius: 12 };
+const card = { flexDirection: "row" as const, alignItems: "center" as const, gap: 8, backgroundColor: C.surface2, borderWidth: 1, borderColor: C.glassBorder, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, padding: 12, marginBottom: 8, borderRadius: 12 };
 const btnGold = { backgroundColor: C.gold, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 };
 const btnGhost = { borderWidth: 1, borderColor: C.line, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 };

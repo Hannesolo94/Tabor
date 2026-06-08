@@ -30,7 +30,7 @@ export function ActionSheetProvider({ children }: { children: ReactNode }) {
             {opts?.reactions && opts.reactions.length > 0 && (
               <View style={{ flexDirection: "row", justifyContent: "center", gap: 10, marginTop: 16 }}>
                 {opts.reactions.map((r, i) => (
-                  <Pressable key={i} onPress={() => { close(); r.onPress(); }} style={{ width: 56, height: 56, borderRadius: 28, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, alignItems: "center", justifyContent: "center" }}>
+                  <Pressable key={i} onPress={() => { close(); r.onPress(); }} style={{ width: 56, height: 56, borderRadius: 28, borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, alignItems: "center", justifyContent: "center" }}>
                     <Text style={{ fontSize: 26 }}>{r.emoji}</Text>
                   </Pressable>
                 ))}

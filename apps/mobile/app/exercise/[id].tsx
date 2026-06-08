@@ -68,7 +68,7 @@ export default function ExerciseDetail() {
         </Pressable>
 
         {picker && (
-          <View style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 12, marginTop: 12 }}>
+          <View style={{ borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, padding: 14, borderRadius: 12, marginTop: 12 }}>
             <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginBottom: 8 }}>ADD TO…</Text>
             {routines.map((r) => (
               <Pressable key={r.id} onPress={() => addTo(r.id)} style={{ paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}><Text style={{ color: C.ivory, fontFamily: F.bodyMid }}>{r.name}</Text></Pressable>

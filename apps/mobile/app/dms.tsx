@@ -25,7 +25,7 @@ export default function Dms() {
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           {threads.length === 0 && <Text style={{ color: C.muted, fontSize: 14, fontFamily: F.body, marginTop: 10 }}>No conversations yet. Add a brother in Friends, then tap Message to start one.</Text>}
           {threads.map((t) => (
-            <Pressable key={t.thread_id} onPress={() => router.push(`/dm/${t.thread_id}?name=${encodeURIComponent(t.name || "Brother")}&uid=${t.other_id}`)} style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, padding: 14, borderRadius: 12, marginBottom: 8 }}>
+            <Pressable key={t.thread_id} onPress={() => router.push(`/dm/${t.thread_id}?name=${encodeURIComponent(t.name || "Brother")}&uid=${t.other_id}`)} style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.glassBorder, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, padding: 14, borderRadius: 12, marginBottom: 8 }}>
               <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.surface, alignItems: "center", justifyContent: "center", marginRight: 12 }}><Text style={{ color: C.gold, fontFamily: F.head, fontSize: 16 }}>{(t.name || "B")[0].toUpperCase()}</Text></View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.bodyMid }}>{t.name || "Brother"}</Text>

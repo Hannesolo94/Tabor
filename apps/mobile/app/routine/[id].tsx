@@ -105,7 +105,7 @@ export default function RoutineDetail() {
         {loading ? <ActivityIndicator color={C.gold} /> : items.map((it, i) => {
           const kind = inputKind(it.exercise?.category, it.exercise?.equipment);
           return (
-            <View key={it.id} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 12, marginBottom: 10 }}>
+            <View key={it.id} style={{ borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, padding: 12, borderRadius: 12, marginBottom: 10 }}>
               <Pressable onPress={() => router.push(`/exercise/${it.exercise_id}`)} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                 <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: C.surface, overflow: "hidden" }}>
                   {it.exercise?.image_url ? <Image source={{ uri: it.exercise.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" /> : null}

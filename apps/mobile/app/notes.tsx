@@ -68,7 +68,7 @@ export default function Notes() {
 
         {notes.length === 0 && !composing && <Text style={{ color: C.muted, fontFamily: F.body, fontSize: 14, textAlign: "center", marginTop: 30 }}>No notes yet. Capture what the Spirit gives you.</Text>}
         {notes.map((n) => (
-          <Pressable key={n.id} onLongPress={() => remove(n)} delayLongPress={350} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, borderRadius: 14, padding: 14, marginBottom: 10 }}>
+          <Pressable key={n.id} onLongPress={() => remove(n)} delayLongPress={350} style={{ borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 18, elevation: 6, borderRadius: 14, padding: 14, marginBottom: 10 }}>
             <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2, fontFamily: F.mono }}>{(CATS.find((c) => c.v === n.cat)?.l ?? n.cat).toUpperCase()}{n.ref ? ` · ${n.ref}` : ""}</Text>
             {n.title ? <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.headMid, marginTop: 4 }}>{n.title}</Text> : null}
             <Text style={{ color: C.text, fontSize: 14, lineHeight: 20, fontFamily: F.body, marginTop: 3 }}>{n.body}</Text>
