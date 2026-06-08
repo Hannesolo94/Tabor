@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@/lib/auth";
 import { loadDm, sendDm, subscribeDm, type DmMsg } from "@/lib/social";
 import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { getPublicKey, encryptDM, decryptDM } from "@/lib/crypto";
+import { uploadChatMedia, mediaBody, parseMedia, type MediaRef } from "@/lib/media";
+import { MediaBubble } from "@/components/MediaBubble";
+import { GifPicker } from "@/components/GifPicker";
 import { C, F } from "@/lib/theme";
 
 export default function DM() {
@@ -17,6 +21,7 @@ export default function DM() {
   const [text, setText] = useState<Record<string, string>>({}); // id -> decrypted plaintext
   const [input, setInput] = useState("");
   const [otherPub, setOtherPub] = useState<string | null>(null);
+  const [gifOpen, setGifOpen] = useState(false);
   const scroller = useRef<ScrollView>(null);
 
   useEffect(() => { if (uid) getPublicKey(uid).then(setOtherPub); }, [uid]);
@@ -65,6 +70,32 @@ export default function DM() {
     if (m) { setMessages((prev) => prev.filter((x) => x.id !== tmpId)); Alert.alert("Not sent", m); }
   }
 
+  async function sendMediaRef(ref: MediaRef) {
+    if (!id || !userId) return;
+    const content = mediaBody(ref);
+    const cipher = otherPub ? await encryptDM(otherPub, content) : null;
+    await sendDm(id, userId, cipher ?? content); // media url stays inside the E2EE body
+  }
+  async function pickMedia() {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { Alert.alert("Permission needed", "Allow photo access to share media."); return; }
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images", "videos"], quality: 0.6, videoMaxDuration: 60 });
+    if (res.canceled || !res.assets?.[0] || !userId) return;
+    const a = res.assets[0];
+    const isVideo = a.type === "video";
+    const ext = isVideo ? "mp4" : a.uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
+    const url = await uploadChatMedia(userId, a.uri, ext, a.mimeType || (isVideo ? "video/mp4" : "image/jpeg"));
+    if (!url) { Alert.alert("Upload failed", "Try again."); return; }
+    await sendMediaRef({ t: isVideo ? "video" : "image", url });
+  }
+  function attach() {
+    Alert.alert("Attach", undefined, [
+      { text: "Photo / Video", onPress: pickMedia },
+      { text: "GIF", onPress: () => setGifOpen(true) },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+
   function report(m: DmMsg) {
     if (!m.author_id || m.author_id === userId || !userId) return;
     Alert.alert("Report this message?", undefined, [
@@ -87,18 +118,22 @@ export default function DM() {
             const mine = m.author_id === userId;
             return (
               <Pressable key={m.id} onLongPress={() => report(m)} delayLongPress={350} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
-                <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 2 }}>
-                  <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20, fontFamily: F.body }}>{text[m.id] ?? "…"}</Text>
-                </View>
+                {parseMedia(text[m.id]) ? <MediaBubble media={parseMedia(text[m.id])!} /> : (
+                  <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 2 }}>
+                    <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20, fontFamily: F.body }}>{text[m.id] ?? "…"}</Text>
+                  </View>
+                )}
               </Pressable>
             );
           })}
         </ScrollView>
-        <View style={{ flexDirection: "row", gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: C.line }}>
+        <View style={{ flexDirection: "row", gap: 6, padding: 12, borderTopWidth: 1, borderTopColor: C.line, alignItems: "center" }}>
+          <Pressable onPress={attach} hitSlop={6} style={{ justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ color: C.gold, fontSize: 24 }}>＋</Text></Pressable>
           <TextInput value={input} onChangeText={setInput} placeholder="Message…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} onSubmitEditing={send} returnKeyType="send" />
-          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
+          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
         </View>
       </KeyboardAvoidingView>
+      <GifPicker visible={gifOpen} onClose={() => setGifOpen(false)} onPick={(url) => sendMediaRef({ t: "gif", url })} />
     </SafeAreaView>
   );
 }

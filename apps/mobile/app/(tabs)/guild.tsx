@@ -2,6 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { uploadChatMedia, mediaBody, parseMedia } from "@/lib/media";
+import { MediaBubble } from "@/components/MediaBubble";
+import { GifPicker } from "@/components/GifPicker";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, loadChannels, loadReactions, toggleReaction, getGlobalChannel, type Channel, type Msg, type Member, type ReactionInfo } from "@/lib/guild";
@@ -21,6 +25,7 @@ export default function Guild() {
   const [mode, setMode] = useState<Mode>("community");
   const [isStaff, setIsStaff] = useState(false);
   const [profileUser, setProfileUser] = useState<PublicProfile | null>(null);
+  const [gifOpen, setGifOpen] = useState(false);
   const [communityCh, setCommunityCh] = useState<Glob>(null);
   const [announceCh, setAnnounceCh] = useState<Glob>(null);
 
@@ -101,6 +106,30 @@ export default function Guild() {
     const msg = sendErrorMessage(error);
     if (msg) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Not sent", msg); }
     else if (hidden) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Removed", "That message broke the guidelines and was removed. You have been silenced pending review."); }
+  }
+
+  async function pickMedia() {
+    if (!effChannel || !effGuild || !userId || !canPost) return;
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { Alert.alert("Permission needed", "Allow photo access to share media."); return; }
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images", "videos"], quality: 0.6, videoMaxDuration: 60 });
+    if (res.canceled || !res.assets?.[0]) return;
+    const a = res.assets[0];
+    const isVideo = a.type === "video";
+    const ext = isVideo ? "mp4" : a.uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
+    const url = await uploadChatMedia(userId, a.uri, ext, a.mimeType || (isVideo ? "video/mp4" : "image/jpeg"));
+    if (!url) { Alert.alert("Upload failed", "Try again."); return; }
+    await sendMessage(effChannel, effGuild, userId, mediaBody({ t: isVideo ? "video" : "image", url }));
+  }
+  async function sendGif(url: string) {
+    if (effChannel && effGuild && userId && canPost) await sendMessage(effChannel, effGuild, userId, mediaBody({ t: "gif", url }));
+  }
+  function attach() {
+    Alert.alert("Attach", undefined, [
+      { text: "Photo / Video", onPress: pickMedia },
+      { text: "GIF", onPress: () => setGifOpen(true) },
+      { text: "Cancel", style: "cancel" },
+    ]);
   }
 
   async function selectGuild(g: GuildRow) {
@@ -238,9 +267,11 @@ export default function Guild() {
               return (
                 <Pressable key={m.id} onLongPress={() => onMessagePress(m)} delayLongPress={300} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
                   <Text style={{ color: mine ? C.gold : C.muted, fontSize: 9, letterSpacing: 1, marginBottom: 3, textAlign: mine ? "right" : "left" }}>{mine ? "YOU" : (m.author_id ? nameMap[m.author_id] ?? "Brother" : "System").toUpperCase()}</Text>
-                  <View style={{ backgroundColor: mode === "board" ? "rgba(201,169,97,0.10)" : mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: mode === "board" ? C.gold : C.line, padding: 11, borderRadius: 2 }}>
-                    <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>
-                  </View>
+                  {parseMedia(m.body) ? <MediaBubble media={parseMedia(m.body)!} /> : (
+                    <View style={{ backgroundColor: mode === "board" ? "rgba(201,169,97,0.10)" : mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: mode === "board" ? C.gold : C.line, padding: 11, borderRadius: 2 }}>
+                      <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>
+                    </View>
+                  )}
                   {reactions[m.id] && Object.keys(reactions[m.id].counts).length > 0 && (
                     <View style={{ flexDirection: "row", gap: 6, marginTop: 4, alignSelf: mine ? "flex-end" : "flex-start" }}>
                       {Object.entries(reactions[m.id].counts).map(([emoji, n]) => (
@@ -256,9 +287,10 @@ export default function Guild() {
           </ScrollView>
 
           {canPost ? (
-            <View style={{ flexDirection: "row", gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: C.line }}>
+            <View style={{ flexDirection: "row", gap: 6, padding: 12, borderTopWidth: 1, borderTopColor: C.line, alignItems: "center" }}>
+              <Pressable onPress={attach} hitSlop={6} style={{ justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ color: C.gold, fontSize: 24 }}>＋</Text></Pressable>
               <TextInput value={input} onChangeText={setInput} placeholder={mode === "board" ? "Post an announcement…" : mode === "community" ? "Message the community" : `Message #${active?.name ?? ""}`} placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2 }} onSubmitEditing={send} returnKeyType="send" />
-              <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>{mode === "board" ? "POST" : "SEND"}</Text></Pressable>
+              <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>{mode === "board" ? "POST" : "SEND"}</Text></Pressable>
             </View>
           ) : (
             <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: C.line, alignItems: "center" }}>
@@ -301,6 +333,7 @@ export default function Guild() {
           </Pressable>
         </Pressable>
       </Modal>
+      <GifPicker visible={gifOpen} onClose={() => setGifOpen(false)} onPick={sendGif} />
     </SafeAreaView>
   );
 }
