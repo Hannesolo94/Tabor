@@ -32,24 +32,18 @@ export default function Body() {
       <View style={{ paddingHorizontal: 22, paddingTop: 8 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ FITNESS GUILD ]</Text>
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>The Body</Text>
-        <View style={{ flexDirection: "row", gap: 8, marginTop: 14, marginBottom: 8 }}>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 14, marginBottom: 10 }}>
           {(["program", "library", "timer"] as const).map((t) => (
-            <Pressable key={t} onPress={() => setTab(t)} style={{ flex: 1, paddingVertical: 8, alignItems: "center", borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
-              <Text style={{ color: tab === t ? C.black : C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>{t === "program" ? "PROGRAM" : t === "library" ? "LIBRARY" : "TABATA"}</Text>
+            <Pressable key={t} onPress={() => setTab(t)} style={{ flex: 1, paddingVertical: 12, alignItems: "center", borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
+              <Text style={{ color: tab === t ? C.black : C.ivory, fontSize: 12, letterSpacing: 1, fontFamily: F.headMid }}>{t === "program" ? "PROGRAM" : t === "library" ? "LIBRARY" : "TABATA"}</Text>
             </Pressable>
           ))}
         </View>
         <View style={{ flexDirection: "row", gap: 8, marginBottom: 6 }}>
-          <Pressable onPress={() => router.push("/fuel")} style={{ flex: 1, paddingVertical: 9, alignItems: "center", borderWidth: 1, borderColor: C.gold, borderRadius: 2 }}>
-            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>🍽  FUEL · NUTRITION</Text>
-          </Pressable>
-          <Pressable onPress={() => router.push("/history")} style={{ flex: 1, paddingVertical: 9, alignItems: "center", borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
-            <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>📋  TRAINING LOG</Text>
-          </Pressable>
+          <QuickLink icon="🍽" label="FUEL" onPress={() => router.push("/fuel")} />
+          <QuickLink icon="📋" label="LOG" onPress={() => router.push("/history")} />
+          <QuickLink icon="📈" label="PROGRESS" onPress={() => router.push("/progress")} accent />
         </View>
-        <Pressable onPress={() => router.push("/progress")} style={{ paddingVertical: 10, alignItems: "center", borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 2, marginBottom: 6 }}>
-          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>📈  PROGRESS · CHARTS</Text>
-        </Pressable>
       </View>
 
       {tab === "program" && <ProgramTab userId={userId} profile={profile} onScroll={tb?.onScroll} router={router} />}
@@ -125,7 +119,7 @@ function ProgramTab({ userId, profile, onScroll, router }: { userId?: string; pr
           <Text style={{ color: C.ivory, fontSize: 16, fontFamily: F.headMid }}>{r.name}</Text>
           <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 3 }}>{(r.focus || "").toUpperCase()}</Text>
         </View>
-        <Text style={{ color: C.muted, fontSize: 8, fontFamily: F.mono }}>HOLD ⋯</Text>
+        <Pressable onPress={() => manage(r)} hitSlop={14} style={{ paddingHorizontal: 6, paddingVertical: 4 }}><Text style={{ color: C.gold, fontSize: 22 }}>⋯</Text></Pressable>
       </Pressable>
       {section.length > 1 && (
         <View style={{ marginLeft: 8, alignItems: "center" }}>
@@ -256,4 +250,12 @@ function Chips({ label, options, value, onPick }: { label: string; options: { v:
 }
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return <Pressable onPress={onPress} style={{ paddingVertical: 7, paddingHorizontal: 12, borderWidth: 1, borderColor: active ? C.gold : C.line, backgroundColor: active ? C.gold : "transparent", borderRadius: 2 }}><Text style={{ color: active ? C.black : C.muted, fontSize: 11, fontFamily: F.bodyMid }}>{label}</Text></Pressable>;
+}
+function QuickLink({ icon, label, onPress, accent }: { icon: string; label: string; onPress: () => void; accent?: boolean }) {
+  return (
+    <Pressable onPress={onPress} style={{ flex: 1, paddingVertical: 10, alignItems: "center", borderWidth: 1, borderColor: accent ? C.gold : C.line, backgroundColor: accent ? "rgba(201,169,97,0.10)" : "transparent", borderRadius: 2 }}>
+      <Text style={{ fontSize: 17 }}>{icon}</Text>
+      <Text style={{ color: accent ? C.gold : C.ivory, fontSize: 10, letterSpacing: 1, fontFamily: F.mono, marginTop: 3 }}>{label}</Text>
+    </Pressable>
+  );
 }
