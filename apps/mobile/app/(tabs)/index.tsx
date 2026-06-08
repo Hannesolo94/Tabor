@@ -93,7 +93,10 @@ export default function Quests() {
           </View>
         </View>
 
-        <Text style={{ color: C.ivory, fontSize: 13, letterSpacing: 3, marginTop: 28, marginBottom: 10 }}>TODAY'S QUESTS</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 28, marginBottom: 10 }}>
+          <Text style={{ color: C.ivory, fontSize: 13, letterSpacing: 3 }}>TODAY'S QUESTS</Text>
+          <Text style={{ color: allDone ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{quests.filter((q) => q.done).length}/{quests.length} CLEARED</Text>
+        </View>
         {quests.map((q) => (
           <Pressable key={q.id} onPress={() => onToggle(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
             <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
@@ -102,10 +105,14 @@ export default function Quests() {
             <View style={{ flex: 1 }}>
               <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{q.pillar}</Text>
               <Text style={{ color: C.ivory, fontSize: 15, marginTop: 2, textDecorationLine: q.done ? "line-through" : "none" }}>{q.title}</Text>
+              {q.sub ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>{q.sub}</Text> : null}
             </View>
-            <Text style={{ color: C.muted, fontSize: 12 }}>+{q.xp}</Text>
+            <Text style={{ color: C.muted, fontSize: 12, marginLeft: 8 }}>+{q.xp}</Text>
           </Pressable>
         ))}
+        {!allDone && quests.length > 0 && (
+          <Text style={{ color: C.muted, fontSize: 12, textAlign: "center", marginTop: 4 }}>Clear all {quests.length} to seal the day and hold your streak.</Text>
+        )}
 
         {sealed && (
           <Animated.View style={{ borderWidth: 1, borderColor: C.gold, padding: 20, marginTop: 8, alignItems: "center", borderRadius: 2, transform: [{ scale: sealAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }], opacity: sealAnim }}>
