@@ -19,6 +19,8 @@
       "package": "quest.tabor.app",
       "permissions": [
         "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ]
     },
@@ -46,6 +48,12 @@
         "projectId": "42908972-b333-4944-a9d3-3a1ad532d6f9"
       }
     },
-    "owner": "burg.er"
+    "owner": "burg.er",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/42908972-b333-4944-a9d3-3a1ad532d6f9"
+    }
   }
 }
