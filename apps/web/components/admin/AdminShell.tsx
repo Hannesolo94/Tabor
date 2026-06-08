@@ -38,6 +38,7 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
     { label: "Donations", href: "/admin/donations" },
   ] },
   { section: "System", items: [
+    { label: "Admins", href: "/admin/admins" },
     { label: "Settings", href: "/admin/settings" },
     { label: "Audit Log", href: "/admin/audit" },
   ] },

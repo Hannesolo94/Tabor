@@ -7,6 +7,7 @@ import { getProductBySku } from "@/lib/products-db";
 import { getRegion } from "@/lib/region";
 import { REGIONS } from "@/lib/region";
 import { startPayment } from "@/lib/payments";
+import { sendEmail, emailShell } from "@/lib/email";
 import { sameOrigin } from "@/lib/http";
 
 interface InItem { sku: string; size?: string; qty?: number }
@@ -85,6 +86,18 @@ export async function POST(req: Request) {
   const pay = await startPayment({ id: order.id, total, currency: cur.code, email, region });
   await admin.from("orders").update({ payment_provider: pay.provider, payment_ref: pay.ref ?? null }).eq("id", order.id);
   if (discountCode) await admin.from("discount_codes").update({ used_count: discountUsed + 1 }).eq("code", discountCode);
+
+  // order confirmation email (branded, best-effort — never blocks the order)
+  try {
+    const itemRows = lines.map((l) => `<tr><td style="padding:6px 0;color:#C3BDB1;font-family:Georgia,serif;font-size:14px">${l.name}${l.size ? ` (${l.size})` : ""} &times; ${l.qty}</td><td align="right" style="padding:6px 0;color:#E8E2D5;font-family:Georgia,serif;font-size:14px">${cur.symbol}${(l.price * l.qty).toFixed(2)}</td></tr>`).join("");
+    const summary = `<table role="presentation" width="100%" style="border-collapse:collapse;margin:6px 0">${itemRows}<tr><td style="padding-top:10px;border-top:1px solid rgba(201,169,97,0.2);color:#8A847A;font-family:Georgia,serif;font-size:13px">TOTAL</td><td align="right" style="padding-top:10px;border-top:1px solid rgba(201,169,97,0.2);color:#C9A961;font-weight:bold;font-family:Georgia,serif;font-size:15px">${cur.symbol}${total.toFixed(2)}</td></tr></table>`;
+    const html = emailShell(
+      "Order received",
+      `Thank you, ${shipping.name}. Your order is in.<br/><br/>${summary}<br/>${pay.message ?? "We will be in touch with the next steps."}`,
+      { eyebrow: "[ ORDER CONFIRMED ]", preheader: `Your TABOR order — ${cur.symbol}${total.toFixed(2)}` },
+    );
+    await sendEmail(email, "TABOR: order received", html);
+  } catch { /* email is non-critical */ }
 
   return NextResponse.json({ orderId: order.id, total, currency: cur.code, symbol: cur.symbol, redirectUrl: pay.redirectUrl, status: pay.status, message: pay.message });
 }

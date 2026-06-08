@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { omnisendAddContact } from "@/lib/omnisend";
+import { sendEmail, emailShell } from "@/lib/email";
 import { sameOrigin } from "@/lib/http";
 
 export async function POST(req: Request) {
@@ -24,9 +25,22 @@ export async function POST(req: Request) {
     // 23505 = already on the list; treat as success
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+  const isNew = !error; // 23505 = already subscribed -> don't re-welcome
 
   // best-effort email-platform sync (never blocks the signup)
   await omnisendAddContact(email, [source]);
+
+  // welcome email with the 10% code (only on a fresh signup)
+  if (isNew) {
+    try {
+      const html = emailShell(
+        "Welcome to the brotherhood",
+        `You're on the list, brother. When the gear drops, you'll be first to know.<br/><br/>Here's <strong>10% off</strong> your first order:<br/><br/><span style="display:inline-block;border:1px dashed #C9A961;color:#C9A961;font-family:'Courier New',monospace;letter-spacing:3px;font-size:18px;padding:10px 18px">FIRE10</span><br/><br/>Sons of Fire. Forged not bought.`,
+        { eyebrow: "[ WELCOME ]", cta: { label: "Shop the gear", url: "https://tabor.quest/shop" }, footnote: "You're receiving this because you signed up at tabor.quest." },
+      );
+      await sendEmail(email, "Welcome to TABOR — 10% off inside", html);
+    } catch { /* welcome email is non-critical */ }
+  }
 
   return NextResponse.json({ ok: true });
 }
