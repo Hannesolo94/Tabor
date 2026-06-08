@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
-import { Text, Animated, View } from "react-native";
+import { Text, Animated, View, StyleSheet } from "react-native";
+import { BlurView } from "expo-blur";
 import { BottomTabBar, type BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { TabBarProvider, useTabBar } from "@/lib/tabbar";
 import { useProfile } from "@/lib/useProfile";
@@ -15,7 +16,7 @@ function XpBar() {
   const { profile } = useProfile();
   const prog = levelProgress(Number(profile?.xp ?? 0));
   return (
-    <View style={{ backgroundColor: C.surface2, paddingHorizontal: 16, paddingTop: 7, paddingBottom: 4, borderTopWidth: 1, borderTopColor: C.glassBorder }}>
+    <View style={{ backgroundColor: "rgba(21,21,26,0.55)", paddingHorizontal: 16, paddingTop: 7, paddingBottom: 4, borderTopWidth: 1, borderTopColor: C.glassBorder }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
         <Text style={{ color: C.gold, fontSize: 10, fontFamily: F.mono, letterSpacing: 1 }}>{prog.rank.toUpperCase()} · LVL {prog.level}</Text>
         <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono }}>{prog.into} / {prog.need} XP</Text>
@@ -33,6 +34,7 @@ function AnimatedTabBar(props: BottomTabBarProps) {
   const tb = useTabBar();
   return (
     <Animated.View style={{ transform: tb ? [{ translateY: tb.translateY }] : [] }}>
+      <BlurView intensity={48} tint="dark" style={StyleSheet.absoluteFill} />
       <XpBar />
       <BottomTabBar {...props} />
     </Animated.View>
@@ -46,7 +48,7 @@ export default function TabsLayout() {
         tabBar={(props) => <AnimatedTabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          tabBarStyle: { backgroundColor: C.surface2, borderTopColor: C.glassBorder, height: 62, paddingBottom: 8, paddingTop: 6, shadowColor: "#000", shadowOffset: { width: 0, height: -8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 18 },
+          tabBarStyle: { backgroundColor: "rgba(21,21,26,0.5)", borderTopColor: C.glassBorder, height: 62, paddingBottom: 8, paddingTop: 6 },
           tabBarActiveTintColor: C.gold,
           tabBarInactiveTintColor: C.muted,
           tabBarLabelStyle: { fontSize: 9, letterSpacing: 1, fontFamily: F.mono },
