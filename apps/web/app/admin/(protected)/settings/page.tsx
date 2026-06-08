@@ -1,6 +1,7 @@
 // Settings hub: store config, integration keys (DB-backed, editable), and a
 // read-only status of core infrastructure keys (managed in the deployment env).
 import { supabaseServer } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin-guard";
 import { saveStore, saveIntegration, addIntegration, savePixels } from "./actions";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
@@ -12,6 +13,7 @@ const card: React.CSSProperties = { border: "1px solid rgba(201,169,97,0.16)", b
 const saveBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0A0A0A", background: `linear-gradient(180deg,#E8D08C,${GOLD})`, border: "none", padding: "11px 20px", cursor: "pointer" };
 
 export default async function SettingsPage() {
+  await requireAdmin();
   const sb = await supabaseServer();
   const [storeRes, intRes, pxRes] = await Promise.all([
     sb.from("app_settings").select("value").eq("key", "store").maybeSingle(),

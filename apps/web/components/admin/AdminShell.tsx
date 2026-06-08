@@ -44,7 +44,13 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
   ] },
 ];
 
-export function AdminShell({ email, name, children }: { email?: string; name?: string | null; children: React.ReactNode }) {
+// Moderators only see the dashboard + community/safety tools.
+const MOD_HREFS = new Set(["/admin", "/admin/community", "/admin/moderation", "/admin/tickets", "/admin/giveaways"]);
+
+export function AdminShell({ email, name, role, children }: { email?: string; name?: string | null; role?: string; children: React.ReactNode }) {
+  const groups = role === "moderator"
+    ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => MOD_HREFS.has(i.href)) })).filter((g) => g.items.length)
+    : NAV_GROUPS;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "230px 1fr", minHeight: "100vh" }}>
       {/* sidebar */}
@@ -57,7 +63,7 @@ export function AdminShell({ email, name, children }: { email?: string; name?: s
           <input name="q" placeholder="Search…" aria-label="Search admin" style={{ width: "100%", fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "#15151A", border: `1px solid ${GOLD}33`, padding: "8px 10px" }} />
         </form>
         <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, overflowY: "auto" }}>
-          {NAV_GROUPS.map((g) => (
+          {groups.map((g) => (
             <div key={g.section} style={{ marginBottom: 10 }}>
               <div style={{ fontFamily: MONO, fontSize: 8.5, color: GOLD, letterSpacing: "0.18em", textTransform: "uppercase", padding: "4px 10px 4px", opacity: 0.7 }}>{g.section}</div>
               {g.items.map((n) => (

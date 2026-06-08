@@ -39,7 +39,7 @@ export async function toggleReaction(messageId: string, userId: string, emoji: s
 }
 
 export async function loadMessages(channelId: string): Promise<Msg[]> {
-  const { data } = await supabase.from("messages").select("id, body, author_id, created_at").eq("channel_id", channelId).order("created_at", { ascending: true }).limit(100);
+  const { data } = await supabase.from("messages").select("id, body, author_id, created_at").eq("channel_id", channelId).eq("hidden", false).order("created_at", { ascending: true }).limit(100);
   return (data as Msg[]) ?? [];
 }
 
@@ -62,7 +62,10 @@ export async function loadRoster(guildId: string): Promise<Member[]> {
 export function subscribeMessages(channelId: string, onInsert: (m: Msg) => void): () => void {
   const ch = supabase
     .channel(`room:${channelId}`)
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `channel_id=eq.${channelId}` }, (payload) => onInsert(payload.new as Msg))
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `channel_id=eq.${channelId}` }, (payload) => {
+      const m = payload.new as Msg & { hidden?: boolean };
+      if (!m.hidden) onInsert(m); // auto-modded messages never reach members
+    })
     .subscribe();
   return () => { supabase.removeChannel(ch); };
 }

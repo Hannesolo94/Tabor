@@ -9,12 +9,13 @@ import { logAudit } from "@/lib/audit";
  *  first (app or web) so they have a profile + a password to log in with. */
 export async function grantAdmin(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!email.includes("@")) return;
+  const role = String(formData.get("role") ?? "admin");
+  if (!email.includes("@") || !["admin", "moderator"].includes(role)) return;
   const admin = supabaseAdmin();
   const { data: prof } = await admin.from("profiles").select("user_id").eq("email", email).maybeSingle();
   if (!prof) return; // no account with that email yet
-  await admin.from("profiles").update({ role: "admin" }).eq("user_id", prof.user_id);
-  await logAudit("admin.grant", "profile", prof.user_id, { email });
+  await admin.from("profiles").update({ role }).eq("user_id", prof.user_id);
+  await logAudit("staff.grant", "profile", prof.user_id, { email, role });
   revalidatePath("/admin/admins");
 }
 
