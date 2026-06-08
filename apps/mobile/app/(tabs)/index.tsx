@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
 import { loadToday, toggleQuest, sealDay, getDayFeedback, recordDayFeedback, CORE_KEYS, type Quest } from "@/lib/quests";
+import { bookOrderFor } from "@/lib/scripture";
 import { levelProgress } from "@/lib/game";
 import { Seal } from "@/components/Seal";
 import { C, F } from "@/lib/theme";
@@ -11,6 +13,7 @@ import { useTabBar } from "@/lib/tabbar";
 
 export default function Quests() {
   const tb = useTabBar();
+  const router = useRouter();
   const { session } = useAuth();
   const { profile, loading: pLoading } = useProfile();
   const userId = session?.user.id;
@@ -70,6 +73,32 @@ export default function Quests() {
     toggleQuest(userId, q, done).catch(() => {});
   }
 
+  // tapping a quest does the relevant thing: open the passage, log the movement, or confirm
+  async function openQuest(q: Quest) {
+    const m = q.quest_key === "word" ? q.title.match(/^Read\s+(.+)\s+(\d+)$/) : null;
+    if (m) {
+      const order = await bookOrderFor(m[1]);
+      const opts: { text: string; style?: "cancel"; onPress?: () => void }[] = [];
+      if (order) opts.push({ text: "Open passage", onPress: () => router.push(`/read/${order}?c=${m[2]}`) });
+      opts.push({ text: q.done ? "Mark not read" : "Mark as read", onPress: () => onToggle(q) });
+      opts.push({ text: "Cancel", style: "cancel" });
+      Alert.alert(q.title, "Take ground in the Word.", opts);
+      return;
+    }
+    if (q.quest_key === "body") {
+      Alert.alert(q.title, q.sub || "Crush it, then log it.", [
+        { text: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
+        { text: "I did my own training", onPress: () => onToggle(q) },
+        { text: "Cancel", style: "cancel" },
+      ]);
+      return;
+    }
+    Alert.alert(q.title, q.sub || "", [
+      { text: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+
   if (loading || pLoading) {
     return <SafeAreaView style={{ flex: 1, backgroundColor: C.black, alignItems: "center", justifyContent: "center" }}><ActivityIndicator color={C.gold} /></SafeAreaView>;
   }
@@ -101,14 +130,14 @@ export default function Quests() {
           <Text style={{ color: C.ivory, fontSize: 13, letterSpacing: 3 }}>TODAY'S QUESTS</Text>
           <Text style={{ color: allDone ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{core.filter((q) => q.done).length}/{core.length} CLEARED</Text>
         </View>
-        {core.map((q) => <QuestRow key={q.id} q={q} onToggle={onToggle} />)}
+        {core.map((q) => <QuestRow key={q.id} q={q} onOpen={openQuest} onToggle={onToggle} />)}
         {!allDone && core.length > 0 && (
           <Text style={{ color: C.muted, fontSize: 12, textAlign: "center", marginTop: 4 }}>Clear all {core.length} to seal the day and hold your streak.</Text>
         )}
         {bonus.length > 0 && (
           <>
             <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 3, fontFamily: F.mono, marginTop: 26, marginBottom: 10 }}>BONUS DISCIPLINES · OPTIONAL</Text>
-            {bonus.map((q) => <QuestRow key={q.id} q={q} onToggle={onToggle} />)}
+            {bonus.map((q) => <QuestRow key={q.id} q={q} onOpen={openQuest} onToggle={onToggle} />)}
           </>
         )}
 
@@ -147,26 +176,21 @@ export default function Quests() {
   );
 }
 
-function QuestRow({ q, onToggle }: { q: Quest; onToggle: (q: Quest) => void }) {
+function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => void; onToggle: (q: Quest) => void }) {
   return (
-    <View style={{ marginBottom: 10 }}>
-      <Pressable onPress={() => onToggle(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
-        <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
-          {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{q.pillar}</Text>
-          <Text style={{ color: C.ivory, fontSize: 15, marginTop: 2, textDecorationLine: q.done ? "line-through" : "none" }}>{q.title}</Text>
-          {q.sub ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>{q.sub}</Text> : null}
-        </View>
-        <Text style={{ color: C.muted, fontSize: 12, marginLeft: 8 }}>+{q.xp}</Text>
+    <Pressable onPress={() => onOpen(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
+      {/* tap the circle to quick-toggle; tap the card to open the action */}
+      <Pressable onPress={() => onToggle(q)} hitSlop={10} style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
+        {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
       </Pressable>
-      {!q.done && (q.quest_key === "body" || q.quest_key === "word") && (
-        <Pressable onPress={() => onToggle(q)} hitSlop={6} style={{ paddingTop: 7, paddingLeft: 52 }}>
-          <Text style={{ color: C.muted, fontSize: 11, textDecorationLine: "underline" }}>{q.quest_key === "body" ? "Doing your own training? Tap to log it" : "Reading your own passage? Tap to log it"}</Text>
-        </Pressable>
-      )}
-    </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2 }}>{q.pillar}</Text>
+        <Text style={{ color: C.ivory, fontSize: 15, marginTop: 2, textDecorationLine: q.done ? "line-through" : "none" }}>{q.title}</Text>
+        {q.sub ? <Text style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>{q.sub}</Text> : null}
+      </View>
+      <Text style={{ color: C.muted, fontSize: 11, marginLeft: 8 }}>+{q.xp}</Text>
+      <Text style={{ color: C.gold, fontSize: 18, marginLeft: 8 }}>›</Text>
+    </Pressable>
   );
 }
 
