@@ -189,3 +189,47 @@ export async function saveTabataPreset(userId: string, p: { name: string; work: 
 export async function deleteTabataPreset(id: string): Promise<void> {
   await supabase.from("tabata_presets").delete().eq("id", id);
 }
+
+// ---- Progress tracking: per-set logging + chart series ----
+export interface SetEntry { exercise_id: string; exercise_name: string; set_index: number; reps: number; weight: number }
+export interface DayPoint { day: string; value: number }
+const dayAgo = (n: number) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
+
+export async function logWorkout(userId: string, name: string, mins: number, sets: SetEntry[], day: string): Promise<void> {
+  const done = sets.filter((s) => s.reps > 0);
+  const volume = done.reduce((a, s) => a + s.reps * (s.weight || 0), 0);
+  const { data: w } = await supabase.from("workouts").insert({ user_id: userId, name, mins, day, meta: { sets: done.length, volume } }).select("id").maybeSingle();
+  if (!done.length) return;
+  await supabase.from("set_logs").insert(done.map((s) => ({ user_id: userId, workout_id: w?.id, exercise_id: s.exercise_id, exercise_name: s.exercise_name, set_index: s.set_index, reps: s.reps, weight: s.weight, day })));
+  // bump PRs with best estimated 1RM (Epley) per lift this session
+  const best: Record<string, number> = {};
+  for (const s of done) { if (!s.weight) continue; const e = Math.round(s.weight * (1 + s.reps / 30)); if (e > (best[s.exercise_name] || 0)) best[s.exercise_name] = e; }
+  for (const [lift, value] of Object.entries(best)) {
+    const { data: cur } = await supabase.from("personal_records").select("value").eq("user_id", userId).eq("lift", lift).maybeSingle();
+    if (!cur || value > Number(cur.value)) await supabase.from("personal_records").upsert({ user_id: userId, lift, value }, { onConflict: "user_id,lift" });
+  }
+}
+
+export async function getVolumeByDay(userId: string, days = 30): Promise<DayPoint[]> {
+  const { data } = await supabase.from("set_logs").select("day, reps, weight").eq("user_id", userId).gte("day", dayAgo(days));
+  const map: Record<string, number> = {};
+  for (const r of data ?? []) map[r.day] = (map[r.day] || 0) + (r.reps || 0) * (Number(r.weight) || 0);
+  return Object.entries(map).map(([day, value]) => ({ day, value })).sort((a, b) => a.day.localeCompare(b.day));
+}
+export async function getTrackedLifts(userId: string): Promise<string[]> {
+  const { data } = await supabase.from("set_logs").select("exercise_name").eq("user_id", userId);
+  return [...new Set((data ?? []).map((r) => r.exercise_name).filter(Boolean) as string[])];
+}
+export async function getLiftProgress(userId: string, lift: string): Promise<DayPoint[]> {
+  const { data } = await supabase.from("set_logs").select("day, reps, weight").eq("user_id", userId).eq("exercise_name", lift);
+  const map: Record<string, number> = {};
+  for (const r of data ?? []) { const e = (Number(r.weight) || 0) * (1 + (r.reps || 0) / 30); if (e > (map[r.day] || 0)) map[r.day] = e; }
+  return Object.entries(map).map(([day, value]) => ({ day, value: Math.round(value) })).sort((a, b) => a.day.localeCompare(b.day));
+}
+export async function logBodyweight(userId: string, weight: number, day: string): Promise<void> {
+  await supabase.from("body_metrics").upsert({ user_id: userId, day, weight }, { onConflict: "user_id,day" });
+}
+export async function getBodyweightSeries(userId: string, days = 90): Promise<DayPoint[]> {
+  const { data } = await supabase.from("body_metrics").select("day, weight").eq("user_id", userId).gte("day", dayAgo(days)).order("day");
+  return (data ?? []).map((r) => ({ day: r.day, value: Number(r.weight) || 0 }));
+}

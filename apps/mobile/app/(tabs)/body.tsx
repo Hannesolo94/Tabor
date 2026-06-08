@@ -46,6 +46,9 @@ export default function Body() {
             <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>📋  TRAINING LOG</Text>
           </Pressable>
         </View>
+        <Pressable onPress={() => router.push("/progress")} style={{ paddingVertical: 10, alignItems: "center", borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 2, marginBottom: 6 }}>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>📈  PROGRESS · CHARTS</Text>
+        </Pressable>
       </View>
 
       {tab === "program" && <ProgramTab userId={userId} profile={profile} onScroll={tb?.onScroll} router={router} />}
