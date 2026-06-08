@@ -193,6 +193,9 @@ export default function Guild() {
                 ))}
               </ScrollView>
             )}
+            <Pressable onPress={() => router.push("/guilds")} style={{ marginTop: 8 }}>
+              <Text style={{ color: C.gold, fontSize: 10, fontFamily: F.mono, letterSpacing: 1 }}>＋ BROWSE / JOIN GUILDS</Text>
+            </Pressable>
           </>
         )}
       </View>
