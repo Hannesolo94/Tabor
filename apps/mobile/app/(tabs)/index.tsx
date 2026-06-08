@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal }
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
-import { loadToday, toggleQuest, sealDay, type Quest } from "@/lib/quests";
+import { loadToday, toggleQuest, sealDay, getDayFeedback, recordDayFeedback, type Quest } from "@/lib/quests";
 import { levelProgress } from "@/lib/game";
 import { Seal } from "@/components/Seal";
 import { C, F } from "@/lib/theme";
@@ -19,6 +19,7 @@ export default function Quests() {
   const [loading, setLoading] = useState(true);
   const [xpOffset, setXpOffset] = useState(0);
   const [sealed, setSealed] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   const barW = useRef(new Animated.Value(0)).current;
   const sealAnim = useRef(new Animated.Value(0)).current;
@@ -32,6 +33,7 @@ export default function Quests() {
       setSealed(q.length > 0 && q.every((x) => x.done));
       setLoading(false);
     });
+    getDayFeedback(userId).then(setFeedback);
   }, [userId]);
 
   const baseXp = Number(profile?.xp ?? 0);
@@ -98,7 +100,8 @@ export default function Quests() {
           <Text style={{ color: allDone ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{quests.filter((q) => q.done).length}/{quests.length} CLEARED</Text>
         </View>
         {quests.map((q) => (
-          <Pressable key={q.id} onPress={() => onToggle(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
+          <View key={q.id} style={{ marginBottom: 10 }}>
+          <Pressable onPress={() => onToggle(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
             <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
               {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
             </View>
@@ -109,6 +112,12 @@ export default function Quests() {
             </View>
             <Text style={{ color: C.muted, fontSize: 12, marginLeft: 8 }}>+{q.xp}</Text>
           </Pressable>
+          {!q.done && (q.quest_key === "body" || q.quest_key === "word") && (
+            <Pressable onPress={() => onToggle(q)} hitSlop={6} style={{ paddingTop: 7, paddingLeft: 52 }}>
+              <Text style={{ color: C.muted, fontSize: 11, textDecorationLine: "underline" }}>{q.quest_key === "body" ? "Doing your own training? Tap to log it" : "Reading your own passage? Tap to log it"}</Text>
+            </Pressable>
+          )}
+          </View>
         ))}
         {!allDone && quests.length > 0 && (
           <Text style={{ color: C.muted, fontSize: 12, textAlign: "center", marginTop: 4 }}>Clear all {quests.length} to seal the day and hold your streak.</Text>
@@ -118,6 +127,20 @@ export default function Quests() {
           <Animated.View style={{ borderWidth: 1, borderColor: C.gold, padding: 20, marginTop: 8, alignItems: "center", borderRadius: 2, transform: [{ scale: sealAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }], opacity: sealAnim }}>
             <Text style={{ color: C.gold, fontSize: 14, letterSpacing: 4, fontFamily: F.mono }}>[ DAY SEALED ]</Text>
             <Text style={{ color: C.text, fontSize: 14, marginTop: 8, textAlign: "center", lineHeight: 21 }}>The day is won. Your streak holds. Return tomorrow, brother.</Text>
+            {!feedback ? (
+              <View style={{ marginTop: 18, alignItems: "center" }}>
+                <Text style={{ color: C.muted, fontSize: 12, marginBottom: 10 }}>How did today's training feel?</Text>
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  {([["easy", "Too easy"], ["right", "Just right"], ["hard", "Too hard"]] as const).map(([sig, label]) => (
+                    <Pressable key={sig} onPress={() => { setFeedback(sig); if (userId) recordDayFeedback(userId, sig).catch(() => {}); }} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 2 }}>
+                      <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono }}>{label}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            ) : (
+              <Text style={{ color: C.muted, fontSize: 11, marginTop: 14, textAlign: "center" }}>{feedback === "easy" ? "Noted. Tomorrow climbs a little higher." : feedback === "hard" ? "Noted. We ease the load tomorrow." : "Locked in. Hold the line."}</Text>
+            )}
           </Animated.View>
         )}
       </ScrollView>

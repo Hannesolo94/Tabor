@@ -117,13 +117,15 @@ function ageFactor(dob?: string | null): number {
   return age >= 55 ? 0.75 : age >= 45 ? 0.85 : age >= 35 ? 0.95 : 1;
 }
 
-interface Gen { fitness_level?: string | null; equipment?: string | null; goals?: string[] | null; dob?: string | null; baseline?: Baseline | null }
+interface Gen { fitness_level?: string | null; equipment?: string | null; goals?: string[] | null; dob?: string | null; baseline?: Baseline | null; difficulty?: number | null }
 interface GenQuest { quest_key: string; pillar: string; title: string; sub: string; stat: string; xp: number; goal: number }
 
 /** Build today's three personalised quests from the user's profile + level. */
 export function generateQuests(p: Gen, level: number, scriptureIndex: number): GenQuest[] {
-  const vol = 2 + Math.min(level * 0.04, 2); // daily rep-total multiplier, 2.0 -> 4.0
-  const prog = 1 + Math.min(level * 0.02, 0.8); // per-set / distance / time, 1.0 -> 1.8
+  // adaptive difficulty: a per-user factor auto-tuned by feedback (still clamped by caps)
+  const diff = Math.max(0.6, Math.min(1.6, Number(p.difficulty) || 1));
+  const vol = (2 + Math.min(level * 0.04, 2)) * diff; // daily rep-total multiplier
+  const prog = (1 + Math.min(level * 0.02, 0.8)) * diff; // per-set / distance / time
   const goals = (p.goals || []).map((g) => String(g).toLowerCase());
   const isMuscle = goals.some((g) => /muscle|strength|gain|build|mass/.test(g));
   const isFat = goals.some((g) => /fat|lean|loss|cut|weight/.test(g));
@@ -150,7 +152,7 @@ export async function loadToday(userId: string): Promise<Quest[]> {
   const day = todayKey();
   const { data } = await supabase.from("quests").select("id, quest_key, pillar, title, sub, xp, done").eq("user_id", userId).eq("day", day);
   if (data && data.length) return data as Quest[];
-  const { data: prof } = await supabase.from("profiles").select("fitness_level, equipment, goals, dob, baseline, xp").eq("user_id", userId).maybeSingle();
+  const { data: prof } = await supabase.from("profiles").select("fitness_level, equipment, goals, dob, baseline, difficulty, xp").eq("user_id", userId).maybeSingle();
   const level = levelFromXp(Number(prof?.xp) || 0);
   // scripture advances with completion: how many Word quests they've finished
   const { count } = await supabase.from("quests").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("quest_key", "word").eq("done", true);
@@ -181,4 +183,21 @@ export async function sealDay(userId: string): Promise<void> {
   const streak = last === yesterday ? (Number(data?.streak) || 0) + 1 : 1;
   const best = Math.max(Number(data?.best_streak) || 0, streak);
   await supabase.from("profiles").update({ streak, best_streak: best, last_active: new Date().toISOString() }).eq("user_id", userId);
+}
+
+/** Today's difficulty feedback, if already given (so we ask only once a day). */
+export async function getDayFeedback(userId: string): Promise<string | null> {
+  const { data } = await supabase.from("day_history").select("feedback").eq("user_id", userId).eq("day", todayKey()).maybeSingle();
+  return data?.feedback ?? null;
+}
+
+/** Record how the day felt and auto-tune the user's fitness difficulty factor.
+ *  Affects only the body quest scaling; outputs stay hard-capped to realistic limits. */
+export async function recordDayFeedback(userId: string, signal: "easy" | "right" | "hard"): Promise<void> {
+  await supabase.from("day_history").upsert({ user_id: userId, day: todayKey(), status: "sealed", feedback: signal });
+  if (signal === "right") return;
+  const { data } = await supabase.from("profiles").select("difficulty").eq("user_id", userId).maybeSingle();
+  const cur = Number(data?.difficulty) || 1;
+  const next = Math.max(0.6, Math.min(1.6, signal === "easy" ? cur * 1.08 : cur * 0.92));
+  await supabase.from("profiles").update({ difficulty: next }).eq("user_id", userId);
 }
