@@ -30,7 +30,7 @@ export default function Honors() {
           <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono, marginBottom: 14 }}>{earned} OF {honors.length} ATTAINED</Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
             {honors.map((h) => (
-              <View key={h.id} style={{ width: "47.5%", borderWidth: 1, borderColor: h.unlocked ? C.gold : C.line, backgroundColor: h.unlocked ? "rgba(201,169,97,0.08)" : C.surface2, borderRadius: 3, padding: 14, opacity: h.unlocked ? 1 : 0.55 }}>
+              <View key={h.id} style={{ width: "47.5%", borderWidth: 1, borderColor: h.unlocked ? C.gold : C.line, backgroundColor: h.unlocked ? "rgba(201,169,97,0.08)" : C.surface2, borderRadius: 14, padding: 14, opacity: h.unlocked ? 1 : 0.55 }}>
                 <Text style={{ fontSize: 22, marginBottom: 6 }}>{h.unlocked ? "🛡" : "🔒"}</Text>
                 <Text style={{ color: h.unlocked ? C.gold : C.text, fontSize: 14, fontFamily: F.headMid }}>{h.name}</Text>
                 <Text style={{ color: C.muted, fontSize: 11.5, lineHeight: 16, fontFamily: F.body, marginTop: 3 }}>{h.desc}</Text>

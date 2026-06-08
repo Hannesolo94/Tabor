@@ -59,8 +59,8 @@ export default function Friends() {
         {/* add */}
         <Text style={sec}>FIND A BROTHER</Text>
         <View style={{ flexDirection: "row", gap: 8, marginBottom: 8 }}>
-          <TextInput value={q} onChangeText={setQ} onSubmitEditing={runSearch} placeholder="Search by name or @handle" placeholderTextColor={C.muted} autoCapitalize="none" style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2 }} />
-          <Pressable onPress={runSearch} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>FIND</Text></Pressable>
+          <TextInput value={q} onChangeText={setQ} onSubmitEditing={runSearch} placeholder="Search by name or @handle" placeholderTextColor={C.muted} autoCapitalize="none" style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12 }} />
+          <Pressable onPress={runSearch} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>FIND</Text></Pressable>
         </View>
         {searching && <ActivityIndicator color={C.gold} style={{ marginVertical: 8 }} />}
         {results.map((u) => (
@@ -103,6 +103,6 @@ function Row({ title, sub, action, onAction }: { title: string; sub: string; act
 }
 
 const sec = { color: C.gold, fontSize: 10, letterSpacing: 3, marginTop: 22, marginBottom: 10 } as const;
-const card = { flexDirection: "row" as const, alignItems: "center" as const, gap: 8, backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, padding: 12, marginBottom: 8, borderRadius: 2 };
-const btnGold = { backgroundColor: C.gold, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 2 };
-const btnGhost = { borderWidth: 1, borderColor: C.line, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 2 };
+const card = { flexDirection: "row" as const, alignItems: "center" as const, gap: 8, backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, padding: 12, marginBottom: 8, borderRadius: 12 };
+const btnGold = { backgroundColor: C.gold, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 };
+const btnGhost = { borderWidth: 1, borderColor: C.line, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 };

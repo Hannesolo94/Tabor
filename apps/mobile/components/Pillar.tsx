@@ -11,7 +11,7 @@ export function Pillar({ tag, title, intro, points }: { tag: string; title: stri
         <Text style={{ color: C.muted, fontSize: 14, marginTop: 10, lineHeight: 22 }}>{intro}</Text>
         <View style={{ marginTop: 22 }}>
           {points.map((p) => (
-            <View key={p} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, borderRadius: 2 }}>
+            <View key={p} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, borderRadius: 12 }}>
               <Text style={{ color: C.text, fontSize: 14 }}>{p}</Text>
             </View>
           ))}

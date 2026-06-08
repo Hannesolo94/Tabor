@@ -30,7 +30,7 @@ export function DonationPrompt({ enabled }: { enabled: boolean }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={snooze}>
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", padding: 28 }}>
-        <View style={{ backgroundColor: C.surface2, borderWidth: 1, borderColor: C.gold, borderRadius: 3, padding: 26, alignItems: "center" }}>
+        <View style={{ backgroundColor: C.surface2, borderWidth: 1, borderColor: C.gold, borderRadius: 14, padding: 26, alignItems: "center" }}>
           <Seal size={56} />
           <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono, marginTop: 14 }}>[ FUEL THE FIRE ]</Text>
           <Text style={{ color: C.ivory, fontSize: 22, fontFamily: F.head, marginTop: 8, textAlign: "center" }}>Keep TABOR free</Text>
@@ -38,10 +38,10 @@ export function DonationPrompt({ enabled }: { enabled: boolean }) {
             This brotherhood is free for life, brother. You keep it that way. Stand with the mission by giving, or by wearing the climb. Half of every gift goes to charities we choose together.
           </Text>
           <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono, textAlign: "center", marginTop: 10 }}>NO ADS. EVER. WE NEVER SELL YOUR DATA.</Text>
-          <Pressable onPress={() => { Linking.openURL(`${SITE}/give`); snooze(); }} style={{ backgroundColor: C.gold, paddingVertical: 14, width: "100%", alignItems: "center", borderRadius: 2, marginTop: 18 }}>
+          <Pressable onPress={() => { Linking.openURL(`${SITE}/give`); snooze(); }} style={{ backgroundColor: C.gold, paddingVertical: 14, width: "100%", alignItems: "center", borderRadius: 12, marginTop: 18 }}>
             <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SUPPORT THE MISSION</Text>
           </Pressable>
-          <Pressable onPress={() => { Linking.openURL(`${SITE}/shop`); snooze(); }} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 13, width: "100%", alignItems: "center", borderRadius: 2, marginTop: 10 }}>
+          <Pressable onPress={() => { Linking.openURL(`${SITE}/shop`); snooze(); }} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 13, width: "100%", alignItems: "center", borderRadius: 12, marginTop: 10 }}>
             <Text style={{ color: C.gold, fontFamily: F.headMid, letterSpacing: 1 }}>SHOP THE GEAR</Text>
           </Pressable>
           <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", marginTop: 16 }}>

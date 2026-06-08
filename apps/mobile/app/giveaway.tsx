@@ -45,7 +45,7 @@ export default function GiveawayScreen() {
           </View>
 
           {!g.am_nominee && (
-            <Pressable onPress={stand} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2, marginBottom: 18 }}>
+            <Pressable onPress={stand} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 12, marginBottom: 18 }}>
               <Text style={{ color: C.gold, fontFamily: F.headMid, letterSpacing: 1 }}>STAND FOR NOMINATION</Text>
             </Pressable>
           )}
@@ -57,7 +57,7 @@ export default function GiveawayScreen() {
             const mine = g.my_vote === n.user_id;
             const pct = totalVotes ? Math.round((n.votes / totalVotes) * 100) : 0;
             return (
-              <Pressable key={n.user_id} onPress={() => vote(n.user_id)} disabled={busy} style={{ borderWidth: 1, borderColor: mine ? C.gold : C.line, backgroundColor: C.surface2, borderRadius: 2, padding: 14, marginBottom: 10, overflow: "hidden" }}>
+              <Pressable key={n.user_id} onPress={() => vote(n.user_id)} disabled={busy} style={{ borderWidth: 1, borderColor: mine ? C.gold : C.line, backgroundColor: C.surface2, borderRadius: 12, padding: 14, marginBottom: 10, overflow: "hidden" }}>
                 <View style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${pct}%`, backgroundColor: "rgba(201,169,97,0.10)" }} />
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                   <View>

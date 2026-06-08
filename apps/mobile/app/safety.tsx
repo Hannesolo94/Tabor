@@ -40,4 +40,4 @@ function Block({ title, body }: { title: string; body: string }) {
     </View>
   );
 }
-const btn = { backgroundColor: C.gold, paddingVertical: 14, alignItems: "center" as const, borderRadius: 2, marginTop: 8 };
+const btn = { backgroundColor: C.gold, paddingVertical: 14, alignItems: "center" as const, borderRadius: 12, marginTop: 8 };

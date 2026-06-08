@@ -24,14 +24,14 @@ export default function Word() {
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>The Word</Text>
         <View style={{ flexDirection: "row", gap: 8, marginTop: 14, marginBottom: 6, flexWrap: "wrap" }}>
           {(["today", "read", "plans", "prayer"] as const).map((t) => (
-            <Pressable key={t} onPress={() => setTab(t)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
+            <Pressable key={t} onPress={() => setTab(t)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 12 }}>
               <Text style={{ color: tab === t ? C.black : C.ivory, fontSize: 11, letterSpacing: 1, fontFamily: F.mono }}>{t.toUpperCase()}</Text>
             </Pressable>
           ))}
-          <Pressable onPress={() => router.push("/bookmarks")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
+          <Pressable onPress={() => router.push("/bookmarks")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 12 }}>
             <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>SAVED</Text>
           </Pressable>
-          <Pressable onPress={() => router.push("/notes")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
+          <Pressable onPress={() => router.push("/notes")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 12 }}>
             <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>NOTES</Text>
           </Pressable>
         </View>
@@ -53,7 +53,7 @@ function Today({ onScroll }: { onScroll: any }) {
   return (
     <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
       <Animated.View style={{ opacity: fade }}>
-        <View style={{ borderWidth: 1, borderColor: C.gold, backgroundColor: C.surface2, padding: 22, borderRadius: 2 }}>
+        <View style={{ borderWidth: 1, borderColor: C.gold, backgroundColor: C.surface2, padding: 22, borderRadius: 12 }}>
           <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono }}>{(v.theme ?? "The Word").toUpperCase()}</Text>
           <Text style={{ color: C.ivory, fontSize: 21, lineHeight: 32, marginTop: 14, fontFamily: F.scripture }}>{v.text}</Text>
           <Text style={{ color: C.gold, fontSize: 14, marginTop: 16, fontFamily: F.headMid }}>— {v.ref}</Text>
@@ -80,7 +80,7 @@ function Read({ onScroll, router, userId }: { onScroll: any; router: any; userId
   const Grid = ({ list }: { list: BookInfo[] }) => (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
       {list.map((b) => (
-        <Pressable key={b.book_order} onPress={() => router.push(`/read/${b.book_order}`)} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 2 }}>
+        <Pressable key={b.book_order} onPress={() => router.push(`/read/${b.book_order}`)} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
           <Text style={{ color: C.ivory, fontSize: 13, fontFamily: F.bodyMid }}>{b.book}</Text>
           <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono }}>{b.chapters} ch</Text>
         </Pressable>
@@ -90,15 +90,15 @@ function Read({ onScroll, router, userId }: { onScroll: any; router: any; userId
   return (
     <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
       {last && results.length === 0 && (
-        <Pressable onPress={() => router.push(`/read/${last.order}?c=${last.chapter}`)} style={{ borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 3, padding: 16, marginBottom: 18 }}>
+        <Pressable onPress={() => router.push(`/read/${last.order}?c=${last.chapter}`)} style={{ borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 14, padding: 16, marginBottom: 18 }}>
           <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>CONTINUE READING</Text>
           <Text style={{ color: C.ivory, fontSize: 20, fontFamily: F.head, marginTop: 4 }}>{last.book} {last.chapter}</Text>
           <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginTop: 2 }}>Pick up where you left off ›</Text>
         </Pressable>
       )}
       <View style={{ flexDirection: "row", gap: 8, marginBottom: 18 }}>
-        <TextInput value={q} onChangeText={setQ} onSubmitEditing={run} placeholder="Search the Scriptures…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} />
-        <Pressable onPress={run} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>GO</Text></Pressable>
+        <TextInput value={q} onChangeText={setQ} onSubmitEditing={run} placeholder="Search the Scriptures…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, fontFamily: F.body }} />
+        <Pressable onPress={run} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.head }}>GO</Text></Pressable>
       </View>
       {results.length > 0 ? (
         <>
@@ -134,11 +134,11 @@ function Plans({ onScroll, router, userId, faith }: { onScroll: any; router: any
       {ordered.map((p) => {
         const done = prog[p.id] ?? 0;
         return (
-          <Pressable key={p.id} onPress={() => router.push(`/plan/${p.id}`)} style={{ borderWidth: 1, borderColor: p.seeker && isSeeker ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, borderRadius: 2, marginBottom: 12 }}>
+          <Pressable key={p.id} onPress={() => router.push(`/plan/${p.id}`)} style={{ borderWidth: 1, borderColor: p.seeker && isSeeker ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, borderRadius: 12, marginBottom: 12 }}>
             {p.seeker ? <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2, fontFamily: F.mono, marginBottom: 4 }}>SEEKER TRACK</Text> : null}
             <Text style={{ color: C.ivory, fontSize: 17, fontFamily: F.headMid }}>{p.title}</Text>
             <Text style={{ color: C.muted, fontSize: 12.5, fontFamily: F.body, marginTop: 3 }}>{p.subtitle}</Text>
-            <View style={{ height: 5, backgroundColor: C.surface, borderRadius: 3, marginTop: 12, overflow: "hidden" }}>
+            <View style={{ height: 5, backgroundColor: C.surface, borderRadius: 14, marginTop: 12, overflow: "hidden" }}>
               <View style={{ width: `${Math.round((done / p.days) * 100)}%`, height: "100%", backgroundColor: C.gold }} />
             </View>
             <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginTop: 5 }}>{done}/{p.days} DAYS</Text>
@@ -159,12 +159,12 @@ function PrayerJournal({ onScroll, userId }: { onScroll: any; userId?: string })
   return (
     <ScrollView onScroll={onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
       <View style={{ flexDirection: "row", gap: 8, marginBottom: 18 }}>
-        <TextInput value={body} onChangeText={setBody} placeholder="Lift a prayer…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} />
-        <Pressable onPress={add} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>ADD</Text></Pressable>
+        <TextInput value={body} onChangeText={setBody} placeholder="Lift a prayer…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, fontFamily: F.body }} />
+        <Pressable onPress={add} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.head }}>ADD</Text></Pressable>
       </View>
       {prayers.length === 0 && <Text style={{ color: C.muted, fontSize: 14, fontFamily: F.body }}>No prayers yet. Bring them before the throne.</Text>}
       {prayers.map((p) => (
-        <Pressable key={p.id} onPress={() => toggle(p)} style={{ borderWidth: 1, borderColor: p.answered ? C.green : C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 2, marginBottom: 10 }}>
+        <Pressable key={p.id} onPress={() => toggle(p)} style={{ borderWidth: 1, borderColor: p.answered ? C.green : C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 12, marginBottom: 10 }}>
           <Text style={{ color: p.answered ? C.muted : C.ivory, fontSize: 14.5, lineHeight: 21, fontFamily: F.body, textDecorationLine: p.answered ? "line-through" : "none" }}>{p.body}</Text>
           <Text style={{ color: p.answered ? C.green : C.muted, fontSize: 11, letterSpacing: 1, fontFamily: F.mono, marginTop: 6 }}>{p.answered ? "● ANSWERED · tap to reopen" : "○ tap when answered"}</Text>
         </Pressable>

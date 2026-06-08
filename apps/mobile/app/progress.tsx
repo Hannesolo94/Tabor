@@ -56,7 +56,7 @@ export default function Progress() {
           {lifts.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }} contentContainerStyle={{ gap: 6 }}>
               {lifts.map((l) => (
-                <Pressable key={l} onPress={() => pickLift(l)} style={{ paddingVertical: 5, paddingHorizontal: 10, borderWidth: 1, borderColor: lift === l ? C.gold : C.line, borderRadius: 2 }}>
+                <Pressable key={l} onPress={() => pickLift(l)} style={{ paddingVertical: 5, paddingHorizontal: 10, borderWidth: 1, borderColor: lift === l ? C.gold : C.line, borderRadius: 12 }}>
                   <Text style={{ color: lift === l ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }} numberOfLines={1}>{l}</Text>
                 </Pressable>
               ))}
@@ -67,8 +67,8 @@ export default function Progress() {
 
         <Section title="BODYWEIGHT" hint="log today's weight to track the trend">
           <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
-            <TextInput value={bwInput} onChangeText={setBwInput} keyboardType="numeric" placeholder="e.g. 82.5" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 2 }} />
-            <Pressable onPress={saveBw} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>LOG</Text></Pressable>
+            <TextInput value={bwInput} onChangeText={setBwInput} keyboardType="numeric" placeholder="e.g. 82.5" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 12 }} />
+            <Pressable onPress={saveBw} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.head }}>LOG</Text></Pressable>
           </View>
           <LineChart data={bw} unit=" kg" color={C.ivory} />
         </Section>
@@ -89,7 +89,7 @@ export default function Progress() {
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <View style={{ marginBottom: 22, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, borderRadius: 2, padding: 14 }}>
+    <View style={{ marginBottom: 22, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, borderRadius: 12, padding: 14 }}>
       <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>{title}</Text>
       {hint ? <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.body, marginTop: 2, marginBottom: 10 }}>{hint}</Text> : <View style={{ height: 10 }} />}
       {children}

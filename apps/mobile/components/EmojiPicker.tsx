@@ -1,5 +1,5 @@
 import { View, Text, Pressable, ScrollView, Modal } from "react-native";
-import { C, F } from "@/lib/theme";
+import { C, F, R, SH } from "@/lib/theme";
 
 const CATEGORIES: { name: string; emojis: string[] }[] = [
   { name: "Faith", emojis: ["🙏", "✝️", "☦️", "✡️", "☪️", "🕉️", "☮️", "🕊️", "😇", "👼", "📖", "🛐", "⛪", "🔥", "💧", "🌿"] },
@@ -14,7 +14,7 @@ export function EmojiPicker({ visible, recents, onPick, onClose }: { visible: bo
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "flex-end" }}>
-        <Pressable onPress={() => {}} style={{ backgroundColor: C.surface, borderTopWidth: 1, borderColor: C.gold, borderTopLeftRadius: 6, borderTopRightRadius: 6, maxHeight: "72%" }}>
+        <Pressable onPress={() => {}} style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.glassBorder, borderTopLeftRadius: R.xl, borderTopRightRadius: R.xl, maxHeight: "72%", ...SH.float }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14, borderBottomWidth: 1, borderBottomColor: C.line }}>
             <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2, fontFamily: F.mono }}>REACT WITH ANY EMOJI</Text>
             <Pressable onPress={onClose} hitSlop={10}><Text style={{ color: C.muted, fontSize: 18 }}>✕</Text></Pressable>

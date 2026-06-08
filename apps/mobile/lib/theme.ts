@@ -26,4 +26,19 @@ export const C = {
   line: k.line,
   green: k.green,
   red: k.red,
+  // depth / glass system
+  glass: "rgba(32,32,40,0.72)",
+  glassSoft: "rgba(44,44,54,0.5)",
+  glassBorder: "rgba(201,169,97,0.18)",
+  hairline: "rgba(255,255,255,0.06)",
 };
+
+// rounded-corner scale
+export const R = { xs: 8, sm: 10, md: 14, lg: 18, xl: 24, pill: 999 } as const;
+
+// elevation presets (RN shadow + Android elevation). Pure RN, no native module.
+export const SH = {
+  card: { shadowColor: "#000", shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.5, shadowRadius: 20, elevation: 7 },
+  float: { shadowColor: "#000", shadowOffset: { width: 0, height: 22 }, shadowOpacity: 0.6, shadowRadius: 34, elevation: 16 },
+  glow: { shadowColor: k.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 22, elevation: 10 },
+} as const;

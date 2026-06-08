@@ -105,9 +105,9 @@ export default function RoutineDetail() {
         {loading ? <ActivityIndicator color={C.gold} /> : items.map((it, i) => {
           const kind = inputKind(it.exercise?.category, it.exercise?.equipment);
           return (
-            <View key={it.id} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2, marginBottom: 10 }}>
+            <View key={it.id} style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 12, marginBottom: 10 }}>
               <Pressable onPress={() => router.push(`/exercise/${it.exercise_id}`)} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <View style={{ width: 48, height: 48, borderRadius: 2, backgroundColor: C.surface, overflow: "hidden" }}>
+                <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: C.surface, overflow: "hidden" }}>
                   {it.exercise?.image_url ? <Image source={{ uri: it.exercise.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" /> : null}
                 </View>
                 <View style={{ flex: 1 }}>
@@ -157,7 +157,7 @@ export default function RoutineDetail() {
         })}
 
         {items.length > 0 && (
-          <Pressable onPress={complete} disabled={saving} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 2, marginTop: 14, opacity: saving ? 0.6 : 1 }}>
+          <Pressable onPress={complete} disabled={saving} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 12, marginTop: 14, opacity: saving ? 0.6 : 1 }}>
             <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>{saving ? "SAVING…" : "COMPLETE WORKOUT"}</Text>
           </Pressable>
         )}
@@ -166,5 +166,5 @@ export default function RoutineDetail() {
   );
 }
 
-const cell = { width: 60, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 8, paddingVertical: 7, borderRadius: 2, textAlign: "center" as const, fontFamily: F.mono, fontSize: 13 };
+const cell = { width: 60, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 8, paddingVertical: 7, borderRadius: 12, textAlign: "center" as const, fontFamily: F.mono, fontSize: 13 };
 const unit = { color: C.muted, fontSize: 10, fontFamily: F.mono } as const;

@@ -153,7 +153,7 @@ export default function Onboarding() {
               <Pressable onPress={() => Linking.openURL(`${SITE}/privacy`)}><Text style={link}>Privacy</Text></Pressable>
             </View>
             <Pressable onPress={() => setAgree((a) => !a)} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 }}>
-              <View style={{ width: 24, height: 24, borderRadius: 4, borderWidth: 2, borderColor: agree ? C.gold : C.muted, backgroundColor: agree ? C.gold : "transparent", alignItems: "center", justifyContent: "center" }}>{agree ? <Text style={{ color: C.black, fontWeight: "900" }}>✓</Text> : null}</View>
+              <View style={{ width: 24, height: 24, borderRadius: 14, borderWidth: 2, borderColor: agree ? C.gold : C.muted, backgroundColor: agree ? C.gold : "transparent", alignItems: "center", justifyContent: "center" }}>{agree ? <Text style={{ color: C.black, fontWeight: "900" }}>✓</Text> : null}</View>
               <Text style={{ color: C.ivory, fontSize: 14, fontFamily: F.body, flex: 1 }}>I agree to the Terms and Community Guidelines.</Text>
             </Pressable>
             <Row label="Allow anonymous analytics" on={analytics} onChange={setAnalytics} />
@@ -269,13 +269,13 @@ export default function Onboarding() {
             <Row label="Discipline — steps, mobility, cold, focus" on={dDiscipline} onChange={setDDiscipline} />
             <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2, fontFamily: F.mono, marginTop: 18, marginBottom: 8 }}>FASTING</Text>
             {FAST_TYPES.map((f) => (
-              <Pressable key={f.v} onPress={() => setFastType(f.v)} style={{ borderWidth: 1, borderColor: fastType === f.v ? C.gold : C.line, backgroundColor: C.surface2, padding: 13, marginBottom: 8, borderRadius: 2 }}>
+              <Pressable key={f.v} onPress={() => setFastType(f.v)} style={{ borderWidth: 1, borderColor: fastType === f.v ? C.gold : C.line, backgroundColor: C.surface2, padding: 13, marginBottom: 8, borderRadius: 12 }}>
                 <Text style={{ color: fastType === f.v ? C.gold : C.ivory, fontSize: 15, fontFamily: F.bodyMid }}>{f.l}</Text>
               </Pressable>
             ))}
             {fastType === "intermittent" && (
               <View style={{ flexDirection: "row", gap: 8, marginTop: 2 }}>
-                {FAST_WINDOWS.map((w) => <Pressable key={w} onPress={() => setFastWindow(w)} style={{ flex: 1, borderWidth: 1, borderColor: fastWindow === w ? C.gold : C.line, paddingVertical: 10, alignItems: "center", borderRadius: 2 }}><Text style={{ color: fastWindow === w ? C.gold : C.muted, fontFamily: F.mono, fontSize: 13 }}>{w}</Text></Pressable>)}
+                {FAST_WINDOWS.map((w) => <Pressable key={w} onPress={() => setFastWindow(w)} style={{ flex: 1, borderWidth: 1, borderColor: fastWindow === w ? C.gold : C.line, paddingVertical: 10, alignItems: "center", borderRadius: 12 }}><Text style={{ color: fastWindow === w ? C.gold : C.muted, fontFamily: F.mono, fontSize: 13 }}>{w}</Text></Pressable>)}
               </View>
             )}
             <Btn label="Begin the climb" onPress={finish} />
@@ -296,11 +296,11 @@ export default function Onboarding() {
 }
 
 function Btn({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
-  return <Pressable onPress={onPress} disabled={disabled} style={{ marginTop: 26, backgroundColor: C.gold, paddingVertical: 15, paddingHorizontal: 40, borderRadius: 2, alignSelf: "center", opacity: disabled ? 0.4 : 1 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{label.toUpperCase()}</Text></Pressable>;
+  return <Pressable onPress={onPress} disabled={disabled} style={{ marginTop: 26, backgroundColor: C.gold, paddingVertical: 15, paddingHorizontal: 40, borderRadius: 12, alignSelf: "center", opacity: disabled ? 0.4 : 1 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{label.toUpperCase()}</Text></Pressable>;
 }
 function Choice({ label, sub, onPress, selected, muted }: { label: string; sub?: string; onPress: () => void; selected?: boolean; muted?: boolean }) {
   return (
-    <Pressable onPress={onPress} style={{ borderWidth: 1, borderColor: selected ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, borderRadius: 2, opacity: muted ? 0.7 : 1 }}>
+    <Pressable onPress={onPress} style={{ borderWidth: 1, borderColor: selected ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, borderRadius: 12, opacity: muted ? 0.7 : 1 }}>
       <Text style={{ color: C.ivory, fontSize: 16, fontWeight: "600", fontFamily: F.bodyMid }}>{label}</Text>
       {sub && <Text style={{ color: C.muted, fontSize: 13, marginTop: 4, lineHeight: 19, fontFamily: F.body }}>{sub}</Text>}
     </Pressable>
@@ -326,5 +326,5 @@ const tag = { color: C.gold, fontSize: 11, letterSpacing: 4, fontFamily: F.mono,
 const title = { color: C.ivory, fontSize: 23, fontWeight: "800" as const, fontFamily: F.head, marginBottom: 12, lineHeight: 30 };
 const body = { color: C.muted, fontSize: 15, lineHeight: 23, fontFamily: F.body, marginBottom: 4 } as const;
 const link = { color: C.gold, fontSize: 14, fontFamily: F.bodyMid, textDecorationLine: "underline" } as const;
-const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 13, fontSize: 18, marginTop: 12, borderRadius: 2, fontFamily: F.body } as const;
+const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 13, fontSize: 18, marginTop: 12, borderRadius: 12, fontFamily: F.body } as const;
 const errStyle = { color: C.red, fontSize: 13, marginTop: 10, fontFamily: F.body } as const;

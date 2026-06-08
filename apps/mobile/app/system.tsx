@@ -41,7 +41,7 @@ export default function System() {
           {messages.map((m, i) => (
             <View key={i} style={{ alignSelf: m.role === "user" ? "flex-end" : "flex-start", maxWidth: "88%", marginBottom: 14 }}>
               <Text style={{ color: m.role === "user" ? C.gold : C.muted, fontSize: 9, letterSpacing: 2, marginBottom: 4, textAlign: m.role === "user" ? "right" : "left" }}>{m.role === "user" ? "YOU" : "THE SYSTEM"}</Text>
-              <View style={{ backgroundColor: m.role === "user" ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: m.role === "system" ? "rgba(201,169,97,0.3)" : C.line, padding: 13, borderRadius: 2 }}>
+              <View style={{ backgroundColor: m.role === "user" ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: m.role === "system" ? "rgba(201,169,97,0.3)" : C.line, padding: 13, borderRadius: 12 }}>
                 <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 21 }}>{m.content}</Text>
               </View>
             </View>
@@ -49,8 +49,8 @@ export default function System() {
           {busy && <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 3 }}>THE SYSTEM CONSIDERS…</Text>}
         </ScrollView>
         <View style={{ flexDirection: "row", gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: C.line }}>
-          <TextInput value={input} onChangeText={setInput} placeholder="Speak to the System…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2 }} onSubmitEditing={send} returnKeyType="send" />
-          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
+          <TextInput value={input} onChangeText={setInput} placeholder="Speak to the System…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 }} onSubmitEditing={send} returnKeyType="send" />
+          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 18, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

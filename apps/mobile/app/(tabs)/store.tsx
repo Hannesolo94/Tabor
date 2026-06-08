@@ -29,10 +29,10 @@ export default function Store() {
         <Text style={{ color: C.muted, fontSize: 13, marginTop: 4, lineHeight: 19 }}>Wear the climb. Tap any piece to view and buy on tabor.quest.</Text>
 
         <View style={{ flexDirection: "row", gap: 10, marginTop: 16, marginBottom: 20 }}>
-          <Pressable onPress={() => Linking.openURL(`${SITE}/shop`)} style={{ flex: 1, borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2 }}>
+          <Pressable onPress={() => Linking.openURL(`${SITE}/shop`)} style={{ flex: 1, borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 12 }}>
             <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 1, fontWeight: "700", fontFamily: F.head }}>SHOP ON WEB ↗</Text>
           </Pressable>
-          <Pressable onPress={() => Linking.openURL(`${SITE}/give`)} style={{ flex: 1, backgroundColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2 }}>
+          <Pressable onPress={() => Linking.openURL(`${SITE}/give`)} style={{ flex: 1, backgroundColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 12 }}>
             <Text style={{ color: C.black, fontSize: 11, letterSpacing: 1, fontWeight: "700", fontFamily: F.head }}>SUPPORT ↗</Text>
           </Pressable>
         </View>
@@ -42,7 +42,7 @@ export default function Store() {
             {products.length === 0 && <Text style={{ color: C.muted, fontSize: 14 }}>No gear live yet. Check back soon.</Text>}
             {products.map((p) => (
               <Pressable key={p.sku} onPress={() => Linking.openURL(`${SITE}/product/${p.sku}`)} style={{ width: w }}>
-                <View style={{ width: w, height: w, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 2, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+                <View style={{ width: w, height: w, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 12, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
                   {p.image_url ? <Image source={{ uri: p.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" /> : <Text style={{ color: C.muted, fontSize: 28 }}>✦</Text>}
                 </View>
                 <Text style={{ color: C.ivory, fontSize: 13, fontWeight: "600", marginTop: 8 }} numberOfLines={1}>{p.name}</Text>

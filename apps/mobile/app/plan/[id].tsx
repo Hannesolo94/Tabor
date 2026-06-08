@@ -41,7 +41,7 @@ export default function PlanDetail() {
         {plan.seeker ? <Text style={{ color: C.gold, fontSize: 9, letterSpacing: 2, fontFamily: F.mono, marginBottom: 4 }}>SEEKER TRACK</Text> : null}
         <Text style={{ color: C.ivory, fontSize: 26, fontFamily: F.head }}>{plan.title}</Text>
         <Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body, marginTop: 4 }}>{plan.subtitle}</Text>
-        <View style={{ height: 6, backgroundColor: C.surface, borderRadius: 3, marginTop: 14, overflow: "hidden" }}>
+        <View style={{ height: 6, backgroundColor: C.surface, borderRadius: 14, marginTop: 14, overflow: "hidden" }}>
           <View style={{ width: `${Math.round((done / plan.days) * 100)}%`, height: "100%", backgroundColor: C.gold }} />
         </View>
         <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginTop: 6, marginBottom: 18 }}>{done}/{plan.days} DAYS COMPLETE</Text>
@@ -50,7 +50,7 @@ export default function PlanDetail() {
           const isDone = e.day <= done;
           const isNext = e.day === done + 1;
           return (
-            <Pressable key={e.day} onPress={() => openDay(e)} style={{ flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: isNext ? C.gold : C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 2, marginBottom: 10 }}>
+            <Pressable key={e.day} onPress={() => openDay(e)} style={{ flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: isNext ? C.gold : C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 12, marginBottom: 10 }}>
               <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: isDone ? C.gold : C.muted, backgroundColor: isDone ? C.gold : "transparent", alignItems: "center", justifyContent: "center" }}>
                 <Text style={{ color: isDone ? C.black : C.muted, fontSize: 12, fontFamily: F.head }}>{isDone ? "✓" : e.day}</Text>
               </View>

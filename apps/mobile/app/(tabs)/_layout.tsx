@@ -15,13 +15,13 @@ function XpBar() {
   const { profile } = useProfile();
   const prog = levelProgress(Number(profile?.xp ?? 0));
   return (
-    <View style={{ backgroundColor: C.surface2, paddingHorizontal: 14, paddingTop: 6, paddingBottom: 3, borderTopWidth: 1, borderTopColor: C.line }}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 3 }}>
-        <Text style={{ color: C.gold, fontSize: 8.5, fontFamily: F.mono, letterSpacing: 1 }}>{prog.rank.toUpperCase()} · LVL {prog.level}</Text>
-        <Text style={{ color: C.muted, fontSize: 8.5, fontFamily: F.mono }}>{prog.into} / {prog.need} XP</Text>
+    <View style={{ backgroundColor: C.surface2, paddingHorizontal: 16, paddingTop: 7, paddingBottom: 4, borderTopWidth: 1, borderTopColor: C.glassBorder }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
+        <Text style={{ color: C.gold, fontSize: 10, fontFamily: F.mono, letterSpacing: 1 }}>{prog.rank.toUpperCase()} · LVL {prog.level}</Text>
+        <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono }}>{prog.into} / {prog.need} XP</Text>
       </View>
-      <View style={{ height: 4, backgroundColor: C.surface, borderRadius: 2, overflow: "hidden" }}>
-        <View style={{ width: `${Math.round(prog.pct * 100)}%`, height: "100%", backgroundColor: C.gold }} />
+      <View style={{ height: 5, backgroundColor: C.surface, borderRadius: 999, overflow: "hidden" }}>
+        <View style={{ width: `${Math.round(prog.pct * 100)}%`, height: "100%", backgroundColor: C.gold, shadowColor: C.gold, shadowOpacity: 0.6, shadowRadius: 6 }} />
       </View>
     </View>
   );
@@ -46,7 +46,7 @@ export default function TabsLayout() {
         tabBar={(props) => <AnimatedTabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          tabBarStyle: { backgroundColor: C.surface2, borderTopColor: C.line, height: 60, paddingBottom: 8, paddingTop: 6 },
+          tabBarStyle: { backgroundColor: C.surface2, borderTopColor: C.glassBorder, height: 62, paddingBottom: 8, paddingTop: 6, shadowColor: "#000", shadowOffset: { width: 0, height: -8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 18 },
           tabBarActiveTintColor: C.gold,
           tabBarInactiveTintColor: C.muted,
           tabBarLabelStyle: { fontSize: 9, letterSpacing: 1, fontFamily: F.mono },

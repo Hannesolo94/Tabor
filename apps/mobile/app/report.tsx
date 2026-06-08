@@ -38,7 +38,7 @@ export default function Report() {
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black, padding: 26, justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 4, fontFamily: F.mono }}>[ REPORT RECEIVED ]</Text>
       <Text style={{ color: C.text, fontSize: 15, fontFamily: F.body, textAlign: "center", marginVertical: 14, lineHeight: 22 }}>Thank you, brother. Your report is logged and our team will look into it. You are making TABOR stronger.</Text>
-      <Pressable onPress={() => router.back()} style={{ backgroundColor: C.gold, paddingVertical: 13, paddingHorizontal: 30, borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>DONE</Text></Pressable>
+      <Pressable onPress={() => router.back()} style={{ backgroundColor: C.gold, paddingVertical: 13, paddingHorizontal: 30, borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>DONE</Text></Pressable>
     </SafeAreaView>
   );
 
@@ -51,7 +51,7 @@ export default function Report() {
       <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
         <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
           {(["bug", "feature"] as const).map((k) => (
-            <Pressable key={k} onPress={() => setKind(k)} style={{ flex: 1, borderWidth: 1, borderColor: kind === k ? C.gold : C.line, backgroundColor: kind === k ? "rgba(201,169,97,0.1)" : "transparent", paddingVertical: 11, alignItems: "center", borderRadius: 2 }}>
+            <Pressable key={k} onPress={() => setKind(k)} style={{ flex: 1, borderWidth: 1, borderColor: kind === k ? C.gold : C.line, backgroundColor: kind === k ? "rgba(201,169,97,0.1)" : "transparent", paddingVertical: 11, alignItems: "center", borderRadius: 12 }}>
               <Text style={{ color: kind === k ? C.gold : C.muted, fontFamily: F.mono, fontSize: 11 }}>{k === "bug" ? "SOMETHING BROKE" : "FEATURE IDEA"}</Text>
             </Pressable>
           ))}
@@ -67,18 +67,18 @@ export default function Report() {
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           {shots.map((s, i) => (
             <Pressable key={i} onPress={() => setShots((p) => p.filter((_, j) => j !== i))}>
-              <Image source={{ uri: s.uri }} style={{ width: 70, height: 70, borderRadius: 4, borderWidth: 1, borderColor: C.line }} />
+              <Image source={{ uri: s.uri }} style={{ width: 70, height: 70, borderRadius: 14, borderWidth: 1, borderColor: C.line }} />
               <Text style={{ color: C.red, fontSize: 9, textAlign: "center", fontFamily: F.mono, marginTop: 2 }}>REMOVE</Text>
             </Pressable>
           ))}
           {shots.length < 4 && (
-            <Pressable onPress={pick} style={{ width: 70, height: 70, borderWidth: 1, borderColor: C.gold, borderRadius: 4, alignItems: "center", justifyContent: "center" }}>
+            <Pressable onPress={pick} style={{ width: 70, height: 70, borderWidth: 1, borderColor: C.gold, borderRadius: 14, alignItems: "center", justifyContent: "center" }}>
               <Text style={{ color: C.gold, fontSize: 24 }}>+</Text>
             </Pressable>
           )}
         </View>
 
-        <Pressable onPress={send} disabled={busy} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 2, marginTop: 24, opacity: busy ? 0.6 : 1 }}>
+        <Pressable onPress={send} disabled={busy} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 12, marginTop: 24, opacity: busy ? 0.6 : 1 }}>
           {busy ? <ActivityIndicator color={C.black} /> : <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SEND REPORT</Text>}
         </Pressable>
       </ScrollView>
@@ -86,4 +86,4 @@ export default function Report() {
   );
 }
 const lbl = { color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginTop: 16, marginBottom: 6 } as const;
-const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 2, fontFamily: F.body, fontSize: 15 } as const;
+const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, fontFamily: F.body, fontSize: 15 } as const;

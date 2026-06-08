@@ -49,26 +49,26 @@ export default function ExerciseDetail() {
       </View>
       <ScrollView contentContainerStyle={{ padding: 22, paddingTop: 0, paddingBottom: 40 }}>
         {ex.image_url ? (
-          <View style={{ width: "100%", aspectRatio: 1.3, backgroundColor: C.surface, borderRadius: 3, overflow: "hidden", marginBottom: 16 }}>
+          <View style={{ width: "100%", aspectRatio: 1.3, backgroundColor: C.surface, borderRadius: 14, overflow: "hidden", marginBottom: 16 }}>
             <Image source={{ uri: ex.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
           </View>
         ) : null}
         <Text style={{ color: C.ivory, fontSize: 24, fontFamily: F.head }}>{ex.name}</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
           {[ex.equipment, ex.level, ex.mechanic, ...ex.primary_muscles].filter(Boolean).map((t, i) => (
-            <View key={i} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 2 }}><Text style={{ color: C.ivory, fontSize: 11, fontFamily: F.mono, textTransform: "uppercase" }}>{t}</Text></View>
+            <View key={i} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 12 }}><Text style={{ color: C.ivory, fontSize: 11, fontFamily: F.mono, textTransform: "uppercase" }}>{t}</Text></View>
           ))}
         </View>
 
-        <Pressable onPress={() => ex.video_url && Linking.openURL(ex.video_url)} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2, marginTop: 18 }}>
+        <Pressable onPress={() => ex.video_url && Linking.openURL(ex.video_url)} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 12, marginTop: 18 }}>
           <Text style={{ color: C.gold, fontFamily: F.head, letterSpacing: 1, fontSize: 13 }}>▶  WATCH DEMO</Text>
         </Pressable>
-        <Pressable onPress={openPicker} style={{ backgroundColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2, marginTop: 10 }}>
+        <Pressable onPress={openPicker} style={{ backgroundColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 12, marginTop: 10 }}>
           <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1, fontSize: 13 }}>+  ADD TO ROUTINE</Text>
         </Pressable>
 
         {picker && (
-          <View style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 2, marginTop: 12 }}>
+          <View style={{ borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 14, borderRadius: 12, marginTop: 12 }}>
             <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginBottom: 8 }}>ADD TO…</Text>
             {routines.map((r) => (
               <Pressable key={r.id} onPress={() => addTo(r.id)} style={{ paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" }}><Text style={{ color: C.ivory, fontFamily: F.bodyMid }}>{r.name}</Text></Pressable>

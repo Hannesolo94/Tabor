@@ -75,7 +75,7 @@ export default function Reader() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, borderBottomWidth: 1, borderBottomColor: C.line }} contentContainerStyle={{ padding: 10, gap: 6 }}>
         {Array.from({ length: chapters }, (_, i) => i + 1).map((n) => (
-          <Pressable key={n} onPress={() => setChapter(n)} style={{ width: 38, height: 38, borderRadius: 2, borderWidth: 1, borderColor: chapter === n ? C.gold : C.line, backgroundColor: chapter === n ? C.gold : "transparent", alignItems: "center", justifyContent: "center" }}>
+          <Pressable key={n} onPress={() => setChapter(n)} style={{ width: 38, height: 38, borderRadius: 12, borderWidth: 1, borderColor: chapter === n ? C.gold : C.line, backgroundColor: chapter === n ? C.gold : "transparent", alignItems: "center", justifyContent: "center" }}>
             <Text style={{ color: chapter === n ? C.black : C.ivory, fontFamily: F.mono, fontSize: 13 }}>{n}</Text>
           </Pressable>
         ))}
@@ -90,15 +90,15 @@ export default function Reader() {
             const hl = highlights.get(ref);
             const booked = marks.has(ref);
             return (
-              <Pressable key={v.verse} onPress={() => toggleSelect(v.verse)} style={{ flexDirection: "row", marginBottom: 4, paddingVertical: 6, paddingHorizontal: 8, borderRadius: 3, borderWidth: isSel ? 1 : 0, borderColor: C.gold, backgroundColor: isSel ? "rgba(201,169,97,0.16)" : hl ? hl + "2e" : "transparent" }}>
+              <Pressable key={v.verse} onPress={() => toggleSelect(v.verse)} style={{ flexDirection: "row", marginBottom: 4, paddingVertical: 6, paddingHorizontal: 8, borderRadius: 14, borderWidth: isSel ? 1 : 0, borderColor: C.gold, backgroundColor: isSel ? "rgba(201,169,97,0.16)" : hl ? hl + "2e" : "transparent" }}>
                 <Text style={{ color: booked ? C.gold : C.muted, fontSize: 12, fontWeight: booked ? "800" : "400", fontFamily: F.mono, width: 26, marginTop: 5 }}>{booked ? "★" : v.verse}</Text>
                 <Text style={{ color: C.text, fontSize: 17, lineHeight: 27, fontFamily: F.scripture, flex: 1 }}>{v.text}</Text>
               </Pressable>
             );
           })}
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 20 }}>
-            <Pressable disabled={chapter <= 1} onPress={() => setChapter((n) => Math.max(1, n - 1))} style={{ opacity: chapter <= 1 ? 0.3 : 1, borderWidth: 1, borderColor: C.line, paddingVertical: 11, paddingHorizontal: 20, borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>‹ PREV</Text></Pressable>
-            <Pressable disabled={chapter >= chapters} onPress={() => setChapter((n) => Math.min(chapters, n + 1))} style={{ opacity: chapter >= chapters ? 0.3 : 1, borderWidth: 1, borderColor: C.line, paddingVertical: 11, paddingHorizontal: 20, borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>NEXT ›</Text></Pressable>
+            <Pressable disabled={chapter <= 1} onPress={() => setChapter((n) => Math.max(1, n - 1))} style={{ opacity: chapter <= 1 ? 0.3 : 1, borderWidth: 1, borderColor: C.line, paddingVertical: 11, paddingHorizontal: 20, borderRadius: 12 }}><Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>‹ PREV</Text></Pressable>
+            <Pressable disabled={chapter >= chapters} onPress={() => setChapter((n) => Math.min(chapters, n + 1))} style={{ opacity: chapter >= chapters ? 0.3 : 1, borderWidth: 1, borderColor: C.line, paddingVertical: 11, paddingHorizontal: 20, borderRadius: 12 }}><Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>NEXT ›</Text></Pressable>
           </View>
         </ScrollView>
       )}
@@ -116,8 +116,8 @@ export default function Reader() {
             <Pressable onPress={() => applyHighlight(null)} style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: C.line, alignItems: "center", justifyContent: "center" }}><Text style={{ color: C.muted, fontSize: 15 }}>⌫</Text></Pressable>
           </View>
           <View style={{ flexDirection: "row", gap: 8 }}>
-            <Pressable onPress={bookmarkSel} style={{ flex: 1, borderWidth: 1, borderColor: C.line, paddingVertical: 12, alignItems: "center", borderRadius: 2 }}><Text style={{ color: C.ivory, fontSize: 12, fontFamily: F.mono, letterSpacing: 1 }}>★ BOOKMARK</Text></Pressable>
-            <Pressable onPress={saveToNotes} style={{ flex: 1.5, backgroundColor: C.gold, paddingVertical: 12, alignItems: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontSize: 12, fontFamily: F.head, letterSpacing: 1 }}>SAVE TO NOTES</Text></Pressable>
+            <Pressable onPress={bookmarkSel} style={{ flex: 1, borderWidth: 1, borderColor: C.line, paddingVertical: 12, alignItems: "center", borderRadius: 12 }}><Text style={{ color: C.ivory, fontSize: 12, fontFamily: F.mono, letterSpacing: 1 }}>★ BOOKMARK</Text></Pressable>
+            <Pressable onPress={saveToNotes} style={{ flex: 1.5, backgroundColor: C.gold, paddingVertical: 12, alignItems: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontSize: 12, fontFamily: F.head, letterSpacing: 1 }}>SAVE TO NOTES</Text></Pressable>
           </View>
         </View>
       )}

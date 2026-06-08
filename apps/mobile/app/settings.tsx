@@ -97,7 +97,7 @@ export default function Settings() {
         <LinkRow label="Contact support" onPress={() => Linking.openURL("mailto:support@tabor.quest")} />
 
         <Text style={[sec, { color: C.red }]}>DANGER ZONE</Text>
-        <Pressable onPress={confirmDelete} style={{ borderWidth: 1, borderColor: "rgba(192,58,58,0.5)", paddingVertical: 14, alignItems: "center", borderRadius: 2 }}>
+        <Pressable onPress={confirmDelete} style={{ borderWidth: 1, borderColor: "rgba(192,58,58,0.5)", paddingVertical: 14, alignItems: "center", borderRadius: 12 }}>
           <Text style={{ color: C.red, fontSize: 13, letterSpacing: 1, fontFamily: F.mono }}>DELETE MY ACCOUNT</Text>
         </Pressable>
         <Text style={{ color: C.muted, fontSize: 11, lineHeight: 17, fontFamily: F.body, marginTop: 8 }}>Permanently erases your account and all your data. This cannot be undone.</Text>

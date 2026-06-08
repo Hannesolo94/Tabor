@@ -109,7 +109,7 @@ export default function Status() {
           {days.map((d) => {
             const on = sealedDays.has(d);
             const isToday = d === todayKey();
-            return <View key={d} style={{ width: 26, height: 26, borderRadius: 3, backgroundColor: on ? C.gold : C.surface, borderWidth: isToday ? 1.5 : 1, borderColor: isToday ? C.goldLight : C.line }} />;
+            return <View key={d} style={{ width: 26, height: 26, borderRadius: 14, backgroundColor: on ? C.gold : C.surface, borderWidth: isToday ? 1.5 : 1, borderColor: isToday ? C.goldLight : C.line }} />;
           })}
         </View>
 
@@ -117,7 +117,7 @@ export default function Status() {
         <Text style={sec}>YOUR CLASS</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           {CLASSES.map((c) => (
-            <Pressable key={c} onPress={() => pickClass(c)} style={{ paddingVertical: 9, paddingHorizontal: 14, borderWidth: 1, borderColor: cls === c ? C.gold : C.line, backgroundColor: cls === c ? C.gold : "transparent", borderRadius: 2 }}>
+            <Pressable key={c} onPress={() => pickClass(c)} style={{ paddingVertical: 9, paddingHorizontal: 14, borderWidth: 1, borderColor: cls === c ? C.gold : C.line, backgroundColor: cls === c ? C.gold : "transparent", borderRadius: 12 }}>
               <Text style={{ color: cls === c ? C.black : C.muted, fontSize: 12, fontWeight: "700" }}>{c}</Text>
             </Pressable>
           ))}
@@ -137,7 +137,7 @@ export default function Status() {
           );
         })}
 
-        <Pressable onPress={signOut} style={{ marginTop: 28, borderWidth: 1, borderColor: "rgba(192,58,58,0.4)", paddingVertical: 14, alignItems: "center", borderRadius: 2 }}>
+        <Pressable onPress={signOut} style={{ marginTop: 28, borderWidth: 1, borderColor: "rgba(192,58,58,0.4)", paddingVertical: 14, alignItems: "center", borderRadius: 12 }}>
           <Text style={{ color: C.red, fontSize: 12, letterSpacing: 2 }}>SIGN OUT</Text>
         </Pressable>
       </ScrollView>
@@ -146,13 +146,13 @@ export default function Status() {
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
-  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 10, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.gold, fontSize: 15, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text></View>;
+  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 10, borderRadius: 12 }}><Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.gold, fontSize: 15, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text></View>;
 }
 function Tag({ label, value }: { label: string; value: string }) {
-  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2 }}><Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.ivory, fontSize: 14, fontWeight: "600", marginTop: 3, textTransform: "capitalize" }}>{value}</Text></View>;
+  return <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 12 }}><Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text><Text style={{ color: C.ivory, fontSize: 14, fontWeight: "600", marginTop: 3, textTransform: "capitalize" }}>{value}</Text></View>;
 }
 function Action({ label, onPress }: { label: string; onPress: () => void }) {
-  return <Pressable onPress={onPress} style={{ flex: 1, borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontWeight: "700" }}>{label}</Text></Pressable>;
+  return <Pressable onPress={onPress} style={{ flex: 1, borderWidth: 1, borderColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 12 }}><Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontWeight: "700" }}>{label}</Text></Pressable>;
 }
 
 const sec = { color: C.gold, fontSize: 10, letterSpacing: 3, marginTop: 26, marginBottom: 12 } as const;

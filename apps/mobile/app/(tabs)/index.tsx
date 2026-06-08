@@ -134,7 +134,7 @@ export default function Quests() {
             <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2 }}>XP</Text>
             <Text style={{ color: C.muted, fontSize: 10 }}>{prog.into} / {prog.need}</Text>
           </View>
-          <View style={{ height: 8, backgroundColor: C.surface, borderRadius: 4, overflow: "hidden" }}>
+          <View style={{ height: 8, backgroundColor: C.surface, borderRadius: 14, overflow: "hidden" }}>
             <Animated.View style={{ width: barW.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }), height: "100%", backgroundColor: C.gold }} />
           </View>
         </View>
@@ -155,7 +155,7 @@ export default function Quests() {
         )}
 
         {sealed && (
-          <Animated.View style={{ borderWidth: 1, borderColor: C.gold, padding: 20, marginTop: 8, alignItems: "center", borderRadius: 2, transform: [{ scale: sealAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }], opacity: sealAnim }}>
+          <Animated.View style={{ borderWidth: 1, borderColor: C.gold, padding: 20, marginTop: 8, alignItems: "center", borderRadius: 12, transform: [{ scale: sealAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }], opacity: sealAnim }}>
             <Text style={{ color: C.gold, fontSize: 14, letterSpacing: 4, fontFamily: F.mono }}>[ DAY SEALED ]</Text>
             <Text style={{ color: C.text, fontSize: 14, marginTop: 8, textAlign: "center", lineHeight: 21 }}>The day is won. Your streak holds. Return tomorrow, brother.</Text>
             {!feedback ? (
@@ -163,7 +163,7 @@ export default function Quests() {
                 <Text style={{ color: C.muted, fontSize: 12, marginBottom: 10 }}>How did today's training feel?</Text>
                 <View style={{ flexDirection: "row", gap: 8 }}>
                   {([["easy", "Too easy"], ["right", "Just right"], ["hard", "Too hard"]] as const).map(([sig, label]) => (
-                    <Pressable key={sig} onPress={() => { setFeedback(sig); if (userId) recordDayFeedback(userId, sig).catch(() => {}); }} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 2 }}>
+                    <Pressable key={sig} onPress={() => { setFeedback(sig); if (userId) recordDayFeedback(userId, sig).catch(() => {}); }} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12 }}>
                       <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono }}>{label}</Text>
                     </Pressable>
                   ))}
@@ -191,7 +191,7 @@ export default function Quests() {
 
 function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => void; onToggle: (q: Quest) => void }) {
   return (
-    <Pressable onPress={() => onOpen(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", borderRadius: 2 }}>
+    <Pressable onPress={() => onOpen(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", borderRadius: 12 }}>
       {/* tap the circle to quick-toggle; tap the card to open the action */}
       <Pressable onPress={() => onToggle(q)} hitSlop={10} style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
         {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
@@ -209,7 +209,7 @@ function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => voi
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 2 }}>
+    <View style={{ flex: 1, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, padding: 12, borderRadius: 12 }}>
       <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 2 }}>{label}</Text>
       <Text style={{ color: C.gold, fontSize: 16, fontWeight: "800", fontFamily: F.head, marginTop: 3 }} numberOfLines={1}>{value}</Text>
     </View>

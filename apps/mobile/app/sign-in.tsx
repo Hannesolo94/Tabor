@@ -65,7 +65,7 @@ export default function SignIn() {
             </Pressable>
           )}
 
-          <Pressable onPress={submit} disabled={busy} style={{ marginTop: 18, backgroundColor: C.gold, paddingVertical: 16, alignItems: "center", borderRadius: 2, opacity: busy ? 0.6 : 1 }}>
+          <Pressable onPress={submit} disabled={busy} style={{ marginTop: 18, backgroundColor: C.gold, paddingVertical: 16, alignItems: "center", borderRadius: 12, opacity: busy ? 0.6 : 1 }}>
             {busy ? <ActivityIndicator color={C.black} /> : <Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, letterSpacing: 2 }}>{mode === "in" ? "ENTER" : "AWAKEN"}</Text>}
           </Pressable>
 
@@ -90,5 +90,5 @@ const inp = {
   paddingVertical: 13,
   fontSize: 15,
   marginTop: 10,
-  borderRadius: 2,
+  borderRadius: 12,
 } as const;

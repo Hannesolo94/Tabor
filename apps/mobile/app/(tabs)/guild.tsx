@@ -194,12 +194,12 @@ export default function Guild() {
       <View style={{ paddingHorizontal: 18, paddingTop: 8, paddingBottom: 6 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ BROTHERHOOD ]</Text>
         <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
-          <Pressable onPress={() => router.push("/dms")} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 2 }}><Text style={{ fontSize: 15 }}>✉</Text><Text style={{ color: C.gold, fontSize: 11, fontFamily: F.headMid, letterSpacing: 1 }}>MESSAGES</Text></Pressable>
-          <Pressable onPress={() => router.push("/friends")} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}><Text style={{ fontSize: 15 }}>👥</Text><Text style={{ color: C.ivory, fontSize: 11, fontFamily: F.headMid, letterSpacing: 1 }}>FRIENDS</Text></Pressable>
+          <Pressable onPress={() => router.push("/dms")} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.10)", borderRadius: 12 }}><Text style={{ fontSize: 15 }}>✉</Text><Text style={{ color: C.gold, fontSize: 11, fontFamily: F.headMid, letterSpacing: 1 }}>MESSAGES</Text></Pressable>
+          <Pressable onPress={() => router.push("/friends")} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderWidth: 1, borderColor: C.line, borderRadius: 12 }}><Text style={{ fontSize: 15 }}>👥</Text><Text style={{ color: C.ivory, fontSize: 11, fontFamily: F.headMid, letterSpacing: 1 }}>FRIENDS</Text></Pressable>
         </View>
         <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
           {MODES.map((m) => (
-            <Pressable key={m.k} onPress={() => setMode(m.k)} style={{ flex: 1, alignItems: "center", paddingVertical: 9, borderWidth: 1, borderColor: mode === m.k ? C.gold : C.line, backgroundColor: mode === m.k ? C.gold : "transparent", borderRadius: 2 }}>
+            <Pressable key={m.k} onPress={() => setMode(m.k)} style={{ flex: 1, alignItems: "center", paddingVertical: 9, borderWidth: 1, borderColor: mode === m.k ? C.gold : C.line, backgroundColor: mode === m.k ? C.gold : "transparent", borderRadius: 12 }}>
               <Text style={{ color: mode === m.k ? C.black : C.ivory, fontSize: 11, letterSpacing: 1, fontWeight: "700" }}>{m.label}</Text>
             </Pressable>
           ))}
@@ -208,7 +208,7 @@ export default function Guild() {
         {mode === "community" && (
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
             <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head }}>Community</Text>
-            <Pressable onPress={() => router.push("/giveaway")} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 5, paddingHorizontal: 11, borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>🎁 GIVEAWAY</Text></Pressable>
+            <Pressable onPress={() => router.push("/giveaway")} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 5, paddingHorizontal: 11, borderRadius: 12 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>🎁 GIVEAWAY</Text></Pressable>
           </View>
         )}
         {mode === "board" && <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head, marginTop: 8 }}>Announcements</Text>}
@@ -219,7 +219,7 @@ export default function Guild() {
               <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head }} numberOfLines={1}>{guildName}</Text>
               <View style={{ flexDirection: "row", gap: 6 }}>
                 {(["chat", "roster"] as const).map((v) => (
-                  <Pressable key={v} onPress={() => setView(v)} style={{ paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: view === v ? C.gold : C.line, backgroundColor: view === v ? C.gold : "transparent", borderRadius: 2 }}>
+                  <Pressable key={v} onPress={() => setView(v)} style={{ paddingVertical: 6, paddingHorizontal: 12, borderWidth: 1, borderColor: view === v ? C.gold : C.line, backgroundColor: view === v ? C.gold : "transparent", borderRadius: 12 }}>
                     <Text style={{ color: view === v ? C.black : C.muted, fontSize: 9, letterSpacing: 1, fontWeight: "700" }}>{v === "chat" ? "CHAT" : "RANKS"}</Text>
                   </Pressable>
                 ))}
@@ -228,7 +228,7 @@ export default function Guild() {
             {guilds.length > 1 && (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginTop: 8 }} contentContainerStyle={{ gap: 8 }}>
                 {guilds.map((g) => (
-                  <Pressable key={g.id} onPress={() => selectGuild(g)} style={{ paddingVertical: 5, paddingHorizontal: 11, borderWidth: 1, borderColor: guildId === g.id ? C.gold : C.line, backgroundColor: guildId === g.id ? "rgba(201,169,97,0.12)" : "transparent", borderRadius: 2 }}>
+                  <Pressable key={g.id} onPress={() => selectGuild(g)} style={{ paddingVertical: 5, paddingHorizontal: 11, borderWidth: 1, borderColor: guildId === g.id ? C.gold : C.line, backgroundColor: guildId === g.id ? "rgba(201,169,97,0.12)" : "transparent", borderRadius: 12 }}>
                     <Text style={{ color: guildId === g.id ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{g.tag ? `[${g.tag}] ` : ""}{g.name}</Text>
                   </Pressable>
                 ))}
@@ -260,7 +260,7 @@ export default function Guild() {
           {mode === "guild" && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}>
               {channels.map((c) => (
-                <Pressable key={c.id} onPress={() => setActive(c)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: active?.id === c.id ? C.gold : C.line, backgroundColor: active?.id === c.id ? C.gold : "transparent", borderRadius: 2 }}>
+                <Pressable key={c.id} onPress={() => setActive(c)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: active?.id === c.id ? C.gold : C.line, backgroundColor: active?.id === c.id ? C.gold : "transparent", borderRadius: 12 }}>
                   <Text style={{ color: active?.id === c.id ? C.black : C.ivory, fontSize: 12, fontFamily: F.bodyMid }}>#{c.name}</Text>
                 </Pressable>
               ))}
@@ -275,7 +275,7 @@ export default function Guild() {
                 <Pressable key={m.id} onLongPress={() => onMessagePress(m)} delayLongPress={300} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
                   <Text style={{ color: mine ? C.gold : C.muted, fontSize: 10, letterSpacing: 1, marginBottom: 3, textAlign: mine ? "right" : "left" }}>{mine ? "YOU" : (m.author_id ? nameMap[m.author_id] ?? "Brother" : "System").toUpperCase()}</Text>
                   {parseMedia(m.body) ? <MediaBubble media={parseMedia(m.body)!} /> : (
-                    <View style={{ backgroundColor: mode === "board" ? "rgba(201,169,97,0.10)" : mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: mode === "board" ? C.gold : C.line, padding: 11, borderRadius: 2 }}>
+                    <View style={{ backgroundColor: mode === "board" ? "rgba(201,169,97,0.10)" : mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: mode === "board" ? C.gold : C.line, padding: 11, borderRadius: 12 }}>
                       <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>
                     </View>
                   )}
@@ -296,8 +296,8 @@ export default function Guild() {
           {canPost ? (
             <View style={{ flexDirection: "row", gap: 6, padding: 12, borderTopWidth: 1, borderTopColor: C.line, alignItems: "center" }}>
               <Pressable onPress={attach} hitSlop={6} style={{ justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ color: C.gold, fontSize: 24 }}>＋</Text></Pressable>
-              <TextInput value={input} onChangeText={setInput} placeholder={mode === "board" ? "Post an announcement…" : mode === "community" ? "Message the community" : `Message #${active?.name ?? ""}`} placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2 }} onSubmitEditing={send} returnKeyType="send" />
-              <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>{mode === "board" ? "POST" : "SEND"}</Text></Pressable>
+              <TextInput value={input} onChangeText={setInput} placeholder={mode === "board" ? "Post an announcement…" : mode === "community" ? "Message the community" : `Message #${active?.name ?? ""}`} placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 }} onSubmitEditing={send} returnKeyType="send" />
+              <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>{mode === "board" ? "POST" : "SEND"}</Text></Pressable>
             </View>
           ) : (
             <View style={{ padding: 14, borderTopWidth: 1, borderTopColor: C.line, alignItems: "center" }}>
@@ -309,7 +309,7 @@ export default function Guild() {
 
       <Modal visible={!!profileUser} transparent animationType="fade" onRequestClose={() => setProfileUser(null)}>
         <Pressable onPress={() => setProfileUser(null)} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", padding: 30 }}>
-          <Pressable onPress={() => {}} style={{ backgroundColor: C.surface2, borderWidth: 1, borderColor: C.gold, borderRadius: 4, padding: 24, alignItems: "center" }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: C.surface2, borderWidth: 1, borderColor: C.gold, borderRadius: 14, padding: 24, alignItems: "center" }}>
             <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: C.surface, alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
               <Text style={{ color: C.gold, fontFamily: F.head, fontSize: 26 }}>{(profileUser?.name || "B")[0].toUpperCase()}</Text>
             </View>
@@ -323,15 +323,15 @@ export default function Guild() {
             {profileUser?.bio ? <Text style={{ color: C.text, fontSize: 14, fontFamily: F.body, textAlign: "center", marginTop: 14, lineHeight: 20 }}>{profileUser.bio}</Text> : null}
             {profileUser && profileUser.user_id !== userId && (
               profileUser.friend_status === "accepted" ? (
-                <Pressable onPress={async () => { const u = profileUser; setProfileUser(null); const tid = await openDm(u.user_id); if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(u.name || "Brother")}&uid=${u.user_id}`); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 34, borderRadius: 2, marginTop: 18 }}>
+                <Pressable onPress={async () => { const u = profileUser; setProfileUser(null); const tid = await openDm(u.user_id); if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(u.name || "Brother")}&uid=${u.user_id}`); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 34, borderRadius: 12, marginTop: 18 }}>
                   <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>MESSAGE</Text>
                 </Pressable>
               ) : profileUser.friend_status === "pending" ? (
-                <View style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 2, marginTop: 18 }}>
+                <View style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 12, marginTop: 18 }}>
                   <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 11, letterSpacing: 1 }}>REQUEST PENDING</Text>
                 </View>
               ) : (
-                <Pressable onPress={async () => { if (!profileUser) return; const r = await sendFriendRequest(profileUser.user_id); setProfileUser((p) => (p ? { ...p, friend_status: r === "sent" ? "pending" : p.friend_status } : p)); Alert.alert(r === "sent" ? "Request sent" : "Done", r === "sent" ? "They will see your request. Once they accept, you can message." : ""); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 2, marginTop: 18 }}>
+                <Pressable onPress={async () => { if (!profileUser) return; const r = await sendFriendRequest(profileUser.user_id); setProfileUser((p) => (p ? { ...p, friend_status: r === "sent" ? "pending" : p.friend_status } : p)); Alert.alert(r === "sent" ? "Request sent" : "Done", r === "sent" ? "They will see your request. Once they accept, you can message." : ""); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 12, marginTop: 18 }}>
                   <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>＋ ADD FRIEND</Text>
                 </Pressable>
               )

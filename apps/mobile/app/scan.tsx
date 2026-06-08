@@ -54,7 +54,7 @@ export default function Scan() {
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black, padding: 26, justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 4, fontFamily: F.mono }}>[ GRANT VISION ]</Text>
       <Text style={{ color: C.text, fontSize: 15, fontFamily: F.body, textAlign: "center", marginVertical: 14, lineHeight: 22 }}>TABOR needs the camera to scan food barcodes for your log.</Text>
-      <Pressable onPress={requestPermission} style={{ backgroundColor: C.gold, paddingVertical: 13, paddingHorizontal: 30, borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>ALLOW CAMERA</Text></Pressable>
+      <Pressable onPress={requestPermission} style={{ backgroundColor: C.gold, paddingVertical: 13, paddingHorizontal: 30, borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>ALLOW CAMERA</Text></Pressable>
       <Pressable onPress={() => router.back()} style={{ marginTop: 16 }}><Text style={{ color: C.muted, fontFamily: F.body }}>Back</Text></Pressable>
     </SafeAreaView>
   );
@@ -88,10 +88,10 @@ export default function Scan() {
 
           <Text style={lbl}>Meal</Text>
           <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-            {MEALS.map((x) => <Pressable key={x} onPress={() => setMeal(x)} style={{ borderWidth: 1, borderColor: meal === x ? C.gold : C.line, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 2 }}><Text style={{ color: meal === x ? C.gold : C.muted, fontFamily: F.mono, fontSize: 11 }}>{x.toUpperCase()}</Text></Pressable>)}
+            {MEALS.map((x) => <Pressable key={x} onPress={() => setMeal(x)} style={{ borderWidth: 1, borderColor: meal === x ? C.gold : C.line, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12 }}><Text style={{ color: meal === x ? C.gold : C.muted, fontFamily: F.mono, fontSize: 11 }}>{x.toUpperCase()}</Text></Pressable>)}
           </View>
 
-          <Pressable onPress={save} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 2, marginTop: 20 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>LOG IT</Text></Pressable>
+          <Pressable onPress={save} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 12, marginTop: 20 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>LOG IT</Text></Pressable>
           <Pressable onPress={reset} style={{ marginTop: 12, alignItems: "center" }}><Text style={{ color: C.muted, fontFamily: F.body }}>Scan another</Text></Pressable>
           {food.source === "off" && <Text style={{ color: C.muted, fontSize: 9, fontFamily: F.mono, textAlign: "center", marginTop: 14 }}>DATA FROM OPEN FOOD FACTS (ODbL)</Text>}
         </ScrollView>
@@ -108,7 +108,7 @@ export default function Scan() {
             <TextInput value={m.carb} onChangeText={(t) => setM({ ...m, carb: t })} placeholder="Carbs" placeholderTextColor={C.muted} keyboardType="numeric" style={[inp, { flex: 1 }]} />
             <TextInput value={m.fat} onChangeText={(t) => setM({ ...m, fat: t })} placeholder="Fat" placeholderTextColor={C.muted} keyboardType="numeric" style={[inp, { flex: 1 }]} />
           </View>
-          <Pressable onPress={saveManual} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 2, marginTop: 16 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>ADD & CONTINUE</Text></Pressable>
+          <Pressable onPress={saveManual} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 12, marginTop: 16 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>ADD & CONTINUE</Text></Pressable>
           <Pressable onPress={reset} style={{ marginTop: 12, alignItems: "center" }}><Text style={{ color: C.muted, fontFamily: F.body }}>Scan again</Text></Pressable>
         </ScrollView>
       )}
@@ -116,4 +116,4 @@ export default function Scan() {
   );
 }
 const lbl = { color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginTop: 18, marginBottom: 6 } as const;
-const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 2, fontFamily: F.body, fontSize: 15, marginTop: 8 } as const;
+const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, fontFamily: F.body, fontSize: 15, marginTop: 8 } as const;

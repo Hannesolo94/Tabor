@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import { View, Text, Pressable, Modal } from "react-native";
-import { C, F } from "@/lib/theme";
+import { C, F, R, SH } from "@/lib/theme";
 
 export interface SheetAction { label: string; onPress?: () => void; style?: "default" | "destructive" | "cancel" }
 export interface SheetOpts { title?: string; message?: string; reactions?: { emoji: string; onPress: () => void }[]; actions: SheetAction[] }
@@ -22,8 +22,8 @@ export function ActionSheetProvider({ children }: { children: ReactNode }) {
       {children}
       <Modal visible={!!opts} transparent animationType="fade" onRequestClose={close} statusBarTranslucent>
         <Pressable onPress={close} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.8)", justifyContent: "flex-end" }}>
-          <Pressable onPress={() => {}} style={{ backgroundColor: C.surface, borderTopWidth: 1, borderColor: C.gold, borderTopLeftRadius: 6, borderTopRightRadius: 6, padding: 16, paddingBottom: 36 }}>
-            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: C.line, alignSelf: "center", marginBottom: 14 }} />
+          <Pressable onPress={() => {}} style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.glassBorder, borderTopLeftRadius: R.xl, borderTopRightRadius: R.xl, padding: 16, paddingBottom: 36, ...SH.float }}>
+            <View style={{ width: 36, height: 4, borderRadius: 12, backgroundColor: C.line, alignSelf: "center", marginBottom: 14 }} />
             {opts?.title ? <Text style={{ color: C.ivory, fontSize: 17, fontFamily: F.head, textAlign: "center" }}>{opts.title}</Text> : null}
             {opts?.message ? <Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body, textAlign: "center", marginTop: 6, lineHeight: 19 }}>{opts.message}</Text> : null}
 
@@ -39,11 +39,11 @@ export function ActionSheetProvider({ children }: { children: ReactNode }) {
 
             <View style={{ marginTop: 16, gap: 8 }}>
               {rows.map((a, i) => (
-                <Pressable key={i} onPress={() => { close(); a.onPress?.(); }} style={{ borderWidth: 1, borderColor: a.style === "destructive" ? "rgba(192,58,58,0.5)" : C.line, backgroundColor: C.surface2, paddingVertical: 15, alignItems: "center", borderRadius: 2 }}>
+                <Pressable key={i} onPress={() => { close(); a.onPress?.(); }} style={{ borderWidth: 1, borderColor: a.style === "destructive" ? "rgba(192,58,58,0.5)" : C.line, backgroundColor: C.surface2, paddingVertical: 15, alignItems: "center", borderRadius: 12 }}>
                   <Text style={{ color: a.style === "destructive" ? C.red : C.ivory, fontSize: 15, fontFamily: F.bodyMid }}>{a.label}</Text>
                 </Pressable>
               ))}
-              <Pressable onPress={close} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 2, marginTop: 4 }}>
+              <Pressable onPress={close} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 12, marginTop: 4 }}>
                 <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.headMid, letterSpacing: 1 }}>{cancel?.label?.toUpperCase() ?? "CANCEL"}</Text>
               </Pressable>
             </View>

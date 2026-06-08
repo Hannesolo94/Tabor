@@ -127,7 +127,7 @@ export default function DM() {
             return (
               <Pressable key={m.id} onLongPress={() => report(m)} delayLongPress={350} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
                 {parseMedia(text[m.id]) ? <MediaBubble media={parseMedia(text[m.id])!} /> : (
-                  <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 2 }}>
+                  <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 12 }}>
                     <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20, fontFamily: F.body }}>{text[m.id] ?? "…"}</Text>
                   </View>
                 )}
@@ -137,8 +137,8 @@ export default function DM() {
         </ScrollView>
         <View style={{ flexDirection: "row", gap: 6, padding: 12, borderTopWidth: 1, borderTopColor: C.line, alignItems: "center" }}>
           <Pressable onPress={attach} hitSlop={6} style={{ justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ color: C.gold, fontSize: 24 }}>＋</Text></Pressable>
-          <TextInput value={input} onChangeText={setInput} placeholder="Message…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 2, fontFamily: F.body }} onSubmitEditing={send} returnKeyType="send" />
-          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
+          <TextInput value={input} onChangeText={setInput} placeholder="Message…" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, fontFamily: F.body }} onSubmitEditing={send} returnKeyType="send" />
+          <Pressable onPress={send} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head }}>SEND</Text></Pressable>
         </View>
       </KeyboardAvoidingView>
       <GifPicker visible={gifOpen} onClose={() => setGifOpen(false)} onPick={(url) => sendMediaRef({ t: "gif", url })} />

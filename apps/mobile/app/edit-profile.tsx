@@ -72,7 +72,7 @@ export default function EditProfile() {
         <TextInput value={name} onChangeText={setName} placeholder="Your name" placeholderTextColor={C.muted} style={inp} />
 
         <Text style={lbl}>Username</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 2, marginTop: 8, paddingLeft: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 12, marginTop: 8, paddingLeft: 12 }}>
           <Text style={{ color: C.muted, fontFamily: F.body, fontSize: 15 }}>@</Text>
           <TextInput value={handle} onChangeText={(t) => setHandle(t.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase())} autoCapitalize="none" placeholder="handle" placeholderTextColor={C.muted} style={{ flex: 1, color: C.ivory, paddingHorizontal: 6, paddingVertical: 12, fontSize: 15, fontFamily: F.body }} />
         </View>
@@ -86,4 +86,4 @@ export default function EditProfile() {
 }
 
 const lbl = { color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginTop: 16 } as const;
-const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, marginTop: 8, borderRadius: 2, fontFamily: F.body } as const;
+const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, marginTop: 8, borderRadius: 12, fontFamily: F.body } as const;

@@ -45,7 +45,7 @@ export default function History() {
         <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
           <TextInput value={lift} onChangeText={setLift} placeholder="Lift (e.g. Bench)" placeholderTextColor={C.muted} style={[inp, { flex: 2 }]} />
           <TextInput value={value} onChangeText={(t) => setValue(t.replace(/[^0-9.]/g, ""))} placeholder="kg" placeholderTextColor={C.muted} keyboardType="numeric" style={[inp, { flex: 1 }]} />
-          <Pressable onPress={addPR} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head }}>SET</Text></Pressable>
+          <Pressable onPress={addPR} style={{ backgroundColor: C.gold, paddingHorizontal: 16, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.head }}>SET</Text></Pressable>
         </View>
         {prs.length === 0 ? <Text style={empty}>No records yet. Log your first lift.</Text> : prs.map((p) => (
           <Pressable key={p.lift} onLongPress={() => removePR(p)} delayLongPress={350} style={row}>
@@ -70,6 +70,6 @@ export default function History() {
   );
 }
 const sec = { color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono, marginBottom: 10 } as const;
-const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 2, fontFamily: F.body, fontSize: 14 } as const;
+const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, fontFamily: F.body, fontSize: 14 } as const;
 const row = { flexDirection: "row" as const, justifyContent: "space-between" as const, alignItems: "center" as const, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" };
 const empty = { color: C.muted, fontSize: 13, fontFamily: F.body } as const;

@@ -71,7 +71,7 @@ function Consent({ onAccept, onBack }: { onAccept: () => void; onBack: () => voi
         To log food and calories we store your nutrition and body metrics. This is health data, kept private to you, never sold, and erased instantly if you delete your account. We need your explicit consent to begin.
       </Text>
       <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginTop: 10 }}>This is general fitness information, not medical advice.</Text>
-      <Pressable onPress={onAccept} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 2, marginTop: 20 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>I CONSENT, BEGIN</Text></Pressable>
+      <Pressable onPress={onAccept} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 12, marginTop: 20 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>I CONSENT, BEGIN</Text></Pressable>
       <Pressable onPress={onBack} style={{ marginTop: 14, alignItems: "center" }}><Text style={{ color: C.muted, fontFamily: F.body }}>Not now</Text></Pressable>
     </ScrollView>
   );
@@ -100,7 +100,7 @@ function GoalSetup({ userId, initial, onDone }: { userId: string; initial: Goals
       <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>{ACT.map((a) => <Chip key={a.v} label={a.l} on={f.activity === a.v} onPress={() => setF({ ...f, activity: a.v })} />)}</View>
       <Text style={lbl}>Goal</Text>
       <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>{GOAL.map((g) => <Chip key={g.v} label={g.l} on={f.goal_type === g.v} onPress={() => setF({ ...f, goal_type: g.v })} />)}</View>
-      <Pressable onPress={save} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 2, marginTop: 20 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SET TARGETS</Text></Pressable>
+      <Pressable onPress={save} style={{ backgroundColor: C.gold, paddingVertical: 14, alignItems: "center", borderRadius: 12, marginTop: 20 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SET TARGETS</Text></Pressable>
     </ScrollView>
   );
 }
@@ -123,7 +123,7 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
   return (
     <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }}>
       {/* totals */}
-      <View style={{ borderWidth: 1, borderColor: C.gold, borderRadius: 3, padding: 16, marginBottom: 16 }}>
+      <View style={{ borderWidth: 1, borderColor: C.gold, borderRadius: 14, padding: 16, marginBottom: 16 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
           <Text style={{ color: C.ivory, fontSize: 30, fontFamily: F.head }}>{kcal}</Text>
           <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 12 }}>/ {goals.kcal_target} kcal · {Math.max(0, goals.kcal_target - kcal)} left</Text>
@@ -136,7 +136,7 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
         </View>
       </View>
 
-      <Pressable onPress={onScan} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 2, marginBottom: 14 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SCAN A BARCODE</Text></Pressable>
+      <Pressable onPress={onScan} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 12, marginBottom: 14 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SCAN A BARCODE</Text></Pressable>
 
       <TextInput value={q} onChangeText={doSearch} placeholder="Or search your foods..." placeholderTextColor={C.muted} style={inp} />
       {results.map((r, i) => (
@@ -167,13 +167,13 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
 
 function Bar({ value, target }: { value: number; target: number }) {
   const pct = target > 0 ? Math.min(100, (value / target) * 100) : 0;
-  return <View style={{ height: 8, backgroundColor: C.surface, borderRadius: 4, overflow: "hidden", marginTop: 8 }}><View style={{ width: `${pct}%`, height: "100%", backgroundColor: pct > 100 ? C.red : C.gold }} /></View>;
+  return <View style={{ height: 8, backgroundColor: C.surface, borderRadius: 14, overflow: "hidden", marginTop: 8 }}><View style={{ width: `${pct}%`, height: "100%", backgroundColor: pct > 100 ? C.red : C.gold }} /></View>;
 }
 function Macro({ label, v, t }: { label: string; v: number; t: number }) {
   return <View style={{ flex: 1 }}><Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono }}>{label} {Math.round(v)}/{t}g</Text><Bar value={v} target={t} /></View>;
 }
 function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
-  return <Pressable onPress={onPress} style={{ borderWidth: 1, borderColor: on ? C.gold : C.line, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 2 }}><Text style={{ color: on ? C.gold : C.muted, fontFamily: F.mono, fontSize: 11 }}>{label.toUpperCase()}</Text></Pressable>;
+  return <Pressable onPress={onPress} style={{ borderWidth: 1, borderColor: on ? C.gold : C.line, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12 }}><Text style={{ color: on ? C.gold : C.muted, fontFamily: F.mono, fontSize: 11 }}>{label.toUpperCase()}</Text></Pressable>;
 }
 const lbl = { color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono, marginTop: 16, marginBottom: 6 } as const;
-const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 11, borderRadius: 2, fontFamily: F.body, fontSize: 15, marginTop: 6 } as const;
+const inp = { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 14, paddingVertical: 11, borderRadius: 12, fontFamily: F.body, fontSize: 15, marginTop: 6 } as const;

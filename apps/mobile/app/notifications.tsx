@@ -54,10 +54,10 @@ export default function Notifications() {
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
           {notes.length === 0 && <Text style={{ color: C.muted, fontSize: 14, textAlign: "center", marginTop: 30 }}>No messages yet. Announcements from the brotherhood land here.</Text>}
           {notes.map((n) => (
-            <Pressable key={n.id} onPress={() => open(n)} style={{ borderWidth: 1, borderColor: n.read ? C.line : C.gold, backgroundColor: n.read ? C.surface2 : "rgba(201,169,97,0.08)", padding: 15, marginBottom: 10, borderRadius: 2 }}>
+            <Pressable key={n.id} onPress={() => open(n)} style={{ borderWidth: 1, borderColor: n.read ? C.line : C.gold, backgroundColor: n.read ? C.surface2 : "rgba(201,169,97,0.08)", padding: 15, marginBottom: 10, borderRadius: 12 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                  {!n.read && <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: C.gold }} />}
+                  {!n.read && <View style={{ width: 7, height: 7, borderRadius: 14, backgroundColor: C.gold }} />}
                   <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2 }}>{(n.kind || "NOTICE").toUpperCase()}</Text>
                 </View>
                 <Text style={{ color: C.muted, fontSize: 10 }}>{new Date(n.created_at).toISOString().slice(0, 10)}</Text>

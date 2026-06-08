@@ -19,13 +19,13 @@ export default function Dms() {
           <Text style={{ color: C.ivory, fontSize: 18, fontWeight: "800", fontFamily: F.head }}>Direct Messages</Text>
           <Text style={{ color: C.muted, fontSize: 10 }}>End-to-end encrypted. Only you and the brother can read them.</Text>
         </View>
-        <Pressable onPress={() => router.push("/friends")} style={{ backgroundColor: C.gold, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 2 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, fontSize: 11 }}>+ NEW</Text></Pressable>
+        <Pressable onPress={() => router.push("/friends")} style={{ backgroundColor: C.gold, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 }}><Text style={{ color: C.black, fontWeight: "800", fontFamily: F.head, fontSize: 11 }}>+ NEW</Text></Pressable>
       </View>
       {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 40 }} /> : (
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           {threads.length === 0 && <Text style={{ color: C.muted, fontSize: 14, fontFamily: F.body, marginTop: 10 }}>No conversations yet. Add a brother in Friends, then tap Message to start one.</Text>}
           {threads.map((t) => (
-            <Pressable key={t.thread_id} onPress={() => router.push(`/dm/${t.thread_id}?name=${encodeURIComponent(t.name || "Brother")}&uid=${t.other_id}`)} style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, padding: 14, borderRadius: 2, marginBottom: 8 }}>
+            <Pressable key={t.thread_id} onPress={() => router.push(`/dm/${t.thread_id}?name=${encodeURIComponent(t.name || "Brother")}&uid=${t.other_id}`)} style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, padding: 14, borderRadius: 12, marginBottom: 8 }}>
               <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.surface, alignItems: "center", justifyContent: "center", marginRight: 12 }}><Text style={{ color: C.gold, fontFamily: F.head, fontSize: 16 }}>{(t.name || "B")[0].toUpperCase()}</Text></View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.bodyMid }}>{t.name || "Brother"}</Text>

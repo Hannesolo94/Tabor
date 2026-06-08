@@ -132,8 +132,8 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
               </View>
             )}
             <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
-              <TextInput value={moveInput} onChangeText={setMoveInput} onSubmitEditing={addMove} placeholder="Add a move (e.g. Burpees)" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 2, fontSize: 13 }} />
-              <Pressable onPress={addMove} style={{ borderWidth: 1, borderColor: C.gold, paddingHorizontal: 14, justifyContent: "center", borderRadius: 2 }}><Text style={{ color: C.gold, fontFamily: F.head }}>ADD</Text></Pressable>
+              <TextInput value={moveInput} onChangeText={setMoveInput} onSubmitEditing={addMove} placeholder="Add a move (e.g. Burpees)" placeholderTextColor={C.muted} style={{ flex: 1, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, color: C.ivory, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 12, fontSize: 13 }} />
+              <Pressable onPress={addMove} style={{ borderWidth: 1, borderColor: C.gold, paddingHorizontal: 14, justifyContent: "center", borderRadius: 12 }}><Text style={{ color: C.gold, fontFamily: F.head }}>ADD</Text></Pressable>
             </View>
             {moves.length > 0 && <Pressable onPress={() => setMoves([])} style={{ marginTop: 6 }}><Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono }}>CLEAR · PURE TIMER</Text></Pressable>}
           </View>
@@ -141,7 +141,7 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
           {presets.length > 0 && (
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
               {presets.map((p) => (
-                <Pressable key={p.id} onPress={() => { setCfg(p.config); setMoves(p.moves); }} onLongPress={() => Alert.alert("Delete preset?", p.name, [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: async () => { await deleteTabataPreset(p.id); loadPresets(); } }])} delayLongPress={350} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 2 }}>
+                <Pressable key={p.id} onPress={() => { setCfg(p.config); setMoves(p.moves); }} onLongPress={() => Alert.alert("Delete preset?", p.name, [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: async () => { await deleteTabataPreset(p.id); loadPresets(); } }])} delayLongPress={350} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 12 }}>
                   <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono }}>{p.name}</Text>
                 </Pressable>
               ))}
@@ -149,7 +149,7 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
           )}
           {userId && <Pressable onPress={savePreset} style={{ marginTop: 14, alignItems: "center" }}><Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body }}>Save current as a timer routine</Text></Pressable>}
 
-          <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 2, marginTop: 18 }}>
+          <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 12, marginTop: 18 }}>
             <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>START</Text>
           </Pressable>
         </ScrollView>
@@ -204,8 +204,8 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
 
       {done ? (
         <View style={{ flexDirection: "row", gap: 12, marginTop: 16 }}>
-          <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 14, paddingHorizontal: 34, borderRadius: 2 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>GO AGAIN</Text></Pressable>
-          <Pressable onPress={reset} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 14, paddingHorizontal: 26, borderRadius: 2 }}><Text style={{ color: C.muted, fontFamily: F.headMid, letterSpacing: 1 }}>EDIT</Text></Pressable>
+          <Pressable onPress={start} style={{ backgroundColor: C.gold, paddingVertical: 14, paddingHorizontal: 34, borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>GO AGAIN</Text></Pressable>
+          <Pressable onPress={reset} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 14, paddingHorizontal: 26, borderRadius: 12 }}><Text style={{ color: C.muted, fontFamily: F.headMid, letterSpacing: 1 }}>EDIT</Text></Pressable>
         </View>
       ) : (
         <>
@@ -235,5 +235,5 @@ function Stepper({ label, value, set, step, min = 0 }: { label: string; value: n
 }
 
 const lbl = { color: C.muted, fontSize: 10, fontFamily: F.mono, letterSpacing: 1 } as const;
-const ctrl = { borderWidth: 1, borderColor: C.line, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 2, minWidth: 56, alignItems: "center" as const };
+const ctrl = { borderWidth: 1, borderColor: C.line, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 12, minWidth: 56, alignItems: "center" as const };
 const ctrlT = { color: C.muted, fontFamily: F.headMid, letterSpacing: 1, fontSize: 14 } as const;
