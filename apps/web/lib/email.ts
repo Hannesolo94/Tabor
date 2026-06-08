@@ -47,8 +47,8 @@ export function emailShell(title: string, body: string, opts: EmailOpts = {}): s
   const serif = "Georgia, 'Times New Roman', serif";
   const mono = "'Courier New', ui-monospace, monospace";
   const button = cta
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 6px"><tr><td align="center" bgcolor="#C9A961" style="border-radius:2px;background-image:linear-gradient(180deg,#E8D08C,#C9A961)">
-        <a href="${cta.url}" target="_blank" style="display:inline-block;padding:14px 34px;font-family:${serif};font-weight:bold;font-size:13px;letter-spacing:1.5px;color:#0A0A0A;text-decoration:none;text-transform:uppercase">${cta.label}</a>
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 6px"><tr><td align="center" bgcolor="#C9A961" style="border-radius:14px;background-image:linear-gradient(180deg,#F0D89A,#C9A961);box-shadow:0 8px 22px rgba(201,169,97,0.35)">
+        <a href="${cta.url}" target="_blank" style="display:inline-block;padding:15px 36px;font-family:${serif};font-weight:bold;font-size:13px;letter-spacing:1.5px;color:#1A1408;text-decoration:none;text-transform:uppercase">${cta.label}</a>
       </td></tr></table>`
     : "";
   const foot = footnote ? `<p style="margin:18px 0 0;font-family:${serif};font-size:12px;line-height:1.6;color:#8A847A">${footnote}</p>` : "";
@@ -57,11 +57,11 @@ export function emailShell(title: string, body: string, opts: EmailOpts = {}): s
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="supported-color-schemes" content="dark light"><title>${title}</title></head>
 <body style="margin:0;padding:0;background:#0A0A0A;">
   <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;mso-hide:all">${preheader ?? `${title} — TABOR. Sons of Fire.`}</span>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0A0A0A" style="background:#0A0A0A;padding:28px 14px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0A0A0A" style="background:#0A0A0A;padding:38px 16px">
     <tr><td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#0E0E12;border:1px solid rgba(201,169,97,0.28)">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#0E0E12;background-image:linear-gradient(180deg,#15151d,#0b0b0f);border:1px solid rgba(201,169,97,0.28);border-radius:20px;overflow:hidden;box-shadow:0 26px 64px rgba(0,0,0,0.6)">
         <!-- gold top bar -->
-        <tr><td style="height:4px;line-height:4px;font-size:0;background:#C9A961;background-image:linear-gradient(90deg,#A8843E,#E8D08C,#A8843E)">&nbsp;</td></tr>
+        <tr><td style="height:5px;line-height:5px;font-size:0;background:#C9A961;background-image:linear-gradient(90deg,#A8843E,#E8D08C,#A8843E)">&nbsp;</td></tr>
         <!-- header / wordmark -->
         <tr><td align="center" style="padding:34px 30px 8px">
           <div style="font-family:${mono};font-size:10px;letter-spacing:5px;color:#C9A961">&#10013;</div>
