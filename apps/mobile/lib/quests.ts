@@ -4,7 +4,7 @@
 // progression. Quests escalate as the user levels up ("progress pushes it").
 import { supabase } from "./supabase";
 import { levelFromXp } from "./game";
-import { generateDisciplineQuests } from "./disciplines";
+import { generateDisciplineQuests, traditionOf, type Tradition } from "./disciplines";
 
 // core quests gate the day-seal; everything else is a bonus discipline
 export const CORE_KEYS = ["word", "body", "brother"];
@@ -34,12 +34,20 @@ const PLAN_SEQ: [string, number, number][] = [
   ["Matthew", 1, 28], ["1 Corinthians", 1, 16], ["Psalms", 1, 41], ["Genesis", 1, 25],
   ["Luke", 1, 24],
 ];
-function buildPlan(): string[] {
+// Deuterocanon — added to the reading journey for Catholic + Orthodox brothers so
+// their Bible is never "missing books." (Orthodox also keep a few more; covered later.)
+const DEUTERO: [string, number, number][] = [
+  ["Tobit", 1, 14], ["Judith", 1, 16], ["Wisdom", 1, 19], ["Sirach", 1, 51],
+  ["Baruch", 1, 6], ["1 Maccabees", 1, 16], ["2 Maccabees", 1, 15],
+];
+function buildPlan(trad: Tradition): string[] {
   const out: string[] = [];
   for (const [book, a, b] of PLAN_SEQ) for (let i = a; i <= b; i++) out.push(`${book} ${i}`);
+  if (trad === "catholic" || trad === "orthodox") {
+    for (const [book, a, b] of DEUTERO) for (let i = a; i <= b; i++) out.push(`${book} ${i}`);
+  }
   return out;
 }
-const READING_PLAN = buildPlan();
 
 // ---------- content: brotherhood actions ----------
 const BROTHER = [
@@ -122,7 +130,7 @@ function ageFactor(dob?: string | null): number {
   return age >= 55 ? 0.75 : age >= 45 ? 0.85 : age >= 35 ? 0.95 : 1;
 }
 
-interface Gen { fitness_level?: string | null; equipment?: string | null; goals?: string[] | null; dob?: string | null; baseline?: Baseline | null; difficulty?: number | null }
+interface Gen { fitness_level?: string | null; equipment?: string | null; goals?: string[] | null; dob?: string | null; baseline?: Baseline | null; difficulty?: number | null; denomination?: string | null }
 interface GenQuest { quest_key: string; pillar: string; title: string; sub: string; stat: string; xp: number; goal: number }
 
 /** Build today's three personalised quests from the user's profile + level. */
@@ -143,7 +151,8 @@ export function generateQuests(p: Gen, level: number, scriptureIndex: number): G
   const b = pool[(di * 5 + 2) % pool.length];
   const body = (a.key === b.key ? [a] : [a, b]).map((m) => m.render(ctx)).join(" + ");
 
-  const passage = READING_PLAN[scriptureIndex % READING_PLAN.length];
+  const plan = buildPlan(traditionOf(p.denomination));
+  const passage = plan[scriptureIndex % plan.length];
   const tier = 1 + Math.floor(level / 3);
   return [
     { quest_key: "word", pillar: "SCRIPTURE RAID", title: `Read ${passage}`, sub: "Take ground in the Word", stat: "WIS", xp: 30, goal: 1 },
@@ -181,7 +190,7 @@ export async function loadToday(userId: string): Promise<Quest[]> {
       const { data: ng } = await supabase.from("nutrition_goals").select("weight_kg, protein_target").eq("user_id", userId).maybeSingle();
       weight_kg = (ng?.weight_kg as number) ?? null; protein_target = (ng?.protein_target as number) ?? null;
     }
-    disc = generateDisciplineQuests({ denomination: (prof as { denomination?: string })?.denomination, goals: (prof as Gen)?.goals, disciplines: prefs, weight_kg, protein_target }, dayIndex());
+    disc = generateDisciplineQuests({ denomination: (prof as { denomination?: string })?.denomination, goals: (prof as Gen)?.goals, disciplines: prefs, weight_kg, protein_target }, dayIndex(), new Date().getDay());
   }
   const rows = [...core, ...disc].map((q) => ({ ...q, user_id: userId, day, done: false, progress: 0 }));
   const ins = await supabase.from("quests").insert(rows).select(SEL);

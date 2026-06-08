@@ -17,15 +17,26 @@ interface DGen {
   protein_target?: number | null; // from nutrition_goals (macros)
 }
 
-type Tradition = "catholic" | "orthodox" | "anglican" | "pentecostal" | "protestant";
+export type Tradition = "catholic" | "orthodox" | "anglican" | "pentecostal" | "protestant";
 export function traditionOf(denom?: string | null): Tradition {
   const d = (denom || "").toLowerCase();
-  if (/orthodox/.test(d)) return "orthodox";
+  if (/orthodox|coptic|oriental|ethiopian|armenian|eritrean|syriac/.test(d)) return "orthodox";
   if (/catholic|roman/.test(d)) return "catholic";
   if (/anglic|episcop/.test(d)) return "anglican";
   if (/pentecost|charismat|spirit.?filled|assemblies of god|apostolic/.test(d)) return "pentecostal";
-  return "protestant"; // baptist, methodist, lutheran, reformed, evangelical, non-denominational
+  return "protestant"; // baptist, methodist, lutheran, reformed, evangelical, adventist, messianic, non-denom
 }
+/** Day of worship: 6 = Saturday for Seventh-day Adventist / Messianic / sabbatarian, else 0 = Sunday. */
+export function sabbathDayOf(denom?: string | null): number {
+  return /adventist|seventh.?day|messianic|hebrew.?roots|sabbatarian/.test((denom || "").toLowerCase()) ? 6 : 0;
+}
+const WORSHIP: Record<Tradition, string> = {
+  catholic: "Worship at Mass today",
+  orthodox: "Worship at the Divine Liturgy today",
+  anglican: "Worship at your church service today",
+  pentecostal: "Gather and worship with your church today",
+  protestant: "Worship with your church family today",
+};
 
 // --- prayer, by tradition ---
 const PRAYER: Record<Tradition, string[]> = {
@@ -36,6 +47,9 @@ const PRAYER: Record<Tradition, string[]> = {
     "Pray a Psalm from the Liturgy of the Hours",
     "Spend 10 minutes before a crucifix or in Adoration",
     "Pray the Anima Christi slowly",
+    "Pray the Divine Mercy Chaplet",
+    "Lectio Divina on today's Gospel reading",
+    "Examine your conscience; resolve to go to Confession",
   ],
   orthodox: [
     "Pray the Jesus Prayer 50 times (use a prayer rope if you have one)",
@@ -44,12 +58,17 @@ const PRAYER: Record<Tradition, string[]> = {
     "Read today's troparion",
     "Stand before your icons for 10 minutes of prayer",
     "Pray 'O Heavenly King' and still your heart",
+    "Pray a Small Compline tonight",
+    "Pray an Akathist to the Theotokos",
+    "Examine your conscience in preparation for Confession",
   ],
   anglican: [
     "Pray Morning or Evening Prayer (the Daily Office)",
     "Pray a collect from the Book of Common Prayer",
     "Read and pray the Psalm appointed for today",
     "Spend 10 minutes in silent prayer",
+    "Pray Compline before bed",
+    "Lectio Divina on the appointed Psalm",
   ],
   pentecostal: [
     "Spend 10 minutes in worship and prayer",
@@ -57,6 +76,8 @@ const PRAYER: Record<Tradition, string[]> = {
     "Intercede for someone who needs a breakthrough",
     "Pray a Psalm aloud over your day",
     "Lay hands on your own family in prayer",
+    "Sing a worship song as your prayer",
+    "Declare a Psalm of praise over your home",
   ],
   protestant: [
     "Pray 10 min — ACTS: Adoration, Confession, Thanks, Supplication",
@@ -64,6 +85,8 @@ const PRAYER: Record<Tradition, string[]> = {
     "Journal one honest prayer",
     "Pray for three people by name",
     "Have a 10-minute quiet time",
+    "Lectio Divina: read, reflect, pray, rest",
+    "Pray the Lord's Prayer slowly, line by line",
   ],
 };
 
@@ -97,8 +120,9 @@ function hydration(weightKg?: number | null, isFat?: boolean): DQuest {
   return { quest_key: "water", pillar: "FUEL", title: `Drink ${litres}L of water`, sub: "Hydrate the temple", stat: "STR", xp: 15, goal: 1 };
 }
 
-/** Bonus discipline quests for the day, based on enabled packs + denomination. */
-export function generateDisciplineQuests(p: DGen, dayIdx: number): DQuest[] {
+/** Bonus discipline quests for the day, based on enabled packs + denomination.
+ *  weekday: 0 = Sunday .. 6 = Saturday (for Sabbath-aware worship). */
+export function generateDisciplineQuests(p: DGen, dayIdx: number, weekday: number): DQuest[] {
   const prefs = (p.disciplines && typeof p.disciplines === "object" ? p.disciplines : {}) as DisciplinePrefs;
   const trad = traditionOf(p.denomination);
   const isFat = (p.goals || []).some((g) => /fat|lean|loss/.test(String(g).toLowerCase()));
@@ -107,7 +131,8 @@ export function generateDisciplineQuests(p: DGen, dayIdx: number): DQuest[] {
   if (prefs.spirit) {
     const prayers = PRAYER[trad];
     out.push({ quest_key: "prayer", pillar: "SCRIPTURE RAID", title: prayers[dayIdx % prayers.length], sub: "Draw near", stat: "MANA", xp: 25, goal: 1 });
-    if (dayIdx % 2 === 0) out.push({ quest_key: "spirit", pillar: "SCRIPTURE RAID", title: SPIRIT_BONUS[dayIdx % SPIRIT_BONUS.length], sub: "Tend the inner man", stat: "WIS", xp: 15, goal: 1 });
+    if (weekday === sabbathDayOf(p.denomination)) out.push({ quest_key: "worship", pillar: "SCRIPTURE RAID", title: WORSHIP[trad], sub: "Do not forsake the gathering", stat: "MANA", xp: 30, goal: 1 });
+    else if (dayIdx % 2 === 0) out.push({ quest_key: "spirit", pillar: "SCRIPTURE RAID", title: SPIRIT_BONUS[dayIdx % SPIRIT_BONUS.length], sub: "Tend the inner man", stat: "WIS", xp: 15, goal: 1 });
   }
   if (prefs.fasting) {
     const f = typeof prefs.fasting === "object" ? prefs.fasting : {};

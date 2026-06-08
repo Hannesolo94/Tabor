@@ -9,6 +9,10 @@ export default function CommunityGuidelines() {
         TABOR is a brotherhood built on Christ. Every brother is welcome, and every brother is held to a standard. Treat one another with honor, patience, and truth. Iron sharpens iron.
       </Section>
 
+      <Section h="Brothers across traditions">
+        We are Catholic, Orthodox, Anglican, Pentecostal, and Protestant. We worship differently, and that is welcome here. We are brothers in Christ first. Debate honestly and charitably if you must, but do not divide over secondary doctrine, mock another man's tradition, or tell a brother he does not belong. The one who tears at the brotherhood over what is not essential answers for it.
+      </Section>
+
       <Section h="Zero tolerance">
         These are not allowed, ever:
         <ul style={ul}>
