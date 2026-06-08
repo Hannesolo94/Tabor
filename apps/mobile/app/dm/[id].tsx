@@ -44,7 +44,8 @@ export default function DM() {
         for (let k = prev.length - 1; k >= 0; k--) { if (prev[k].id.startsWith("tmp-") && prev[k].author_id === msg.author_id) { i = k; break; } }
         if (i >= 0) {
           const oldId = prev[i].id;
-          setText((t) => { const nt = { ...t }; nt[msg.id] = plain; delete nt[oldId]; return nt; });
+          // keep our own plaintext: we can't decrypt our own ciphertext, so the optimistic copy is the source of truth
+          setText((t) => { const nt = { ...t }; nt[msg.id] = t[oldId] ?? plain; delete nt[oldId]; return nt; });
           const next = [...prev]; next[i] = msg; return next;
         }
         setText((t) => ({ ...t, [msg.id]: plain }));
@@ -73,8 +74,13 @@ export default function DM() {
   async function sendMediaRef(ref: MediaRef) {
     if (!id || !userId) return;
     const content = mediaBody(ref);
+    const tmpId = `tmp-${Date.now()}`;
+    setMessages((prev) => [...prev, { id: tmpId, body: "", author_id: userId, created_at: new Date().toISOString() }]);
+    setText((t) => ({ ...t, [tmpId]: content })); // keep our own copy: we can't decrypt our own ciphertext
+    setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 60);
     const cipher = otherPub ? await encryptDM(otherPub, content) : null;
-    await sendDm(id, userId, cipher ?? content); // media url stays inside the E2EE body
+    const { error } = await sendDm(id, userId, cipher ?? content); // media url stays inside the E2EE body
+    if (error) setMessages((prev) => prev.filter((x) => x.id !== tmpId));
   }
   async function pickMedia() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
