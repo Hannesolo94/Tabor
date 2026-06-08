@@ -169,7 +169,12 @@ export default function Guild() {
           ))}
         </View>
 
-        {mode === "community" && <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head, marginTop: 8 }}>Community</Text>}
+        {mode === "community" && (
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+            <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head }}>Community</Text>
+            <Pressable onPress={() => router.push("/giveaway")} style={{ borderWidth: 1, borderColor: C.gold, paddingVertical: 5, paddingHorizontal: 11, borderRadius: 2 }}><Text style={{ color: C.gold, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>🎁 GIVEAWAY</Text></Pressable>
+          </View>
+        )}
         {mode === "board" && <Text style={{ color: C.ivory, fontSize: 22, fontWeight: "800", fontFamily: F.head, marginTop: 8 }}>Announcements</Text>}
 
         {mode === "guild" && (

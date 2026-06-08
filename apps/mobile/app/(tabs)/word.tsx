@@ -31,6 +31,9 @@ export default function Word() {
           <Pressable onPress={() => router.push("/bookmarks")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
             <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>SAVED</Text>
           </Pressable>
+          <Pressable onPress={() => router.push("/notes")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
+            <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>NOTES</Text>
+          </Pressable>
         </View>
       </View>
 

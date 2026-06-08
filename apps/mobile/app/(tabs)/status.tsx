@@ -96,16 +96,11 @@ export default function Status() {
           <Tag label="TRAINING" value={profile?.fitness_level ? String(profile.fitness_level) : "—"} />
         </View>
 
-        {/* menu (Brothers + Guilds moved to the Guild tab) */}
+        {/* menu — Inbox is the home bell, Notes -> Word, Giveaway/Brothers/Guilds -> Guild tab */}
         <View style={{ flexDirection: "row", gap: 10, marginTop: 18 }}>
-          <Action label="INBOX" onPress={() => router.push("/notifications")} />
+          <Action label="HONORS" onPress={() => router.push("/honors")} />
           <Action label="THE SYSTEM" onPress={() => router.push("/system")} />
           <Action label="SETTINGS" onPress={() => router.push("/settings")} />
-        </View>
-        <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-          <Action label="HONORS" onPress={() => router.push("/honors")} />
-          <Action label="GIVEAWAY" onPress={() => router.push("/giveaway")} />
-          <Action label="NOTES" onPress={() => router.push("/notes")} />
         </View>
 
         {/* history */}

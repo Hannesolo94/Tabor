@@ -31,17 +31,19 @@ export default function Body() {
       <View style={{ paddingHorizontal: 22, paddingTop: 8 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ FITNESS GUILD ]</Text>
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>The Body</Text>
-        <View style={{ flexDirection: "row", gap: 8, marginTop: 14, marginBottom: 6 }}>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 14, marginBottom: 8 }}>
           {(["program", "library", "timer"] as const).map((t) => (
-            <Pressable key={t} onPress={() => setTab(t)} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
+            <Pressable key={t} onPress={() => setTab(t)} style={{ flex: 1, paddingVertical: 8, alignItems: "center", borderWidth: 1, borderColor: tab === t ? C.gold : C.line, backgroundColor: tab === t ? C.gold : "transparent", borderRadius: 2 }}>
               <Text style={{ color: tab === t ? C.black : C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>{t === "program" ? "PROGRAM" : t === "library" ? "LIBRARY" : "TABATA"}</Text>
             </Pressable>
           ))}
-          <Pressable onPress={() => router.push("/fuel")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.gold, borderRadius: 2 }}>
-            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>FUEL ↗</Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 8, marginBottom: 6 }}>
+          <Pressable onPress={() => router.push("/fuel")} style={{ flex: 1, paddingVertical: 9, alignItems: "center", borderWidth: 1, borderColor: C.gold, borderRadius: 2 }}>
+            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>🍽  FUEL · NUTRITION</Text>
           </Pressable>
-          <Pressable onPress={() => router.push("/history")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
-            <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>LOG</Text>
+          <Pressable onPress={() => router.push("/history")} style={{ flex: 1, paddingVertical: 9, alignItems: "center", borderWidth: 1, borderColor: C.line, borderRadius: 2 }}>
+            <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>📋  TRAINING LOG</Text>
           </Pressable>
         </View>
       </View>

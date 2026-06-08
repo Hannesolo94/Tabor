@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
+import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
 import { loadToday, toggleQuest, sealDay, getDayFeedback, recordDayFeedback, CORE_KEYS, type Quest } from "@/lib/quests";
@@ -23,6 +24,7 @@ export default function Quests() {
   const [xpOffset, setXpOffset] = useState(0);
   const [sealed, setSealed] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [unread, setUnread] = useState(0);
 
   const barW = useRef(new Animated.Value(0)).current;
   const sealAnim = useRef(new Animated.Value(0)).current;
@@ -38,6 +40,11 @@ export default function Quests() {
     });
     getDayFeedback(userId).then(setFeedback);
   }, [userId]);
+  // unread inbox badge for the bell, refreshed on focus
+  useFocusEffect(useCallback(() => {
+    if (!userId) return;
+    supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("read", false).then(({ count }) => setUnread(count ?? 0));
+  }, [userId]));
 
   const baseXp = Number(profile?.xp ?? 0);
   const prog = useMemo(() => levelProgress(baseXp + xpOffset), [baseXp, xpOffset]);
@@ -106,7 +113,13 @@ export default function Quests() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }} edges={["top"]}>
       <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
-        <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ THE SYSTEM ]</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ THE SYSTEM ]</Text>
+          <Pressable onPress={() => router.push("/notifications")} hitSlop={10}>
+            <Text style={{ fontSize: 20 }}>🔔</Text>
+            {unread > 0 && <View style={{ position: "absolute", top: -2, right: -3, minWidth: 15, height: 15, borderRadius: 8, backgroundColor: C.red, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 }}><Text style={{ color: "#fff", fontSize: 8, fontWeight: "800" }}>{unread > 9 ? "9+" : unread}</Text></View>}
+          </Pressable>
+        </View>
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>Daily Quest</Text>
         <Text style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>{profile?.name ? `${profile.name}, the` : "The"} climb continues.{profile?.cls ? ` ${String(profile.cls)}.` : ""}</Text>
 
