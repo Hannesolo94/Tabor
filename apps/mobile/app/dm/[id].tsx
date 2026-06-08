@@ -32,8 +32,19 @@ export default function DM() {
     });
     const unsub = subscribeDm(id, async (msg) => {
       const plain = await decryptDM(otherPub, msg.body);
-      setText((t) => ({ ...t, [msg.id]: plain }));
-      setMessages((prev) => (prev.some((p) => p.id === msg.id) ? prev : [...prev, msg]));
+      setMessages((prev) => {
+        if (prev.some((p) => p.id === msg.id)) return prev; // already have the real row
+        // replace my own optimistic (tmp-) bubble instead of showing a duplicate
+        let i = -1;
+        for (let k = prev.length - 1; k >= 0; k--) { if (prev[k].id.startsWith("tmp-") && prev[k].author_id === msg.author_id) { i = k; break; } }
+        if (i >= 0) {
+          const oldId = prev[i].id;
+          setText((t) => { const nt = { ...t }; nt[msg.id] = plain; delete nt[oldId]; return nt; });
+          const next = [...prev]; next[i] = msg; return next;
+        }
+        setText((t) => ({ ...t, [msg.id]: plain }));
+        return [...prev, msg];
+      });
       setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 60);
     });
     return () => unsub();
