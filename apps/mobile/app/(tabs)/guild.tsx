@@ -9,7 +9,8 @@ import { GifPicker } from "@/components/GifPicker";
 import { useActionSheet, type SheetAction } from "@/components/ActionSheet";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, loadChannels, loadReactions, toggleReaction, getGlobalChannel, type Channel, type Msg, type Member, type ReactionInfo } from "@/lib/guild";
+import { ensureGuild, loadMessages, sendMessage, loadRoster, subscribeMessages, loadChannels, loadReactions, toggleReaction, getGlobalChannel, getRecentEmojis, pushRecentEmoji, type Channel, type Msg, type Member, type ReactionInfo } from "@/lib/guild";
+import { EmojiPicker } from "@/components/EmojiPicker";
 import { blockUser, myGuilds, openDm, getPublicProfile, sendFriendRequest, type GuildRow, type PublicProfile } from "@/lib/social";
 import { violatesGuidelines, reportContent, sendErrorMessage } from "@/lib/moderation";
 import { rankForLevel, levelFromXp } from "@/lib/game";
@@ -28,6 +29,8 @@ export default function Guild() {
   const [isStaff, setIsStaff] = useState(false);
   const [profileUser, setProfileUser] = useState<PublicProfile | null>(null);
   const [gifOpen, setGifOpen] = useState(false);
+  const [emojiFor, setEmojiFor] = useState<Msg | null>(null);
+  const [recents, setRecents] = useState<string[]>([]);
   const [communityCh, setCommunityCh] = useState<Glob>(null);
   const [announceCh, setAnnounceCh] = useState<Glob>(null);
 
@@ -60,6 +63,7 @@ export default function Guild() {
     (async () => {
       const { data: prof } = await supabase.from("profiles").select("role").eq("user_id", userId).maybeSingle();
       setIsStaff(prof?.role === "admin" || prof?.role === "moderator");
+      getRecentEmojis(userId).then(setRecents).catch(() => {});
       setCommunityCh(await getGlobalChannel("community"));
       setAnnounceCh(await getGlobalChannel("announcements"));
       const { guildId: gid, channels: ch } = await ensureGuild(userId);
@@ -154,6 +158,10 @@ export default function Guild() {
     setReactions((r) => ({ ...r, [m.id]: { counts, mine: mineNext } }));
     toggleReaction(m.id, userId, emoji, !mine).catch(() => {});
   }
+  function doReact(m: Msg, emoji: string) {
+    react(m, emoji);
+    if (userId) pushRecentEmoji(userId, emoji, recents).then(setRecents).catch(() => {});
+  }
 
   async function openProfile(uid: string) {
     const p = await getPublicProfile(uid);
@@ -168,7 +176,10 @@ export default function Guild() {
       actions.push({ label: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } });
     }
     actions.push({ label: "Cancel", style: "cancel" });
-    sheet({ title: "Message", reactions: [{ emoji: "🔥", onPress: () => react(m, "🔥") }, { emoji: "🙏", onPress: () => react(m, "🙏") }, { emoji: "💪", onPress: () => react(m, "💪") }], actions });
+    const base = recents.length ? recents.slice(0, 5) : ["🔥", "🙏", "💪"];
+    const reactions = base.map((e) => ({ emoji: e, onPress: () => doReact(m, e) }));
+    reactions.push({ emoji: "➕", onPress: () => setEmojiFor(m) });
+    sheet({ title: "Message", reactions, actions });
   }
 
   if (loading) {
@@ -330,6 +341,7 @@ export default function Guild() {
         </Pressable>
       </Modal>
       <GifPicker visible={gifOpen} onClose={() => setGifOpen(false)} onPick={sendGif} />
+      <EmojiPicker visible={!!emojiFor} recents={recents} onPick={(e) => { if (emojiFor) doReact(emojiFor, e); setEmojiFor(null); }} onClose={() => setEmojiFor(null)} />
     </SafeAreaView>
   );
 }

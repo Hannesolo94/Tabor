@@ -86,3 +86,14 @@ export function subscribeMessages(channelId: string, onInsert: (m: Msg) => void)
     .subscribe();
   return () => { supabase.removeChannel(ch); };
 }
+
+// ---- recently used reaction emojis ----
+export async function getRecentEmojis(userId: string): Promise<string[]> {
+  const { data } = await supabase.from("profiles").select("recent_emojis").eq("user_id", userId).maybeSingle();
+  return (data?.recent_emojis as string[]) ?? [];
+}
+export async function pushRecentEmoji(userId: string, emoji: string, current: string[]): Promise<string[]> {
+  const next = [emoji, ...current.filter((e) => e !== emoji)].slice(0, 10);
+  await supabase.from("profiles").update({ recent_emojis: next }).eq("user_id", userId);
+  return next;
+}
