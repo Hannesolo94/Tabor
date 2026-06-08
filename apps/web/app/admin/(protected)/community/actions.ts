@@ -35,6 +35,12 @@ export async function sendBroadcast(formData: FormData): Promise<void> {
     await Promise.allSettled(emails.slice(0, 1000).map((to) => sendEmail(to, title, html)));
   }
 
+  // post it to the global Announcements board so it has a home in the app
+  const { data: annCh } = await admin.from("channels").select("id, guild_id").eq("system", "announcements").maybeSingle();
+  if (annCh && user) {
+    await admin.from("messages").insert({ channel_id: annCh.id, guild_id: annCh.guild_id, author_id: user.id, body: `${title}\n\n${body}`.trim(), kind: "text" });
+  }
+
   // announcements always push to every device (no opt-out, per requirement)
   const { data: toks } = await admin.from("push_tokens").select("token");
   await sendExpoPush((toks ?? []).map((t) => t.token), title, body.slice(0, 140), deepLink ? { route: deepLink } : undefined);

@@ -31,6 +31,12 @@ export async function loadChannels(guildId: string): Promise<Channel[]> {
   return (data as Channel[]) ?? [];
 }
 
+/** The global Announcements / Community channels (everyone is a member of their guild). */
+export async function getGlobalChannel(system: "community" | "announcements"): Promise<{ id: string; guild_id: string } | null> {
+  const { data } = await supabase.from("channels").select("id, guild_id").eq("system", system).limit(1).maybeSingle();
+  return (data as { id: string; guild_id: string }) ?? null;
+}
+
 export interface ReactionInfo { counts: Record<string, number>; mine: string[] }
 export async function loadReactions(messageIds: string[], userId: string): Promise<Record<string, ReactionInfo>> {
   if (!messageIds.length) return {};
