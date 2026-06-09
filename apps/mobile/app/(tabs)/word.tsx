@@ -40,7 +40,7 @@ export default function Word() {
         </View>
       </View>
 
-      {tab === "today" && <Today onScroll={tb?.onScroll} />}
+      {tab === "today" && <Today onScroll={tb?.onScroll} router={router} />}
       {tab === "read" && <Read onScroll={tb?.onScroll} router={router} userId={userId} />}
       {tab === "plans" && <Plans onScroll={tb?.onScroll} router={router} userId={userId} faith={profile?.faith ?? profile?.believer} />}
       {tab === "prayer" && <PrayerJournal onScroll={tb?.onScroll} userId={userId} />}
@@ -49,7 +49,7 @@ export default function Word() {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function Today({ onScroll }: { onScroll: any }) {
+function Today({ onScroll, router }: { onScroll: any; router: any }) {
   const v = verseForDay();
   const fade = useRef(new Animated.Value(0)).current;
   useEffect(() => { Animated.timing(fade, { toValue: 1, duration: 500, useNativeDriver: true }).start(); }, [fade]);
@@ -65,6 +65,14 @@ function Today({ onScroll }: { onScroll: any }) {
           <Text style={{ color: C.muted, fontSize: 11, letterSpacing: 2, fontFamily: F.mono }}>REFLECT</Text>
           <Text style={{ color: C.text, fontSize: 15, lineHeight: 23, marginTop: 6, fontFamily: F.body }}>Where does this passage meet you today? Carry one line of it into your training and your battles.</Text>
         </View>
+        <Pressable onPress={() => router.push("/office")} style={{ marginTop: 22, borderWidth: 1, borderColor: `${C.gold}55`, backgroundColor: "rgba(201,169,97,0.06)", borderRadius: 14, padding: 18, flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>DAILY OFFICE</Text>
+            <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.bodyMid, marginTop: 5 }}>Today's prayers for your tradition</Text>
+            <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginTop: 3, lineHeight: 18 }}>Troparion, collects, and the prayers of your church.</Text>
+          </View>
+          <Text style={{ color: C.gold, fontSize: 22 }}>›</Text>
+        </Pressable>
       </Animated.View>
     </ScrollView>
   );

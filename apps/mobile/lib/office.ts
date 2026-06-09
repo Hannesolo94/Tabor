@@ -2,7 +2,7 @@
 // today — the Orthodox resurrectional troparion (tone of the week / Paschal season), and
 // the standard daily prayers of each tradition. Pure functions; public-domain texts.
 import type { Tradition } from "./disciplines";
-import { liturgicalContext, orthodoxEaster } from "./liturgical";
+import { liturgicalContext, orthodoxEaster, westernEaster } from "./liturgical";
 
 export interface OfficeSection { label: string; body: string }
 export interface DailyOffice { eyebrow: string; title: string; season: string | null; intro: string; sections: OfficeSection[] }
@@ -92,64 +92,123 @@ function paschalNote(season: string | null): string {
   return season && season !== "Ordinary" ? `${season}.` : "Draw near. Pray slowly, and mean it.";
 }
 
+// --- Great Feast troparia (Orthodox), public-domain translations ---
+const FEAST_TROP: Record<string, string> = {
+  nativity_theotokos: "Thy nativity, O Theotokos and Virgin, hath proclaimed joy to all the world; for from thee did shine forth the Sun of Righteousness, Christ our God, annulling the curse and bestowing the blessing, abolishing death and granting us life everlasting.",
+  cross: "O Lord, save Thy people and bless Thine inheritance; grant victory to the faithful over their adversaries, and by the power of Thy Cross do Thou preserve Thy commonwealth.",
+  entrance_theotokos: "Today is the prelude of the good will of God, and the heralding of the salvation of mankind. The Virgin appeareth openly in the temple of God, and foretelleth Christ unto all. To her, then, let us cry with a great voice: Rejoice, O thou fulfillment of the Creator's dispensation.",
+  nativity: "Thy Nativity, O Christ our God, hath shined upon the world the light of knowledge; for thereby they that worshipped the stars were taught by a star to adore Thee, the Sun of Righteousness, and to know Thee, the Dayspring from on high. O Lord, glory to Thee.",
+  theophany: "When Thou wast baptized in the Jordan, O Lord, the worship of the Trinity was made manifest; for the voice of the Father bare witness to Thee, calling Thee His beloved Son. And the Spirit in the form of a dove confirmed the truth of His word. O Christ our God, who hath appeared and enlightened the world, glory to Thee.",
+  meeting: "Rejoice, O thou who art full of grace, O Virgin Theotokos, for from thee hath risen the Sun of Righteousness, Christ our God, enlightening those in darkness. Rejoice, O righteous Elder, as thou receivest in thine arms the Redeemer of our souls, who granteth us the Resurrection.",
+  annunciation: "Today is the fountainhead of our salvation and the manifestation of the mystery which was from eternity. The Son of God becometh the Son of the Virgin, and Gabriel announceth the good tidings of grace. Wherefore, let us also cry to the Theotokos with him: Rejoice, O thou who art full of grace; the Lord is with thee.",
+  transfiguration: "Thou wast transfigured on the mount, O Christ God, revealing Thy glory to Thy disciples as far as they could bear it. Let Thine everlasting light shine upon us sinners, through the prayers of the Theotokos. O Giver of light, glory to Thee.",
+  dormition: "In giving birth thou didst preserve thy virginity; in thy dormition thou didst not forsake the world, O Theotokos. Thou wast translated unto life, since thou art the Mother of Life; and by thine intercessions dost thou deliver our souls from death.",
+  palm: "By raising Lazarus from the dead before Thy Passion, Thou didst confirm the universal resurrection, O Christ God. Like the children with the palms of victory, we cry out to Thee, O Vanquisher of Death: Hosanna in the highest! Blessed is He that cometh in the name of the Lord.",
+  ascension: "Thou hast ascended in glory, O Christ our God, granting joy to Thy disciples by the promise of the Holy Spirit; through the blessing they were assured that Thou art the Son of God, the Redeemer of the world.",
+  pentecost: "Blessed art Thou, O Christ our God, who hast revealed the fishermen as most wise by sending down upon them the Holy Spirit; through them Thou didst draw the world into Thy net. O Lover of Mankind, glory to Thee.",
+};
+
+interface Feast { name: string; troparion?: string }
+/** Major feast for the day, by tradition. Orthodox feasts carry their troparion. */
+function feastOf(date: Date, trad: Tradition): Feast | null {
+  const m = date.getUTCMonth() + 1, d = date.getUTCDate(), y = date.getUTCFullYear();
+  const md = (mm: number, dd: number) => m === mm && d === dd;
+  const on = (a: Date) => onlyDate(date) === onlyDate(a);
+
+  if (trad === "orthodox") {
+    const p = orthodoxEaster(y); // movable feasts fall in the same year as Pascha
+    if (on(addDays(p, -7))) return { name: "Entry into Jerusalem", troparion: FEAST_TROP.palm };
+    if (on(addDays(p, 39))) return { name: "Ascension", troparion: FEAST_TROP.ascension };
+    if (on(addDays(p, 49))) return { name: "Pentecost", troparion: FEAST_TROP.pentecost };
+    if (md(9, 8)) return { name: "Nativity of the Theotokos", troparion: FEAST_TROP.nativity_theotokos };
+    if (md(9, 14)) return { name: "Exaltation of the Cross", troparion: FEAST_TROP.cross };
+    if (md(11, 21)) return { name: "Entrance of the Theotokos", troparion: FEAST_TROP.entrance_theotokos };
+    if (md(12, 25)) return { name: "Nativity of Christ", troparion: FEAST_TROP.nativity };
+    if (md(1, 6)) return { name: "Theophany", troparion: FEAST_TROP.theophany };
+    if (md(2, 2)) return { name: "Meeting of the Lord", troparion: FEAST_TROP.meeting };
+    if (md(3, 25)) return { name: "Annunciation", troparion: FEAST_TROP.annunciation };
+    if (md(8, 6)) return { name: "Transfiguration", troparion: FEAST_TROP.transfiguration };
+    if (md(8, 15)) return { name: "Dormition", troparion: FEAST_TROP.dormition };
+    return null;
+  }
+  // Western (Catholic / Anglican / Protestant / Pentecostal)
+  const e = westernEaster(y);
+  if (on(e)) return { name: "Easter Sunday" };
+  if (on(addDays(e, 39))) return { name: "Ascension" };
+  if (on(addDays(e, 49))) return { name: "Pentecost" };
+  if (md(12, 25)) return { name: "Christmas" };
+  if (md(1, 6)) return { name: "Epiphany" };
+  if (md(11, 1)) return { name: "All Saints" };
+  if (md(3, 25)) return { name: "The Annunciation" };
+  return null;
+}
+
 export function dailyOffice(date: Date, trad: Tradition): DailyOffice {
   const lit = liturgicalContext(date, trad);
   const season = lit.season === "Ordinary" ? null : lit.season;
   const inLent = /lent/i.test(lit.season);
+  const feast = feastOf(date, trad);
+  const seasonLine = feast ? feast.name : season;
 
   if (trad === "orthodox") {
     const paschal = inPaschalSeason(date);
     const tone = toneOfWeek(date);
-    const sections: OfficeSection[] = [
-      paschal
+    const trop: OfficeSection = feast?.troparion
+      ? { label: `FEAST · ${feast.name.toUpperCase()}`, body: feast.troparion }
+      : paschal
         ? { label: "PASCHAL TROPARION", body: PASCHAL }
-        : { label: `RESURRECTIONAL TROPARION · TONE ${tone}`, body: RESURRECTION_TONES[tone - 1] },
+        : { label: `RESURRECTIONAL TROPARION · TONE ${tone}`, body: RESURRECTION_TONES[tone - 1] };
+    const sections: OfficeSection[] = [
+      trop,
       { label: "O HEAVENLY KING", body: HEAVENLY_KING },
       { label: "TRISAGION PRAYERS", body: TRISAGION },
       { label: "THE JESUS PRAYER", body: JESUS_PRAYER },
       { label: "THE LORD'S PRAYER", body: LORDS_PRAYER },
     ];
     if (inLent) sections.push({ label: "PRAYER OF ST EPHREM", body: ST_EPHREM });
-    return { eyebrow: "ORTHODOX · DAILY OFFICE", title: paschal ? "Christ is Risen" : "Today's Troparion", season, intro: paschalNote(season), sections };
+    return { eyebrow: "ORTHODOX · DAILY OFFICE", title: feast?.name ?? (paschal ? "Christ is Risen" : "Today's Troparion"), season: seasonLine, intro: paschalNote(season), sections };
   }
 
+  // Western traditions optionally lead with the feast of the day
+  const feastBanner: OfficeSection[] = feast ? [{ label: "FEAST OF THE DAY", body: `Today the Church celebrates ${feast.name}. Carry it in your heart as you pray.` }] : [];
+
   if (trad === "catholic") {
-    const sections: OfficeSection[] = [
+    const sections: OfficeSection[] = [...feastBanner,
       { label: "THE LORD'S PRAYER", body: LORDS_PRAYER },
       { label: "HAIL MARY", body: HAIL_MARY },
       { label: "GLORY BE", body: GLORY_BE },
       { label: "ANIMA CHRISTI", body: ANIMA_CHRISTI },
       { label: "ACT OF CONTRITION", body: ACT_OF_CONTRITION },
     ];
-    return { eyebrow: "CATHOLIC · DAILY PRAYERS", title: "Today's Prayers", season, intro: paschalNote(season), sections };
+    return { eyebrow: "CATHOLIC · DAILY PRAYERS", title: feast?.name ?? "Today's Prayers", season: seasonLine, intro: paschalNote(season), sections };
   }
 
   if (trad === "anglican") {
-    const sections: OfficeSection[] = [
+    const sections: OfficeSection[] = [...feastBanner,
       { label: "COLLECT FOR PURITY", body: COLLECT_PURITY },
       { label: "THE LORD'S PRAYER", body: LORDS_PRAYER },
       { label: "A GENERAL THANKSGIVING", body: GENERAL_THANKSGIVING },
       { label: "GLORY BE", body: GLORY_BE },
     ];
-    return { eyebrow: "ANGLICAN · THE DAILY OFFICE", title: "Morning & Evening Prayer", season, intro: paschalNote(season), sections };
+    return { eyebrow: "ANGLICAN · THE DAILY OFFICE", title: feast?.name ?? "Morning & Evening Prayer", season: seasonLine, intro: paschalNote(season), sections };
   }
 
   if (trad === "pentecostal") {
-    const sections: OfficeSection[] = [
+    const sections: OfficeSection[] = [...feastBanner,
       { label: "THE LORD'S PRAYER", body: LORDS_PRAYER },
       { label: "A PRAYER FOR THE SPIRIT", body: SPIRIT_PRAYER },
       { label: "DECLARE HIS PRAISE", body: PRAISE_DECLARATION },
       { label: "DOXOLOGY", body: DOXOLOGY },
     ];
-    return { eyebrow: "DAILY PRAYER", title: "Draw Near", season, intro: "Pray it aloud. Let your heart catch fire.", sections };
+    return { eyebrow: "DAILY PRAYER", title: feast?.name ?? "Draw Near", season: seasonLine, intro: "Pray it aloud. Let your heart catch fire.", sections };
   }
 
   // protestant (baptist, methodist, lutheran, reformed, evangelical, non-denom...)
-  const sections: OfficeSection[] = [
+  const sections: OfficeSection[] = [...feastBanner,
     { label: "THE LORD'S PRAYER", body: LORDS_PRAYER },
     { label: "A PRAYER OF SURRENDER", body: SURRENDER_PRAYER },
     { label: "DECLARE HIS PRAISE", body: PRAISE_DECLARATION },
     { label: "DOXOLOGY", body: DOXOLOGY },
   ];
-  return { eyebrow: "DAILY PRAYER", title: "Quiet Time", season, intro: "Read, reflect, pray, rest.", sections };
+  return { eyebrow: "DAILY PRAYER", title: feast?.name ?? "Quiet Time", season: seasonLine, intro: "Read, reflect, pray, rest.", sections };
 }
