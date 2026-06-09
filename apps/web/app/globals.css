@@ -193,3 +193,15 @@ button {
 .admin-nav-group:hover {
   background: rgba(201, 169, 97, 0.06);
 }
+/* brand seal preview — force the hardcoded-size SVG to fit its box */
+.brand-seal-fit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.brand-seal-fit > svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
