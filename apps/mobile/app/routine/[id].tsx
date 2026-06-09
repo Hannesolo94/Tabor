@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Image, ActivityIndicator, Alert, TextInput } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, ActivityIndicator, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { getRoutineExercises, deleteRoutine, logWorkout, inputKind, type RoutineExercise, type SetEntry } from "@/lib/fitness";
+import { getRoutineExercises, deleteRoutine, removeExerciseFromRoutine, moveRoutineExercises, logWorkout, inputKind, type RoutineExercise, type SetEntry } from "@/lib/fitness";
+import { useActionSheet } from "@/components/ActionSheet";
 import { todayKey } from "@/lib/quests";
 import { C, F } from "@/lib/theme";
 
@@ -28,6 +29,7 @@ export default function RoutineDetail() {
   const [logs, setLogs] = useState<Record<string, Row[]>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const sheet = useActionSheet();
 
   useEffect(() => {
     if (!id) return;
@@ -60,6 +62,33 @@ export default function RoutineDetail() {
       return { ...prev, [itemId]: rows };
     });
   }
+  function removeSet(itemId: string, idx: number) {
+    setLogs((prev) => {
+      const rows = [...(prev[itemId] ?? [])];
+      if (rows.length <= 1) return prev;
+      rows.splice(idx, 1);
+      return { ...prev, [itemId]: rows };
+    });
+  }
+  async function move(idx: number, dir: -1 | 1) {
+    const j = idx + dir;
+    if (j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[idx], next[j]] = [next[j], next[idx]];
+    setItems(next);
+    await moveRoutineExercises(next.map((x) => x.id));
+  }
+  function removeExercise(it: RoutineExercise) {
+    sheet({
+      title: `Remove ${it.exercise?.name ?? "exercise"}?`,
+      message: "It will be taken out of this routine.",
+      actions: [{ label: "Remove exercise", style: "destructive", onPress: async () => {
+        setItems((prev) => prev.filter((x) => x.id !== it.id));
+        setLogs((prev) => { const n = { ...prev }; delete n[it.id]; return n; });
+        await removeExerciseFromRoutine(it.id);
+      } }],
+    });
+  }
 
   async function complete() {
     if (!userId || saving) return;
@@ -83,13 +112,21 @@ export default function RoutineDetail() {
     }
     await logWorkout(userId, name, Math.max(20, items.length * 8), sets, todayKey());
     setSaving(false);
-    Alert.alert("Workout logged", sets.length ? `Logged ${sets.length} ${sets.length === 1 ? "set" : "sets"}. Your charts just grew.` : "Well fought. The body is forged.", [
-      { text: "See progress", onPress: () => router.replace("/progress") },
-      { text: "Done", onPress: () => router.back() },
-    ]);
+    sheet({
+      title: "Workout logged",
+      message: sets.length ? `Logged ${sets.length} ${sets.length === 1 ? "set" : "sets"}. Your charts just grew.` : "Well fought. The body is forged.",
+      actions: [
+        { label: "See progress", onPress: () => router.replace("/progress") },
+        { label: "Done", onPress: () => router.back() },
+      ],
+    });
   }
   function confirmDelete() {
-    Alert.alert("Delete routine?", "", [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: async () => { if (id) await deleteRoutine(id); router.back(); } }]);
+    sheet({
+      title: "Delete routine?",
+      message: "This removes the whole routine and its exercises.",
+      actions: [{ label: "Delete routine", style: "destructive", onPress: async () => { if (id) await deleteRoutine(id); router.back(); } }],
+    });
   }
 
   return (
@@ -146,11 +183,23 @@ export default function RoutineDetail() {
                         )}
                       </>
                     )}
+                    {(logs[it.id]?.length ?? 0) > 1 && (
+                      <Pressable onPress={() => removeSet(it.id, idx)} hitSlop={8} style={{ marginLeft: "auto", paddingHorizontal: 2 }}>
+                        <Text style={{ color: C.muted, fontSize: 18 }}>×</Text>
+                      </Pressable>
+                    )}
                   </View>
                 ))}
                 <Pressable onPress={() => addSet(it.id)} hitSlop={6} style={{ alignSelf: "flex-start", marginTop: 2 }}>
                   <Text style={{ color: C.gold, fontSize: 10, fontFamily: F.mono, letterSpacing: 1 }}>＋ ADD {kind === "time_distance" || kind === "time" ? "ROUND" : "SET"}</Text>
                 </Pressable>
+              </View>
+
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 16, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: C.line }}>
+                <Pressable onPress={() => move(i, -1)} disabled={i === 0} hitSlop={8}><Text style={{ color: i === 0 ? C.line : C.gold, fontSize: 19 }}>↑</Text></Pressable>
+                <Pressable onPress={() => move(i, 1)} disabled={i === items.length - 1} hitSlop={8}><Text style={{ color: i === items.length - 1 ? C.line : C.gold, fontSize: 19 }}>↓</Text></Pressable>
+                <Text style={{ color: C.muted, fontSize: 9, fontFamily: F.mono, letterSpacing: 1 }}>REORDER</Text>
+                <Pressable onPress={() => removeExercise(it)} hitSlop={8} style={{ marginLeft: "auto" }}><Text style={{ color: C.red, fontSize: 10, fontFamily: F.mono, letterSpacing: 1 }}>✕ REMOVE</Text></Pressable>
               </View>
             </View>
           );

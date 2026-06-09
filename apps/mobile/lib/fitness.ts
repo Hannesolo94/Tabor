@@ -148,6 +148,12 @@ export async function addExerciseToRoutine(routineId: string, exerciseId: string
 export async function deleteRoutine(routineId: string): Promise<void> {
   await supabase.from("routines").delete().eq("id", routineId);
 }
+export async function removeExerciseFromRoutine(routineExerciseId: string): Promise<void> {
+  await supabase.from("routine_exercises").delete().eq("id", routineExerciseId);
+}
+export async function moveRoutineExercises(orderedIds: string[]): Promise<void> {
+  await Promise.all(orderedIds.map((id, i) => supabase.from("routine_exercises").update({ sort: i }).eq("id", id)));
+}
 export async function renameRoutine(routineId: string, name: string): Promise<void> {
   await supabase.from("routines").update({ name }).eq("id", routineId);
 }
