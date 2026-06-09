@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
@@ -111,12 +111,24 @@ function GoalSetup({ userId, initial, onDone }: { userId: string; initial: Goals
 function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals; rows: LogRow[]; today: string; onScan: () => void; onChange: () => void; userId: string }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Food[]>([]);
+  const [searching, setSearching] = useState(false);
   const [cel, setCel] = useState<number | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sheet = useActionSheet();
   const sum = (k: keyof LogRow) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
   const kcal = sum("kcal"), protein = sum("protein"), carb = sum("carb"), fat = sum("fat");
 
-  async function doSearch(text: string) { setQ(text); setResults(text.trim().length >= 2 ? await searchFoods(text) : []); }
+  function onType(text: string) {
+    setQ(text);
+    if (timer.current) clearTimeout(timer.current);
+    if (text.trim().length < 2) { setResults([]); setSearching(false); return; }
+    setSearching(true);
+    timer.current = setTimeout(async () => {
+      const r = await searchFoods(text);
+      setResults(r);
+      setSearching(false);
+    }, 450);
+  }
   async function quickLog(food: Food) {
     sheet({
       title: food.name,
@@ -145,7 +157,9 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
 
       <Pressable onPress={onScan} style={{ backgroundColor: C.gold, paddingVertical: 15, alignItems: "center", borderRadius: 12, marginBottom: 14 }}><Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>SCAN A BARCODE</Text></Pressable>
 
-      <TextInput value={q} onChangeText={doSearch} placeholder="Or search your foods..." placeholderTextColor={C.muted} style={inp} />
+      <TextInput value={q} onChangeText={onType} placeholder="Search any food (e.g. chicken breast)…" placeholderTextColor={C.muted} autoCorrect={false} style={inp} />
+      {searching && <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 11, paddingVertical: 10 }}>SEARCHING…</Text>}
+      {!searching && q.trim().length >= 2 && results.length === 0 && <Text style={{ color: C.muted, fontFamily: F.body, fontSize: 13, paddingVertical: 10 }}>No foods found. Try another name, or scan the barcode.</Text>}
       {results.map((r, i) => (
         <Pressable key={(r.barcode || r.id || "") + i} onPress={() => quickLog(r)} style={{ borderBottomWidth: 1, borderBottomColor: C.line, paddingVertical: 11 }}>
           <Text style={{ color: C.ivory, fontFamily: F.body, fontSize: 14 }}>{r.name}{r.brand ? ` · ${r.brand}` : ""}</Text>

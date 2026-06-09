@@ -55,16 +55,63 @@ export async function resolveBarcode(raw: string): Promise<Food | null> {
   return null;
 }
 
+interface OffProduct { code?: string; product_name?: string; brands?: string; serving_size?: string; serving_quantity?: number | string; image_front_small_url?: string; nutriments?: Record<string, number | string | undefined> }
+
+/** Search by name: instant local hits (custom + cached) PLUS a live Open Food Facts search,
+ *  merged + deduped. Remote hits are cached so coverage compounds and works offline next time. */
 export async function searchFoods(q: string): Promise<Food[]> {
-  if (q.trim().length < 2) return [];
+  const term = q.trim();
+  if (term.length < 2) return [];
   const [off, custom] = await Promise.all([
-    supabase.from("foods_off_cache").select("*").ilike("name", `%${q}%`).limit(20),
-    supabase.from("foods_custom").select("*").ilike("name", `%${q}%`).limit(20),
+    supabase.from("foods_off_cache").select("*").ilike("name", `%${term}%`).limit(15),
+    supabase.from("foods_custom").select("*").ilike("name", `%${term}%`).limit(15),
   ]);
-  return [
+  const local: Food[] = [
     ...(custom.data ?? []).map((c) => ({ source: "custom" as const, ...c })),
     ...(off.data ?? []).map((o) => ({ source: "off" as const, ...o })),
   ];
+
+  let remote: Food[] = [];
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(term)}&search_simple=1&action=process&json=1&page_size=20&lc=en&fields=code,product_name,brands,serving_size,serving_quantity,nutriments,image_front_small_url`;
+    const res = await fetch(url, { headers: { "User-Agent": OFF_UA }, signal: ctrl.signal });
+    clearTimeout(t);
+    const data = (await res.json()) as { products?: OffProduct[] };
+    remote = (data.products ?? [])
+      .filter((p) => p.product_name && p.code && Number(p.nutriments?.["energy-kcal_100g"]) > 0)
+      .map((p) => {
+        const n = p.nutriments ?? {};
+        return {
+          source: "off" as const,
+          barcode: normalizeBarcode(String(p.code)),
+          name: String(p.product_name),
+          brand: p.brands || null,
+          kcal_100g: Number(n["energy-kcal_100g"]) || 0,
+          protein_100g: Number(n["proteins_100g"]) || null,
+          carb_100g: Number(n["carbohydrates_100g"]) || null,
+          fat_100g: Number(n["fat_100g"]) || null,
+          serving_size_g: typeof p.serving_quantity === "number" ? p.serving_quantity : Number(p.serving_quantity) || null,
+          serving_label: p.serving_size || null,
+          image_url: p.image_front_small_url || null,
+        } as Food;
+      });
+    if (remote.length) {
+      const rows = remote.map(({ source, ...r }) => r); // eslint-disable-line @typescript-eslint/no-unused-vars
+      supabase.from("foods_off_cache").upsert(rows, { onConflict: "barcode" }).then(() => {}, () => {});
+    }
+  } catch { /* offline / OFF slow — fall back to local only */ }
+
+  const seen = new Set<string>();
+  const out: Food[] = [];
+  for (const f of [...local, ...remote]) {
+    const key = (f.barcode || f.name).toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(f);
+  }
+  return out.slice(0, 30);
 }
 
 export async function addCustomFood(userId: string, f: { name: string; brand?: string; kcal_100g: number; protein_100g?: number; carb_100g?: number; fat_100g?: number; barcode?: string }) {
