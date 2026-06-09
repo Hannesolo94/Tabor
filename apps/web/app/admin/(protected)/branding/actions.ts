@@ -23,9 +23,9 @@ export async function createUploadTicket(name: string): Promise<{ path: string; 
 }
 
 /** Step 2: after the browser finishes the direct upload, record the file's metadata. */
-export async function recordDesignFile(input: { name: string; path: string; mime: string | null; size: number; sku: string | null; folder: string | null }): Promise<void> {
+export async function recordDesignFile(input: { name: string; path: string; mime: string | null; size: number; sku: string | null; scope: string | null; folder: string | null; notes: string | null }): Promise<void> {
   const admin = supabaseAdmin();
-  await admin.from("design_files").insert({ name: input.name, path: input.path, mime: input.mime, size_bytes: input.size, product_sku: input.sku || null, folder: input.folder || null });
+  await admin.from("design_files").insert({ name: input.name, path: input.path, mime: input.mime, size_bytes: input.size, product_sku: input.sku || null, scope: input.scope || null, folder: input.folder || null, notes: input.notes || null });
   revalidatePath("/admin/branding");
 }
 

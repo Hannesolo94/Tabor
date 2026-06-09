@@ -16,7 +16,9 @@ export interface DesignFile {
   mime: string | null;
   size_bytes: number | null;
   product_sku: string | null;
+  scope: string | null;
   folder: string | null;
+  notes: string | null;
   created_at: string;
   url: string | null;
 }
@@ -61,7 +63,8 @@ export function DesignFiles({ files, products }: { files: DesignFile[]; products
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [folder, setFolder] = useState("");
-  const [sku, setSku] = useState("");
+  const [scopeVal, setScopeVal] = useState("");
+  const [notes, setNotes] = useState("");
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -75,8 +78,10 @@ export function DesignFiles({ files, products }: { files: DesignFile[]; products
       if ("error" in ticket) { setErr(ticket.error); setUploading(false); return; }
       const { error } = await sb.storage.from("design-files").uploadToSignedUrl(ticket.path, ticket.token, file);
       if (error) { setErr(error.message); setUploading(false); return; }
-      await recordDesignFile({ name: file.name, path: ticket.path, mime: file.type || null, size: file.size, sku: sku || null, folder: folder || null });
-      setFile(null); setFolder(""); setSku(""); if (fileRef.current) fileRef.current.value = "";
+      const sku = scopeVal.startsWith("sku:") ? scopeVal.slice(4) : null;
+      const scope = scopeVal.startsWith("scope:") ? scopeVal.slice(6) : null;
+      await recordDesignFile({ name: file.name, path: ticket.path, mime: file.type || null, size: file.size, sku, scope, folder: folder || null, notes: notes || null });
+      setFile(null); setFolder(""); setScopeVal(""); setNotes(""); if (fileRef.current) fileRef.current.value = "";
       setUploading(false); router.refresh();
     } catch (ex) { setErr(ex instanceof Error ? ex.message : "Upload failed."); setUploading(false); }
   }
@@ -109,15 +114,22 @@ export function DesignFiles({ files, products }: { files: DesignFile[]; products
 
       {/* Upload */}
       <form onSubmit={doUpload} className="admin-card" style={{ ...cardStyle, marginBottom: 20, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-        <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required style={{ ...inputStyle, padding: "7px 11px", maxWidth: 280 }} />
-        <input value={folder} onChange={(e) => setFolder(e.target.value)} placeholder="Folder (optional, e.g. Tees, Logos)" style={{ ...inputStyle, minWidth: 220 }} />
-        <select value={sku} onChange={(e) => setSku(e.target.value)} style={{ ...inputStyle, minWidth: 180 }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+          <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} style={{ display: "none" }} />
+          <span style={goldButton}>Choose file</span>
+          <span style={{ fontFamily: BODY, fontSize: 12.5, color: file ? "#E8E2D5" : "#8A847A", maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file ? file.name : "No file chosen"}</span>
+        </label>
+        <input value={folder} onChange={(e) => setFolder(e.target.value)} placeholder="Folder (optional, e.g. Tees, Logos)" style={{ ...inputStyle, minWidth: 200 }} />
+        <select value={scopeVal} onChange={(e) => setScopeVal(e.target.value)} style={{ ...inputStyle, minWidth: 190 }}>
           <option value="">No product</option>
-          {products.map((p) => (
-            <option key={p.sku} value={p.sku}>{p.name}</option>
-          ))}
+          <option value="scope:apparel">All apparel</option>
+          <option value="scope:gear">All gear</option>
+          <optgroup label="Specific product">
+            {products.map((p) => (<option key={p.sku} value={`sku:${p.sku}`}>{p.name}</option>))}
+          </optgroup>
         </select>
-        <button type="submit" disabled={uploading || !file} style={{ ...goldButton, opacity: uploading || !file ? 0.6 : 1 }}>{uploading ? "Uploading…" : "Upload"}</button>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes / print instructions — placement, colours, sizing, anything I should know…" style={{ ...inputStyle, width: "100%", minHeight: 60, resize: "vertical" }} />
+        <button type="submit" disabled={uploading || !file} style={{ ...goldButton, opacity: uploading || !file ? 0.6 : 1 }}>{uploading ? "Uploading…" : "Upload design"}</button>
         {err && <span style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", width: "100%" }}>{err}</span>}
       </form>
 
@@ -159,6 +171,7 @@ export function DesignFiles({ files, products }: { files: DesignFile[]; products
               const isImage = f.mime?.startsWith("image/") && f.url;
               const tagFolder = f.folder;
               const tagProduct = productName(f.product_sku);
+              const tagScope = f.scope === "apparel" ? "All Apparel" : f.scope === "gear" ? "All Gear" : null;
               return (
                 <tr key={f.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                   <td style={{ ...td, width: 48 }}>
@@ -168,12 +181,13 @@ export function DesignFiles({ files, products }: { files: DesignFile[]; products
                       <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 8, background: "rgba(201,169,97,0.08)", border: "1px solid rgba(201,169,97,0.2)", fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.04em" }}>{extOf(f)}</span>
                     )}
                   </td>
-                  <td style={{ ...td, color: "#E8E2D5", fontWeight: 600 }}>{f.name}</td>
+                  <td style={{ ...td, color: "#E8E2D5", fontWeight: 600 }}>{f.name}{f.notes ? <div style={{ fontFamily: BODY, fontSize: 11, color: "#8A847A", fontWeight: 400, marginTop: 3, maxWidth: 380, whiteSpace: "normal", lineHeight: 1.4 }}>{f.notes}</div> : null}</td>
                   <td style={td}>
                     <span style={{ display: "inline-flex", flexWrap: "wrap", gap: 6 }}>
                       {tagFolder && <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.06em", padding: "3px 8px", borderRadius: 8, color: GOLD, border: "1px solid rgba(201,169,97,0.4)", background: "rgba(201,169,97,0.08)" }}>{tagFolder}</span>}
+                      {tagScope && <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.06em", padding: "3px 8px", borderRadius: 8, color: "#C9A961", border: "1px solid rgba(201,169,97,0.4)", background: "rgba(201,169,97,0.08)" }}>{tagScope}</span>}
                       {tagProduct && <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.06em", padding: "3px 8px", borderRadius: 8, color: "#9FC9D6", border: "1px solid rgba(159,201,214,0.35)", background: "rgba(159,201,214,0.08)" }}>{tagProduct}</span>}
-                      {!tagFolder && !tagProduct && <span style={{ color: "#6F6A60" }}>—</span>}
+                      {!tagFolder && !tagProduct && !tagScope && <span style={{ color: "#6F6A60" }}>—</span>}
                     </span>
                   </td>
                   <td style={{ ...td, textAlign: "right", fontFamily: MONO, fontSize: 11, color: "#9A948A" }}>{humanizeBytes(f.size_bytes)}</td>
