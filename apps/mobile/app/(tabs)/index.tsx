@@ -97,26 +97,14 @@ export default function Quests() {
       sheet({ title: q.title, message: "Take ground in the Word.", actions });
       return;
     }
-    if (q.quest_key === "body") {
-      sheet({ title: q.title, message: q.sub || "Crush it, then log it.", actions: [
-        { label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
-        { label: "I did my own training", onPress: () => onToggle(q) },
-        { label: "Cancel", style: "cancel" },
-      ] });
-      return;
-    }
-    if (q.quest_key === "brother") {
-      sheet({ title: q.title, message: q.sub || "No man climbs alone.", actions: [
-        { label: "Open the brotherhood", onPress: () => router.push("/guild") },
-        { label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
-        { label: "Cancel", style: "cancel" },
-      ] });
-      return;
-    }
-    sheet({ title: q.title, message: q.sub || undefined, actions: [
-      { label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
-      { label: "Cancel", style: "cancel" },
-    ] });
+    // every other quest opens its pillar's section (where one exists), then lets you mark it
+    const dest = QUEST_DEST[q.quest_key];
+    const actions: SheetAction[] = [];
+    if (dest) actions.push({ label: dest.label, onPress: () => router.push(dest.href as never) });
+    if (q.quest_key === "body") actions.push({ label: "I did my own training", onPress: () => onToggle(q) });
+    actions.push({ label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) });
+    actions.push({ label: "Cancel", style: "cancel" });
+    sheet({ title: q.title, message: q.sub || undefined, actions });
   }
 
   if (loading || pLoading) {
@@ -209,6 +197,19 @@ export default function Quests() {
     </SafeAreaView>
   );
 }
+
+// Where each quest type opens. word reads deep-link to the chapter (handled inline);
+// these open the relevant pillar hub. discipline/real-world tasks have no destination.
+const QUEST_DEST: Record<string, { label: string; href: string }> = {
+  prayer: { label: "Open the Word", href: "/word" },
+  spirit: { label: "Open the Word", href: "/word" },
+  worship: { label: "Open the Word", href: "/word" },
+  brother: { label: "Open the brotherhood", href: "/guild" },
+  body: { label: "Open training", href: "/body" },
+  water: { label: "Open fuel", href: "/fuel" },
+  fast: { label: "Open fuel", href: "/fuel" },
+  macro: { label: "Open fuel", href: "/fuel" },
+};
 
 function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => void; onToggle: (q: Quest) => void }) {
   return (
