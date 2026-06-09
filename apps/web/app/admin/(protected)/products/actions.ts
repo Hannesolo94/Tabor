@@ -105,6 +105,16 @@ export async function bulkUpdate(formData: FormData): Promise<void> {
   revalidatePath("/admin/products");
 }
 
+// Bulk delete: remove many selected products at once (e.g. placeholders).
+export async function bulkDelete(formData: FormData): Promise<void> {
+  const skus = formData.getAll("skus").map(String).filter(Boolean);
+  if (!skus.length) return;
+  const sb = await supabaseServer();
+  await sb.from("products").delete().in("sku", skus);
+  await logAudit("product.bulk_delete", "product", skus.join(","));
+  revalidatePath("/admin/products");
+}
+
 // Quick toggles from the list (live/draft, featured).
 export async function toggleField(formData: FormData): Promise<void> {
   const sku = String(formData.get("sku") ?? "");

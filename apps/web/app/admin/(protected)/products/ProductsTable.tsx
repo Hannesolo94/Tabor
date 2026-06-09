@@ -4,7 +4,7 @@
 // publish/unpublish, feature/unfeature across many products at once).
 import { useState } from "react";
 import Link from "next/link";
-import { bulkUpdate } from "./actions";
+import { bulkUpdate, bulkDelete } from "./actions";
 import { CATEGORIES, PERSONAS, categoryById, personaById } from "@/lib/catalog";
 import { GOLD, MONO, BODY } from "@/lib/ui";
 
@@ -56,6 +56,7 @@ export function ProductsTable({ rows }: { rows: Row[] }) {
           <form action={bulkUpdate}>{hidden}<input type="hidden" name="field" value="status" /><input type="hidden" name="value" value="draft" /><button type="submit" style={actionBtn}>Unpublish</button></form>
           <form action={bulkUpdate}>{hidden}<input type="hidden" name="field" value="featured" /><input type="hidden" name="value" value="true" /><button type="submit" style={actionBtn}>Feature</button></form>
           <form action={bulkUpdate}>{hidden}<input type="hidden" name="field" value="featured" /><input type="hidden" name="value" value="false" /><button type="submit" style={actionBtn}>Unfeature</button></form>
+          <form action={bulkDelete} onSubmit={(e) => { if (!confirm(`Delete ${sel.size} product(s)? This permanently removes them and cannot be undone.`)) e.preventDefault(); }} style={{ marginLeft: "auto" }}>{hidden}<button type="submit" style={{ ...actionBtn, color: "#ff8c8c", border: "1px solid rgba(192,58,58,0.55)", background: "rgba(122,31,31,0.18)" }}>Delete</button></form>
         </div>
       )}
 
