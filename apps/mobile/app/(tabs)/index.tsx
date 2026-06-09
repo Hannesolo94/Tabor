@@ -201,9 +201,9 @@ export default function Quests() {
 // Where each quest type opens. word reads deep-link to the chapter (handled inline);
 // these open the relevant pillar hub. discipline/real-world tasks have no destination.
 const QUEST_DEST: Record<string, { label: string; href: string }> = {
-  prayer: { label: "Open the Word", href: "/word" },
-  spirit: { label: "Open the Word", href: "/word" },
-  worship: { label: "Open the Word", href: "/word" },
+  prayer: { label: "Open the Daily Office", href: "/office" },
+  spirit: { label: "Open the Daily Office", href: "/office" },
+  worship: { label: "Open the Daily Office", href: "/office" },
   brother: { label: "Open the brotherhood", href: "/guild" },
   body: { label: "Open training", href: "/body" },
   water: { label: "Open fuel", href: "/fuel" },
