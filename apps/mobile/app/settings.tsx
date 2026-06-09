@@ -6,13 +6,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useActionSheet } from "@/components/ActionSheet";
+import { traditionOf, type Tradition } from "@/lib/disciplines";
+import { syncLiturgicalReminders } from "@/lib/litReminders";
 import { C, F } from "@/lib/theme";
 
 const SITE = "https://tabor.quest";
 const DONATE_OFF = "tabor.donate.off";
 
-interface Prefs { push: { quests: boolean; guild: boolean; dm: boolean }; email: { quests: boolean } }
-const DEFAULTS: Prefs = { push: { quests: true, guild: true, dm: true }, email: { quests: false } };
+interface Prefs { push: { quests: boolean; guild: boolean; dm: boolean; feasts: boolean }; email: { quests: boolean } }
+const DEFAULTS: Prefs = { push: { quests: true, guild: true, dm: true, feasts: true }, email: { quests: false } };
 
 export default function Settings() {
   const router = useRouter();
@@ -41,6 +43,7 @@ export default function Settings() {
   }
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [loaded, setLoaded] = useState(false);
+  const [trad, setTrad] = useState<Tradition>("protestant");
   const [supportReminder, setSupportReminder] = useState(true);
 
   useEffect(() => { AsyncStorage.getItem(DONATE_OFF).then((v) => setSupportReminder(v !== "1")); }, []);
@@ -48,9 +51,10 @@ export default function Settings() {
 
   useEffect(() => {
     if (!userId) return;
-    supabase.from("profiles").select("notif_prefs").eq("user_id", userId).maybeSingle().then(({ data }) => {
+    supabase.from("profiles").select("notif_prefs, denomination").eq("user_id", userId).maybeSingle().then(({ data }) => {
       const p = (data?.notif_prefs ?? {}) as Partial<Prefs>;
       setPrefs({ push: { ...DEFAULTS.push, ...(p.push ?? {}) }, email: { ...DEFAULTS.email, ...(p.email ?? {}) } });
+      setTrad(traditionOf(data?.denomination ?? null));
       setLoaded(true);
     });
   }, [userId]);
@@ -61,6 +65,7 @@ export default function Settings() {
   }
   const setPush = (k: keyof Prefs["push"], v: boolean) => save({ ...prefs, push: { ...prefs.push, [k]: v } });
   const setEmail = (k: keyof Prefs["email"], v: boolean) => save({ ...prefs, email: { ...prefs.email, [k]: v } });
+  const setFeasts = (v: boolean) => { setPush("feasts", v); syncLiturgicalReminders(v, trad).catch(() => {}); };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
@@ -73,6 +78,7 @@ export default function Settings() {
         <Row label="Daily quest reminder" on={prefs.push.quests} onChange={(v) => setPush("quests", v)} />
         <Row label="Guild activity" on={prefs.push.guild} onChange={(v) => setPush("guild", v)} />
         <Row label="Direct messages" on={prefs.push.dm} onChange={(v) => setPush("dm", v)} />
+        <Row label="Feasts & fasts of the Church" on={prefs.push.feasts} onChange={setFeasts} />
         <Locked label="Announcements" />
 
         <Text style={sec}>BY EMAIL</Text>

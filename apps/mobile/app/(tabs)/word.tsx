@@ -73,6 +73,14 @@ function Today({ onScroll, router }: { onScroll: any; router: any }) {
           </View>
           <Text style={{ color: C.gold, fontSize: 22 }}>›</Text>
         </Pressable>
+        <Pressable onPress={() => router.push("/calendar")} style={{ marginTop: 12, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface2, borderRadius: 14, padding: 18, flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>THE CHURCH YEAR</Text>
+            <Text style={{ color: C.ivory, fontSize: 15, fontFamily: F.bodyMid, marginTop: 5 }}>Liturgical calendar</Text>
+            <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginTop: 3, lineHeight: 18 }}>Feasts, fasts and seasons. See what is coming to prepare.</Text>
+          </View>
+          <Text style={{ color: C.gold, fontSize: 22 }}>›</Text>
+        </Pressable>
       </Animated.View>
     </ScrollView>
   );
