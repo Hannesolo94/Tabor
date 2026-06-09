@@ -144,6 +144,18 @@ export async function getDiary(userId: string, date: string): Promise<LogRow[]> 
 }
 export async function deleteLog(id: string) { return supabase.from("food_log").delete().eq("id", id); }
 
+/** Change the portion of an already-logged item — re-scales kcal + macros linearly. */
+export async function updateLogQty(row: LogRow, newQtyG: number) {
+  const factor = row.qty_g > 0 ? newQtyG / row.qty_g : 1;
+  return supabase.from("food_log").update({
+    qty_g: newQtyG,
+    kcal: Math.round(row.kcal * factor),
+    protein: row.protein != null ? +(row.protein * factor).toFixed(1) : null,
+    carb: row.carb != null ? +(row.carb * factor).toFixed(1) : null,
+    fat: row.fat != null ? +(row.fat * factor).toFixed(1) : null,
+  }).eq("id", row.id);
+}
+
 export async function getGoals(userId: string): Promise<Goals | null> {
   const { data } = await supabase.from("nutrition_goals").select("*").eq("user_id", userId).maybeSingle();
   return data as Goals | null;

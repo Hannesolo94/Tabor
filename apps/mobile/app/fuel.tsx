@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, Modal, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { getGoals, getDiary, deleteLog, searchFoods, logFood, saveGoals, type Goals, type LogRow, type Food } from "@/lib/nutrition";
+import { getGoals, getDiary, deleteLog, updateLogQty, searchFoods, logFood, saveGoals, type Goals, type LogRow, type Food } from "@/lib/nutrition";
 import { useActionSheet } from "@/components/ActionSheet";
 import { Celebration } from "@/components/Celebration";
 import { C, F } from "@/lib/theme";
@@ -113,8 +113,9 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
   const [results, setResults] = useState<Food[]>([]);
   const [searching, setSearching] = useState(false);
   const [cel, setCel] = useState<number | null>(null);
+  const [portion, setPortion] = useState<{ mode: "add"; food: Food } | { mode: "edit"; row: LogRow } | null>(null);
+  const [grams, setGrams] = useState("100");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const sheet = useActionSheet();
   const sum = (k: keyof LogRow) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
   const kcal = sum("kcal"), protein = sum("protein"), carb = sum("carb"), fat = sum("fat");
 
@@ -129,14 +130,18 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
       setSearching(false);
     }, 450);
   }
-  async function quickLog(food: Food) {
-    sheet({
-      title: food.name,
-      message: "Log 100g to which meal?",
-      actions: MEALS.map((mm) => ({ label: mm[0].toUpperCase() + mm.slice(1), onPress: async () => { const r = await logFood(userId, mm, food, 100, today); setQ(""); setResults([]); onChange(); if (r.firstToday) setCel(r.xp); } })),
-    });
+  function openAdd(food: Food) { setPortion({ mode: "add", food }); setGrams("100"); }
+  function openEdit(row: LogRow) { setPortion({ mode: "edit", row }); setGrams(String(row.qty_g)); }
+  const gNum = Math.max(0, Number(grams) || 0);
+  const previewKcal = !portion ? 0 : portion.mode === "add" ? Math.round((portion.food.kcal_100g || 0) * gNum / 100) : Math.round((portion.row.kcal / Math.max(1, portion.row.qty_g)) * gNum);
+  async function doLog(meal: string) {
+    if (!portion || portion.mode !== "add" || gNum <= 0) return;
+    const r = await logFood(userId, meal, portion.food, gNum, today);
+    setPortion(null); setQ(""); setResults([]); onChange();
+    if (r.firstToday) setCel(r.xp);
   }
-  function remove(r: LogRow) { sheet({ title: "Remove?", message: r.name, actions: [{ label: "Remove", style: "destructive", onPress: async () => { await deleteLog(r.id); onChange(); } }] }); }
+  async function doSave() { if (!portion || portion.mode !== "edit" || gNum <= 0) return; await updateLogQty(portion.row, gNum); setPortion(null); onChange(); }
+  async function doRemove() { if (!portion || portion.mode !== "edit") return; await deleteLog(portion.row.id); setPortion(null); onChange(); }
 
   return (
     <>
@@ -161,7 +166,7 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
       {searching && <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 11, paddingVertical: 10 }}>SEARCHING…</Text>}
       {!searching && q.trim().length >= 2 && results.length === 0 && <Text style={{ color: C.muted, fontFamily: F.body, fontSize: 13, paddingVertical: 10 }}>No foods found. Try another name, or scan the barcode.</Text>}
       {results.map((r, i) => (
-        <Pressable key={(r.barcode || r.id || "") + i} onPress={() => quickLog(r)} style={{ borderBottomWidth: 1, borderBottomColor: C.line, paddingVertical: 11 }}>
+        <Pressable key={(r.barcode || r.id || "") + i} onPress={() => openAdd(r)} style={{ borderBottomWidth: 1, borderBottomColor: C.line, paddingVertical: 11 }}>
           <Text style={{ color: C.ivory, fontFamily: F.body, fontSize: 14 }}>{r.name}{r.brand ? ` · ${r.brand}` : ""}</Text>
           <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 11 }}>{Math.round(r.kcal_100g)} kcal/100g</Text>
         </Pressable>
@@ -173,7 +178,7 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
           <View key={mm} style={{ marginTop: 18 }}>
             <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono, marginBottom: 6 }}>{mm.toUpperCase()} · {items.reduce((s, r) => s + r.kcal, 0)} KCAL</Text>
             {items.length === 0 ? <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body }}>Nothing logged.</Text> : items.map((r) => (
-              <Pressable key={r.id} onLongPress={() => remove(r)} delayLongPress={350} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 8 }}>
+              <Pressable key={r.id} onPress={() => openEdit(r)} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8 }}>
                 <Text style={{ color: C.text, fontFamily: F.body, fontSize: 14, flex: 1 }}>{r.name} <Text style={{ color: C.muted, fontSize: 11 }}>{r.qty_g}g</Text></Text>
                 <Text style={{ color: C.text, fontFamily: F.mono, fontSize: 13 }}>{r.kcal}</Text>
               </Pressable>
@@ -183,6 +188,39 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
       })}
       <Text style={{ color: C.muted, fontSize: 9, fontFamily: F.mono, textAlign: "center", marginTop: 24 }}>DATA FROM OPEN FOOD FACTS (ODbL) · NOT MEDICAL ADVICE</Text>
     </ScrollView>
+
+    <Modal visible={portion != null} transparent animationType="fade" onRequestClose={() => setPortion(null)}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+        <Pressable onPress={() => setPortion(null)} style={{ flex: 1, justifyContent: "center", padding: 24, backgroundColor: "rgba(0,0,0,0.65)" }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: C.surface2, borderRadius: 20, borderWidth: 1, borderColor: C.glassBorder, padding: 22 }}>
+            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2, fontFamily: F.mono }}>{portion?.mode === "edit" ? "EDIT PORTION" : "ADD FOOD"}</Text>
+            <Text style={{ color: C.ivory, fontSize: 18, fontFamily: F.head, marginTop: 6 }} numberOfLines={2}>{portion?.mode === "add" ? portion.food.name : portion?.mode === "edit" ? portion.row.name : ""}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 16 }}>
+              <TextInput value={grams} onChangeText={(t) => setGrams(t.replace(/[^0-9]/g, ""))} keyboardType="number-pad" placeholder="grams" placeholderTextColor={C.muted} style={{ ...inp, width: 120, marginTop: 0 }} />
+              <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 13 }}>grams</Text>
+              <Text style={{ color: C.gold, fontFamily: F.head, fontSize: 24, marginLeft: "auto" }}>{previewKcal}<Text style={{ fontSize: 12, color: C.muted, fontFamily: F.mono }}> kcal</Text></Text>
+            </View>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+              {[50, 100, 150, 200].map((n) => <Pressable key={n} onPress={() => setGrams(String(n))} style={{ borderWidth: 1, borderColor: gNum === n ? C.gold : C.line, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 14 }}><Text style={{ color: gNum === n ? C.gold : C.muted, fontFamily: F.mono, fontSize: 12 }}>{n}g</Text></Pressable>)}
+            </View>
+            {portion?.mode === "add" ? (
+              <>
+                <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, letterSpacing: 2, marginTop: 20, marginBottom: 8 }}>ADD TO</Text>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                  {MEALS.map((mm) => <Pressable key={mm} onPress={() => doLog(mm)} style={{ flexBasis: "47%", flexGrow: 1, backgroundColor: gNum > 0 ? C.gold : C.surface, paddingVertical: 13, alignItems: "center", borderRadius: 12 }}><Text numberOfLines={1} style={{ color: gNum > 0 ? C.black : C.muted, fontFamily: F.headMid, fontSize: 13 }}>{mm[0].toUpperCase() + mm.slice(1)}</Text></Pressable>)}
+                </View>
+              </>
+            ) : (
+              <View style={{ flexDirection: "row", gap: 10, marginTop: 20 }}>
+                <Pressable onPress={doRemove} style={{ borderWidth: 1, borderColor: "rgba(192,58,58,0.5)", borderRadius: 12, paddingVertical: 13, paddingHorizontal: 18 }}><Text style={{ color: C.red, fontFamily: F.mono, fontSize: 12, letterSpacing: 1 }}>REMOVE</Text></Pressable>
+                <Pressable onPress={doSave} style={{ flex: 1, backgroundColor: C.gold, paddingVertical: 13, alignItems: "center", borderRadius: 12 }}><Text style={{ color: C.black, fontFamily: F.headMid }}>SAVE</Text></Pressable>
+              </View>
+            )}
+          </Pressable>
+        </Pressable>
+      </KeyboardAvoidingView>
+    </Modal>
+
     <Celebration visible={cel != null} xp={cel ?? undefined} title="[ FUEL TRACKED ]" message="The temple is fed. First log of the day. Keep tracking." onDone={() => setCel(null)} />
     </>
   );
