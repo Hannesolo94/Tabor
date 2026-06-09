@@ -105,6 +105,14 @@ export default function Quests() {
       ] });
       return;
     }
+    if (q.quest_key === "brother") {
+      sheet({ title: q.title, message: q.sub || "No man climbs alone.", actions: [
+        { label: "Open the brotherhood", onPress: () => router.push("/guild") },
+        { label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
+        { label: "Cancel", style: "cancel" },
+      ] });
+      return;
+    }
     sheet({ title: q.title, message: q.sub || undefined, actions: [
       { label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
       { label: "Cancel", style: "cancel" },
