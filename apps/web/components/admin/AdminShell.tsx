@@ -27,6 +27,7 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
   { section: "Content", items: [
     { label: "Pages", href: "/admin/content" },
     { label: "Blog", href: "/admin/blog" },
+    { label: "Branding", href: "/admin/branding" },
   ] },
   { section: "Community", items: [
     { label: "Broadcast", href: "/admin/community" },
