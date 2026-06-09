@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { getRoutineExercises, deleteRoutine, removeExerciseFromRoutine, moveRoutineExercises, logWorkout, saveRoutineSets, getLatestBodyweight, workoutXp, estimateCalories, grantWorkoutXp, inputKind, type RoutineExercise, type SetEntry, type SavedSet } from "@/lib/fitness";
 import { useActionSheet } from "@/components/ActionSheet";
 import { Celebration } from "@/components/Celebration";
+import { useUnits } from "@/lib/units";
 import { todayKey } from "@/lib/quests";
 import { C, F } from "@/lib/theme";
 
@@ -34,6 +35,7 @@ export default function RoutineDetail() {
   const [celebrate, setCelebrate] = useState<{ sets: SetEntry[]; xp: number } | null>(null);
   const [mins, setMins] = useState("");
   const sheet = useActionSheet();
+  const u = useUnits();
   const rowToSaved = (r: Row): SavedSet => ({ reps: r.reps, weight: r.weight, time: r.time, distance: r.distance });
 
   useEffect(() => {
@@ -111,14 +113,14 @@ export default function RoutineDetail() {
       (logs[it.id] ?? []).forEach((row, i) => {
         const base = { exercise_id: it.exercise_id, exercise_name: it.exercise?.name ?? "Exercise", set_index: i + 1, reps: 0, weight: 0 };
         if (kind === "time_distance") {
-          const time = parseFloat(row.time) || 0, dist = parseFloat(row.distance) || 0;
-          if (time > 0 || dist > 0) sets.push({ ...base, duration_sec: Math.round(time * 60), distance_m: Math.round(dist * 1000) });
+          const time = parseFloat(row.time) || 0, dist = parseFloat(row.distance) || 0; // dist in display units
+          if (time > 0 || dist > 0) sets.push({ ...base, duration_sec: Math.round(time * 60), distance_m: Math.round(u.dispToKm(dist) * 1000) });
         } else if (kind === "time") {
           const time = parseFloat(row.time) || 0;
           if (time > 0) sets.push({ ...base, duration_sec: Math.round(time) });
         } else {
           const reps = parseInt(row.reps, 10);
-          if (reps > 0) sets.push({ ...base, reps, weight: kind === "reps_weight" ? parseFloat(row.weight) || 0 : 0 });
+          if (reps > 0) sets.push({ ...base, reps, weight: kind === "reps_weight" ? u.dispToKg(parseFloat(row.weight) || 0) : 0 }); // weight in display units
         }
       });
     }
@@ -187,8 +189,8 @@ export default function RoutineDetail() {
                       <>
                         <TextInput value={row.time} onChangeText={(v) => setCell(it.id, idx, "time", v)} keyboardType="numeric" placeholder="min" placeholderTextColor={C.muted} style={cell} />
                         <Text style={unit}>min</Text>
-                        <TextInput value={row.distance} onChangeText={(v) => setCell(it.id, idx, "distance", v)} keyboardType="numeric" placeholder="km" placeholderTextColor={C.muted} style={cell} />
-                        <Text style={unit}>km</Text>
+                        <TextInput value={row.distance} onChangeText={(v) => setCell(it.id, idx, "distance", v)} keyboardType="numeric" placeholder={u.dUnit} placeholderTextColor={C.muted} style={cell} />
+                        <Text style={unit}>{u.dUnit}</Text>
                       </>
                     ) : kind === "time" ? (
                       <>
@@ -203,7 +205,7 @@ export default function RoutineDetail() {
                           <>
                             <Text style={{ color: C.muted, fontSize: 13 }}>×</Text>
                             <TextInput value={row.weight} onChangeText={(v) => setCell(it.id, idx, "weight", v)} keyboardType="numeric" placeholder="0" placeholderTextColor={C.muted} style={cell} />
-                            <Text style={unit}>kg</Text>
+                            <Text style={unit}>{u.wUnit}</Text>
                           </>
                         )}
                       </>

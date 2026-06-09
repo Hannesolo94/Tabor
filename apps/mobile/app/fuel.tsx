@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { getGoals, getDiary, deleteLog, updateLogQty, searchFoods, logFood, saveGoals, type Goals, type LogRow, type Food } from "@/lib/nutrition";
 import { useActionSheet } from "@/components/ActionSheet";
 import { Celebration } from "@/components/Celebration";
+import { useUnits } from "@/lib/units";
 import { C, F } from "@/lib/theme";
 
 const MEALS = ["breakfast", "lunch", "dinner", "snack"];
@@ -82,19 +83,21 @@ function Consent({ onAccept, onBack }: { onAccept: () => void; onBack: () => voi
 function GoalSetup({ userId, initial, onDone }: { userId: string; initial: Goals | null; onDone: () => void }) {
   const [f, setF] = useState({ weight_kg: "", height_cm: "", age: "", sex: "male", activity: "1.55", goal_type: "fat_loss" });
   const sheet = useActionSheet();
+  const u = useUnits();
   const ACT = [{ v: "1.2", l: "Low" }, { v: "1.375", l: "Light" }, { v: "1.55", l: "Moderate" }, { v: "1.725", l: "High" }];
   const GOAL = [{ v: "fat_loss", l: "Fat loss" }, { v: "maintain", l: "Maintain" }, { v: "muscle_gain", l: "Muscle" }];
   async function save() {
     if (!f.weight_kg || !f.height_cm || !f.age) { sheet({ title: "Fill it in", message: "We need weight, height, and age to set your targets.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
-    await saveGoals(userId, { weight_kg: +f.weight_kg, height_cm: +f.height_cm, age: +f.age, sex: f.sex, activity: +f.activity, goal_type: f.goal_type });
+    // inputs are in display units -> store metric
+    await saveGoals(userId, { weight_kg: u.dispToKg(+f.weight_kg), height_cm: u.dispToCm(+f.height_cm), age: +f.age, sex: f.sex, activity: +f.activity, goal_type: f.goal_type });
     onDone();
   }
   return (
     <ScrollView contentContainerStyle={{ padding: 22 }}>
       <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono }}>SET YOUR TARGETS</Text>
       <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-        <View style={{ flex: 1 }}><Text style={lbl}>Weight (kg)</Text><TextInput value={f.weight_kg} onChangeText={(t) => setF({ ...f, weight_kg: t.replace(/[^0-9.]/g, "") })} keyboardType="numeric" style={inp} /></View>
-        <View style={{ flex: 1 }}><Text style={lbl}>Height (cm)</Text><TextInput value={f.height_cm} onChangeText={(t) => setF({ ...f, height_cm: t.replace(/[^0-9.]/g, "") })} keyboardType="numeric" style={inp} /></View>
+        <View style={{ flex: 1 }}><Text style={lbl}>Weight ({u.wUnit})</Text><TextInput value={f.weight_kg} onChangeText={(t) => setF({ ...f, weight_kg: t.replace(/[^0-9.]/g, "") })} keyboardType="numeric" style={inp} /></View>
+        <View style={{ flex: 1 }}><Text style={lbl}>Height ({u.hUnit})</Text><TextInput value={f.height_cm} onChangeText={(t) => setF({ ...f, height_cm: t.replace(/[^0-9.]/g, "") })} keyboardType="numeric" style={inp} /></View>
         <View style={{ flex: 1 }}><Text style={lbl}>Age</Text><TextInput value={f.age} onChangeText={(t) => setF({ ...f, age: t.replace(/[^0-9]/g, "") })} keyboardType="number-pad" style={inp} /></View>
       </View>
       <Text style={lbl}>Sex (for the formula)</Text>

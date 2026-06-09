@@ -14,6 +14,7 @@ import { registerForPush } from "@/lib/push";
 import { refreshLiturgicalReminders } from "@/lib/litReminders";
 import { DonationPrompt } from "@/components/DonationPrompt";
 import { ActionSheetProvider } from "@/components/ActionSheet";
+import { UnitsProvider } from "@/lib/units";
 import { C, F } from "@/lib/theme";
 
 function useAuthGate(session: unknown, loading: boolean, onboarded: boolean | null) {
@@ -64,9 +65,11 @@ export default function RootLayout() {
   }
   return (
     <AuthProvider>
-      <ActionSheetProvider>
-        <RootNav />
-      </ActionSheetProvider>
+      <UnitsProvider>
+        <ActionSheetProvider>
+          <RootNav />
+        </ActionSheetProvider>
+      </UnitsProvider>
     </AuthProvider>
   );
 }

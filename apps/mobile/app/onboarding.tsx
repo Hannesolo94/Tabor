@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Seal } from "@/components/Seal";
+import { useUnits } from "@/lib/units";
 import { C, F } from "@/lib/theme";
 
 type Faith = "believer" | "seeker" | null;
@@ -50,6 +51,7 @@ type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | 
 export default function Onboarding() {
   const router = useRouter();
   const { refresh, signOut } = useAuth();
+  const u = useUnits();
   const [step, setStep] = useState<Step>("intro");
   const [year, setYear] = useState("");
   const [agree, setAgree] = useState(false);
@@ -87,7 +89,7 @@ export default function Onboarding() {
     if (bPush) baseline.pushups = +bPush;
     if (bSquat) baseline.squats = +bSquat;
     if (bPull) baseline.pullups = +bPull;
-    if (bBenchKg) baseline.bench_kg = +bBenchKg;
+    if (bBenchKg) baseline.bench_kg = u.dispToKg(+bBenchKg); // input in display units -> store kg
     if (bBenchReps) baseline.bench_reps = +bBenchReps;
     const disciplines: Record<string, unknown> = { fuel: dFuel, spirit: dSpirit, discipline: dDiscipline };
     if (fastType === "intermittent") disciplines.fasting = { type: "intermittent", window: fastWindow };
@@ -213,7 +215,7 @@ export default function Onboarding() {
             <Text style={body}>So your quests match your real strength. Best honest guess. You can skip and calibrate later.</Text>
             {equipment === "full" ? (
               <>
-                <Field label="Bench press — working weight (kg)" value={bBenchKg} onChange={setBBenchKg} />
+                <Field label={`Bench press — working weight (${u.wUnit})`} value={bBenchKg} onChange={setBBenchKg} />
                 <Field label="...for how many reps" value={bBenchReps} onChange={setBBenchReps} />
                 <Field label="Max pull-ups in a row (0 if none)" value={bPull} onChange={setBPull} />
               </>

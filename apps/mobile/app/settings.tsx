@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { useActionSheet } from "@/components/ActionSheet";
 import { traditionOf, type Tradition } from "@/lib/disciplines";
 import { syncLiturgicalReminders } from "@/lib/litReminders";
+import { useUnits } from "@/lib/units";
 import { C, F } from "@/lib/theme";
 
 const SITE = "https://tabor.quest";
@@ -45,6 +46,7 @@ export default function Settings() {
   const [loaded, setLoaded] = useState(false);
   const [trad, setTrad] = useState<Tradition>("protestant");
   const [supportReminder, setSupportReminder] = useState(true);
+  const u = useUnits();
 
   useEffect(() => { AsyncStorage.getItem(DONATE_OFF).then((v) => setSupportReminder(v !== "1")); }, []);
   const toggleSupportReminder = (v: boolean) => { setSupportReminder(v); AsyncStorage.setItem(DONATE_OFF, v ? "0" : "1"); };
@@ -89,6 +91,16 @@ export default function Settings() {
           Announcements from the brotherhood are always delivered. Phone push activates with the published app; email reminders send once the email provider is connected.
         </Text>
         {!loaded ? null : null}
+
+        <Text style={sec}>MEASUREMENTS</Text>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
+          {(["metric", "imperial"] as const).map((s) => (
+            <Pressable key={s} onPress={() => u.setSystem(s)} style={{ flex: 1, paddingVertical: 13, alignItems: "center", borderRadius: 12, borderWidth: 1, borderColor: u.system === s ? C.gold : C.line, backgroundColor: u.system === s ? C.gold : "transparent" }}>
+              <Text style={{ color: u.system === s ? C.black : C.ivory, fontFamily: F.mono, fontSize: 11, letterSpacing: 1 }}>{s === "metric" ? "METRIC" : "IMPERIAL"}</Text>
+              <Text style={{ color: u.system === s ? "#1a1408" : C.muted, fontFamily: F.mono, fontSize: 8.5, marginTop: 2 }}>{s === "metric" ? "kg · cm · km" : "lb · in · mi"}</Text>
+            </Pressable>
+          ))}
+        </View>
 
         <Text style={sec}>SUPPORT</Text>
         <Row label="Monthly support reminder" on={supportReminder} onChange={toggleSupportReminder} />
