@@ -37,6 +37,9 @@ export default function Word() {
           <Pressable onPress={() => router.push("/office")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: `${C.gold}55`, borderRadius: 12 }}>
             <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>OFFICE</Text>
           </Pressable>
+          <Pressable onPress={() => router.push("/calendar")} style={{ paddingVertical: 7, paddingHorizontal: 13, borderWidth: 1, borderColor: `${C.gold}55`, borderRadius: 12 }}>
+            <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 1, fontFamily: F.mono }}>CALENDAR</Text>
+          </Pressable>
         </View>
       </View>
 
