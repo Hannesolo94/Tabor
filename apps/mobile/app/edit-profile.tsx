@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, TextInput, ScrollView, Image, Alert } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
 import { uploadAvatar, updateProfile } from "@/lib/profile";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 export default function EditProfile() {
@@ -19,6 +20,7 @@ export default function EditProfile() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
+  const sheet = useActionSheet();
 
   useEffect(() => {
     if (profile && !ready) {
@@ -32,14 +34,14 @@ export default function EditProfile() {
 
   async function pickAvatar() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert("Permission needed", "Allow photo access to set a profile picture."); return; }
+    if (!perm.granted) { sheet({ title: "Permission needed", message: "Allow photo access to set a profile picture.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.5, base64: true });
     if (res.canceled || !res.assets?.[0]?.base64 || !userId) return;
     setBusy(true);
     const ext = (res.assets[0].uri || "").toLowerCase().endsWith(".png") ? "png" : "jpg";
     const url = await uploadAvatar(userId, res.assets[0].base64, ext);
     setBusy(false);
-    if (url) setAvatar(url); else Alert.alert("Upload failed", "Try again.");
+    if (url) setAvatar(url); else sheet({ title: "Upload failed", message: "Try again.", actions: [{ label: "Got it", style: "cancel" }] });
   }
 
   async function save() {
@@ -48,7 +50,7 @@ export default function EditProfile() {
     setBusy(true);
     const { error } = await updateProfile(userId, { name: name.trim(), handle: h || undefined, bio: bio.trim() || null, avatar_url: avatar });
     setBusy(false);
-    if (error) { Alert.alert("Couldn't save", /duplicate|unique/i.test(error) ? "That handle is already taken. Try another." : error); return; }
+    if (error) { sheet({ title: "Couldn't save", message: /duplicate|unique/i.test(error) ? "That handle is already taken. Try another." : error, actions: [{ label: "Got it", style: "cancel" }] }); return; }
     router.back();
   }
 

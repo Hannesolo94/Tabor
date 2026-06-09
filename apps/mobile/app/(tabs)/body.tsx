@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Image, TextInput, ActivityIndicator, FlatList, Modal, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, TextInput, ActivityIndicator, FlatList, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";

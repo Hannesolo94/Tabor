@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Vibration, Alert, Modal, TextInput } from "react-native";
+import { View, Text, Pressable, ScrollView, Vibration, Modal, TextInput } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { getTabataPresets, saveTabataPreset, deleteTabataPreset, getRoutines, getRoutineExercises, DEFAULT_TABATA, type TabataConfig, type TabataPreset, type Routine } from "@/lib/fitness";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 type SegType = "prepare" | "work" | "rest" | "restSet" | "cooldown";
@@ -41,6 +42,7 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
   const [routines, setRoutines] = useState<Routine[]>([]);
   const seq = useMemo(() => buildSeq(cfg), [cfg]);
   const totalDur = useMemo(() => seq.reduce((a, s) => a + s.dur, 0), [seq]);
+  const sheet = useActionSheet();
 
   const [idx, setIdx] = useState(-1);
   const [left, setLeft] = useState(0);
@@ -141,7 +143,7 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
           {presets.length > 0 && (
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
               {presets.map((p) => (
-                <Pressable key={p.id} onPress={() => { setCfg(p.config); setMoves(p.moves); }} onLongPress={() => Alert.alert("Delete preset?", p.name, [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: async () => { await deleteTabataPreset(p.id); loadPresets(); } }])} delayLongPress={350} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 12 }}>
+                <Pressable key={p.id} onPress={() => { setCfg(p.config); setMoves(p.moves); }} onLongPress={() => sheet({ title: "Delete preset?", message: p.name, actions: [{ label: "Delete", style: "destructive", onPress: async () => { await deleteTabataPreset(p.id); loadPresets(); } }] })} delayLongPress={350} style={{ borderWidth: 1, borderColor: C.line, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 12 }}>
                   <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono }}>{p.name}</Text>
                 </Pressable>
               ))}

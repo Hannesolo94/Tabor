@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { browseGuilds, joinGuild, myGuilds, createGuild, type GuildRow } from "@/lib/social";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 const GUIDELINES = "Guilds are brotherhoods under Christ. Keep it honoring: no hate, harassment, or filth. Lead well, sharpen each other.";
@@ -18,6 +19,7 @@ export default function Guilds() {
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
   const [creating, setCreating] = useState(false);
+  const sheet = useActionSheet();
 
   async function refresh() {
     const [a, m] = await Promise.all([browseGuilds(), userId ? myGuilds(userId) : Promise.resolve([])]);
@@ -35,8 +37,8 @@ export default function Guilds() {
     setCreating(true);
     const gid = await createGuild(name.trim(), tag.trim());
     setCreating(false);
-    if (gid) { setName(""); setTag(""); await refresh(); Alert.alert("Guild forged", `${name.trim()} is live. You lead it.`); }
-    else Alert.alert("Could not create guild", "Try again.");
+    if (gid) { setName(""); setTag(""); await refresh(); sheet({ title: "Guild forged", message: `${name.trim()} is live. You lead it.`, actions: [{ label: "Got it", style: "cancel" }] }); }
+    else sheet({ title: "Could not create guild", message: "Try again.", actions: [{ label: "Got it", style: "cancel" }] });
   }
 
   if (loading) return <SafeAreaView style={{ flex: 1, backgroundColor: C.black, alignItems: "center", justifyContent: "center" }}><ActivityIndicator color={C.gold} /></SafeAreaView>;

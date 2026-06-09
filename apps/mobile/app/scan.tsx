@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
-import { View, Text, Pressable, TextInput, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useAuth } from "@/lib/auth";
 import { resolveBarcode, addCustomFood, logFood, type Food } from "@/lib/nutrition";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 const MEALS = ["breakfast", "lunch", "dinner", "snack"];
@@ -26,6 +27,7 @@ export default function Scan() {
   const [meal, setMeal] = useState(defaultMeal());
   // manual add
   const [m, setM] = useState({ name: "", kcal: "", protein: "", carb: "", fat: "" });
+  const sheet = useActionSheet();
 
   async function onScan(code: string) {
     if (lockRef.current) return;
@@ -39,7 +41,7 @@ export default function Scan() {
   async function save() {
     if (!userId || !food) return;
     const { error } = await logFood(userId, meal, food, Number(qty) || 0, today);
-    if (error) { Alert.alert("Couldn't log", error.message); return; }
+    if (error) { sheet({ title: "Couldn't log", message: error.message || undefined, actions: [{ label: "Got it", style: "cancel" }] }); return; }
     router.back();
   }
   async function saveManual() {

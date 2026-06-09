@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { listNotes, addNote, deleteNote, type Note } from "@/lib/notes";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 const CATS = [
@@ -21,6 +22,7 @@ export default function Notes() {
   const [cat, setCat] = useState("general");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const sheet = useActionSheet();
 
   async function load() { if (userId) setNotes(await listNotes(userId)); }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
@@ -31,10 +33,12 @@ export default function Notes() {
     setTitle(""); setBody(""); setComposing(false); load();
   }
   function remove(n: Note) {
-    Alert.alert("Delete note?", undefined, [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: async () => { await deleteNote(n.id); load(); } },
-    ]);
+    sheet({
+      title: "Delete note?",
+      actions: [
+        { label: "Delete", style: "destructive", onPress: async () => { await deleteNote(n.id); load(); } },
+      ],
+    });
   }
 
   return (

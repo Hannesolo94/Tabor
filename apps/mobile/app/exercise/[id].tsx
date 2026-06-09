@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Image, Linking, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, Linking, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { getExercise, getRoutines, createRoutine, addExerciseToRoutine, type Exercise, type Routine } from "@/lib/fitness";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 export default function ExerciseDetail() {
@@ -15,6 +16,7 @@ export default function ExerciseDetail() {
   const [loading, setLoading] = useState(true);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [picker, setPicker] = useState(false);
+  const sheet = useActionSheet();
 
   useEffect(() => {
     if (!id) return;
@@ -31,12 +33,12 @@ export default function ExerciseDetail() {
     if (!ex) return;
     await addExerciseToRoutine(routineId, ex.id);
     setPicker(false);
-    Alert.alert("Added", "Exercise added to your routine.");
+    sheet({ title: "Added", message: "Exercise added to your routine.", actions: [{ label: "Got it", style: "cancel" }] });
   }
   async function newRoutineWith() {
     if (!userId || !ex) return;
     const rid = await createRoutine(userId, "My Routine");
-    if (rid) { await addExerciseToRoutine(rid, ex.id); setPicker(false); Alert.alert("Routine created", "Added to a new custom routine."); }
+    if (rid) { await addExerciseToRoutine(rid, ex.id); setPicker(false); sheet({ title: "Routine created", message: "Added to a new custom routine.", actions: [{ label: "Got it", style: "cancel" }] }); }
   }
 
   if (loading) return <SafeAreaView style={{ flex: 1, backgroundColor: C.black, alignItems: "center", justifyContent: "center" }}><ActivityIndicator color={C.gold} /></SafeAreaView>;

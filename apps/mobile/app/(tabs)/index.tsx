@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
+import { useActionSheet, type SheetAction } from "@/components/ActionSheet";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
@@ -15,6 +16,7 @@ import { useTabBar } from "@/lib/tabbar";
 export default function Quests() {
   const tb = useTabBar();
   const router = useRouter();
+  const sheet = useActionSheet();
   const { session } = useAuth();
   const { profile, loading: pLoading } = useProfile();
   const userId = session?.user.id;
@@ -85,25 +87,25 @@ export default function Quests() {
     const m = q.quest_key === "word" ? q.title.match(/^Read\s+(.+)\s+(\d+)$/) : null;
     if (m) {
       const order = await bookOrderFor(m[1]);
-      const opts: { text: string; style?: "cancel"; onPress?: () => void }[] = [];
-      if (order) opts.push({ text: "Open passage", onPress: () => router.push(`/read/${order}?c=${m[2]}`) });
-      opts.push({ text: q.done ? "Mark not read" : "Mark as read", onPress: () => onToggle(q) });
-      opts.push({ text: "Cancel", style: "cancel" });
-      Alert.alert(q.title, "Take ground in the Word.", opts);
+      const actions: SheetAction[] = [];
+      if (order) actions.push({ label: "Open passage", onPress: () => router.push(`/read/${order}?c=${m[2]}`) });
+      actions.push({ label: q.done ? "Mark not read" : "Mark as read", onPress: () => onToggle(q) });
+      actions.push({ label: "Cancel", style: "cancel" });
+      sheet({ title: q.title, message: "Take ground in the Word.", actions });
       return;
     }
     if (q.quest_key === "body") {
-      Alert.alert(q.title, q.sub || "Crush it, then log it.", [
-        { text: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
-        { text: "I did my own training", onPress: () => onToggle(q) },
-        { text: "Cancel", style: "cancel" },
-      ]);
+      sheet({ title: q.title, message: q.sub || "Crush it, then log it.", actions: [
+        { label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
+        { label: "I did my own training", onPress: () => onToggle(q) },
+        { label: "Cancel", style: "cancel" },
+      ] });
       return;
     }
-    Alert.alert(q.title, q.sub || "", [
-      { text: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    sheet({ title: q.title, message: q.sub || undefined, actions: [
+      { label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) },
+      { label: "Cancel", style: "cancel" },
+    ] });
   }
 
   if (loading || pLoading) {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Modal } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -103,28 +103,28 @@ export default function Guild() {
   async function send() {
     const body = input.trim();
     if (!body || !effChannel || !effGuild || !userId || !canPost) return;
-    if (violatesGuidelines(body)) { Alert.alert("Keep it honoring", "That message breaks the community guidelines."); return; }
+    if (violatesGuidelines(body)) { sheet({ title: "Keep it honoring", message: "That message breaks the community guidelines.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     setInput("");
     const optimistic: Msg = { id: `tmp-${Date.now()}`, body, author_id: userId, created_at: new Date().toISOString() };
     setMessages((prev) => [...prev, optimistic]);
     setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 60);
     const { error, hidden } = await sendMessage(effChannel, effGuild, userId, body);
     const msg = sendErrorMessage(error);
-    if (msg) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Not sent", msg); }
-    else if (hidden) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); Alert.alert("Removed", "That message broke the guidelines and was removed. You have been silenced pending review."); }
+    if (msg) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); sheet({ title: "Not sent", message: msg, actions: [{ label: "Got it", style: "cancel" }] }); }
+    else if (hidden) { setMessages((prev) => prev.filter((m) => m.id !== optimistic.id)); sheet({ title: "Removed", message: "That message broke the guidelines and was removed. You have been silenced pending review.", actions: [{ label: "Got it", style: "cancel" }] }); }
   }
 
   async function pickMedia() {
     if (!effChannel || !effGuild || !userId || !canPost) return;
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert("Permission needed", "Allow photo access to share media."); return; }
+    if (!perm.granted) { sheet({ title: "Permission needed", message: "Allow photo access to share media.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images", "videos"], quality: 0.6, videoMaxDuration: 60 });
     if (res.canceled || !res.assets?.[0]) return;
     const a = res.assets[0];
     const isVideo = a.type === "video";
     const ext = isVideo ? "mp4" : a.uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
     const url = await uploadChatMedia(userId, a.uri, ext, a.mimeType || (isVideo ? "video/mp4" : "image/jpeg"));
-    if (!url) { Alert.alert("Upload failed", "Try again."); return; }
+    if (!url) { sheet({ title: "Upload failed", message: "Try again.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     await sendMessage(effChannel, effGuild, userId, mediaBody({ t: isVideo ? "video" : "image", url }));
   }
   async function sendGif(url: string) {
@@ -172,8 +172,8 @@ export default function Guild() {
     const actions: SheetAction[] = [];
     if (m.author_id && m.author_id !== userId) {
       actions.push({ label: "View profile", onPress: () => openProfile(m.author_id!) });
-      actions.push({ label: "Report message", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); Alert.alert("Reported", "Thank you. Our team will review it."); } });
-      actions.push({ label: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); Alert.alert("Blocked", "You will no longer see them."); } });
+      actions.push({ label: "Report message", onPress: async () => { if (userId) await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "message" }); sheet({ title: "Reported", message: "Thank you. Our team will review it.", actions: [{ label: "Got it", style: "cancel" }] }); } });
+      actions.push({ label: "Block this brother", style: "destructive", onPress: async () => { if (m.author_id) await blockUser(m.author_id); sheet({ title: "Blocked", message: "You will no longer see them.", actions: [{ label: "Got it", style: "cancel" }] }); } });
     }
     actions.push({ label: "Cancel", style: "cancel" });
     const base = recents.length ? recents.slice(0, 5) : ["🔥", "🙏", "💪"];
@@ -331,7 +331,7 @@ export default function Guild() {
                   <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 11, letterSpacing: 1 }}>REQUEST PENDING</Text>
                 </View>
               ) : (
-                <Pressable onPress={async () => { if (!profileUser) return; const r = await sendFriendRequest(profileUser.user_id); setProfileUser((p) => (p ? { ...p, friend_status: r === "sent" ? "pending" : p.friend_status } : p)); Alert.alert(r === "sent" ? "Request sent" : "Done", r === "sent" ? "They will see your request. Once they accept, you can message." : ""); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 12, marginTop: 18 }}>
+                <Pressable onPress={async () => { if (!profileUser) return; const r = await sendFriendRequest(profileUser.user_id); setProfileUser((p) => (p ? { ...p, friend_status: r === "sent" ? "pending" : p.friend_status } : p)); sheet({ title: r === "sent" ? "Request sent" : "Done", message: r === "sent" ? "They will see your request. Once they accept, you can message." : undefined, actions: [{ label: "Got it", style: "cancel" }] }); }} style={{ backgroundColor: C.gold, paddingVertical: 12, paddingHorizontal: 30, borderRadius: 12, marginTop: 18 }}>
                   <Text style={{ color: C.black, fontFamily: F.head, letterSpacing: 1 }}>＋ ADD FRIEND</Text>
                 </Pressable>
               )

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { getBookmarks, toggleBookmark, bookOrderFor } from "@/lib/scripture";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 export default function Bookmarks() {
@@ -11,6 +12,7 @@ export default function Bookmarks() {
   const { session } = useAuth();
   const userId = session?.user.id;
   const [refs, setRefs] = useState<string[]>([]);
+  const sheet = useActionSheet();
 
   async function load() { if (userId) setRefs(await getBookmarks(userId)); }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
@@ -24,7 +26,7 @@ export default function Bookmarks() {
     if (order) router.push(`/read/${order}?c=${chap}`);
   }
   function remove(ref: string) {
-    Alert.alert("Remove bookmark?", ref, [{ text: "Cancel", style: "cancel" }, { text: "Remove", style: "destructive", onPress: async () => { if (userId) { await toggleBookmark(userId, ref, false); load(); } } }]);
+    sheet({ title: "Remove bookmark?", message: ref, actions: [{ label: "Remove", style: "destructive", onPress: async () => { if (userId) { await toggleBookmark(userId, ref, false); load(); } } }] });
   }
 
   return (

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ensureHandle, searchUsers, listFriends, sendFriendRequest, respondFriend, openDm, blockUser, type FriendRow, type SearchRow } from "@/lib/social";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 export default function Friends() {
@@ -13,6 +14,7 @@ export default function Friends() {
   const [results, setResults] = useState<SearchRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
+  const sheet = useActionSheet();
 
   async function refresh() { setFriends(await listFriends()); }
   useEffect(() => { (async () => { setHandle(await ensureHandle()); await refresh(); setLoading(false); })(); }, []);
@@ -24,7 +26,11 @@ export default function Friends() {
 
   async function add(u: SearchRow) {
     const r = await sendFriendRequest(u.user_id);
-    Alert.alert(r === "sent" ? "Request sent" : r === "exists" ? "Already connected or pending" : r === "blocked" ? "Unavailable" : "Done", r === "sent" ? `${u.name || u.handle} will see your request.` : "");
+    sheet({
+      title: r === "sent" ? "Request sent" : r === "exists" ? "Already connected or pending" : r === "blocked" ? "Unavailable" : "Done",
+      message: r === "sent" ? `${u.name || u.handle} will see your request.` : undefined,
+      actions: [{ label: "Got it", style: "cancel" }],
+    });
     setResults((rs) => rs.filter((x) => x.user_id !== u.user_id));
     refresh();
   }
@@ -33,10 +39,11 @@ export default function Friends() {
     if (tid) router.push(`/dm/${tid}?name=${encodeURIComponent(f.name || "Brother")}&uid=${f.other_id}`);
   }
   function confirmBlock(f: FriendRow) {
-    Alert.alert("Block this brother?", "They will be removed and can no longer reach you.", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Block", style: "destructive", onPress: async () => { await blockUser(f.other_id); refresh(); } },
-    ]);
+    sheet({
+      title: "Block this brother?",
+      message: "They will be removed and can no longer reach you.",
+      actions: [{ label: "Block", style: "destructive", onPress: async () => { await blockUser(f.other_id); refresh(); } }],
+    });
   }
 
   const incoming = friends.filter((f) => f.status === "pending" && f.direction === "incoming");

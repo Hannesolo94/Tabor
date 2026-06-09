@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/lib/auth";
 import { getWorkouts, getPRs, setPR, deletePR, type WorkoutRow, type PR } from "@/lib/fitness";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 export default function History() {
@@ -14,6 +15,7 @@ export default function History() {
   const [prs, setPrs] = useState<PR[]>([]);
   const [lift, setLift] = useState("");
   const [value, setValue] = useState("");
+  const sheet = useActionSheet();
 
   async function load() {
     if (!userId) return;
@@ -28,7 +30,7 @@ export default function History() {
     setLift(""); setValue(""); load();
   }
   function removePR(p: PR) {
-    Alert.alert("Remove PR?", p.lift, [{ text: "Cancel", style: "cancel" }, { text: "Remove", style: "destructive", onPress: async () => { if (userId) { await deletePR(userId, p.lift); load(); } } }]);
+    sheet({ title: "Remove PR?", message: p.lift, actions: [{ label: "Remove", style: "destructive", onPress: async () => { if (userId) { await deletePR(userId, p.lift); load(); } } }] });
   }
 
   const totalMins = workouts.reduce((s, w) => s + (w.mins ?? 0), 0);

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { getGoals, getDiary, deleteLog, searchFoods, logFood, saveGoals, type Goals, type LogRow, type Food } from "@/lib/nutrition";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 const MEALS = ["breakfast", "lunch", "dinner", "snack"];
@@ -79,10 +80,11 @@ function Consent({ onAccept, onBack }: { onAccept: () => void; onBack: () => voi
 
 function GoalSetup({ userId, initial, onDone }: { userId: string; initial: Goals | null; onDone: () => void }) {
   const [f, setF] = useState({ weight_kg: "", height_cm: "", age: "", sex: "male", activity: "1.55", goal_type: "fat_loss" });
+  const sheet = useActionSheet();
   const ACT = [{ v: "1.2", l: "Low" }, { v: "1.375", l: "Light" }, { v: "1.55", l: "Moderate" }, { v: "1.725", l: "High" }];
   const GOAL = [{ v: "fat_loss", l: "Fat loss" }, { v: "maintain", l: "Maintain" }, { v: "muscle_gain", l: "Muscle" }];
   async function save() {
-    if (!f.weight_kg || !f.height_cm || !f.age) { Alert.alert("Fill it in", "We need weight, height, and age to set your targets."); return; }
+    if (!f.weight_kg || !f.height_cm || !f.age) { sheet({ title: "Fill it in", message: "We need weight, height, and age to set your targets.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     await saveGoals(userId, { weight_kg: +f.weight_kg, height_cm: +f.height_cm, age: +f.age, sex: f.sex, activity: +f.activity, goal_type: f.goal_type });
     onDone();
   }
@@ -108,17 +110,19 @@ function GoalSetup({ userId, initial, onDone }: { userId: string; initial: Goals
 function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals; rows: LogRow[]; today: string; onScan: () => void; onChange: () => void; userId: string }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Food[]>([]);
+  const sheet = useActionSheet();
   const sum = (k: keyof LogRow) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
   const kcal = sum("kcal"), protein = sum("protein"), carb = sum("carb"), fat = sum("fat");
 
   async function doSearch(text: string) { setQ(text); setResults(text.trim().length >= 2 ? await searchFoods(text) : []); }
   async function quickLog(food: Food) {
-    Alert.alert(food.name, "Log 100g to which meal?", [
-      ...MEALS.map((mm) => ({ text: mm[0].toUpperCase() + mm.slice(1), onPress: async () => { await logFood(userId, mm, food, 100, today); setQ(""); setResults([]); onChange(); } })),
-      { text: "Cancel", style: "cancel" as const },
-    ]);
+    sheet({
+      title: food.name,
+      message: "Log 100g to which meal?",
+      actions: MEALS.map((mm) => ({ label: mm[0].toUpperCase() + mm.slice(1), onPress: async () => { await logFood(userId, mm, food, 100, today); setQ(""); setResults([]); onChange(); } })),
+    });
   }
-  function remove(r: LogRow) { Alert.alert("Remove?", r.name, [{ text: "Cancel", style: "cancel" }, { text: "Remove", style: "destructive", onPress: async () => { await deleteLog(r.id); onChange(); } }]); }
+  function remove(r: LogRow) { sheet({ title: "Remove?", message: r.name, actions: [{ label: "Remove", style: "destructive", onPress: async () => { await deleteLog(r.id); onChange(); } }] }); }
 
   return (
     <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }}>

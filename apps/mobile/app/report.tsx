@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, Image, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, Image, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@/lib/auth";
 import { submitReport } from "@/lib/feedback";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 export default function Report() {
@@ -17,6 +18,7 @@ export default function Report() {
   const [shots, setShots] = useState<{ uri: string; base64: string; ext: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const sheet = useActionSheet();
 
   async function pick() {
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], base64: true, quality: 0.6, allowsMultipleSelection: true, selectionLimit: 4 });
@@ -26,11 +28,11 @@ export default function Report() {
   }
 
   async function send() {
-    if (!userId || !title.trim()) { Alert.alert("Add a title", "Give it a short title so we know what broke."); return; }
+    if (!userId || !title.trim()) { sheet({ title: "Add a title", message: "Give it a short title so we know what broke.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     setBusy(true);
     const { error } = await submitReport(userId, { kind, title, body, shots: shots.map((s) => ({ base64: s.base64, ext: s.ext })) });
     setBusy(false);
-    if (error) { Alert.alert("Could not send", error); return; }
+    if (error) { sheet({ title: "Could not send", message: error, actions: [{ label: "Got it", style: "cancel" }] }); return; }
     setDone(true);
   }
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Switch, Alert, Linking, Share } from "react-native";
+import { View, Text, Pressable, ScrollView, Switch, Linking, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
 
 const SITE = "https://tabor.quest";
@@ -17,26 +18,26 @@ export default function Settings() {
   const router = useRouter();
   const { session, signOut } = useAuth();
   const userId = session?.user.id;
+  const sheet = useActionSheet();
 
   async function exportData() {
     try {
       const { data } = await supabase.rpc("export_my_data");
       await Share.share({ message: JSON.stringify(data, null, 2) });
-    } catch { Alert.alert("Could not export", "Please try again."); }
+    } catch { sheet({ title: "Could not export", message: "Please try again.", actions: [{ label: "Got it", style: "cancel" }] }); }
   }
 
   function confirmDelete() {
-    Alert.alert(
-      "Delete your account?",
-      "This permanently erases your profile, progress, messages, and all data. This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete everything", style: "destructive", onPress: async () => {
+    sheet({
+      title: "Delete your account?",
+      message: "This permanently erases your profile, progress, messages, and all data. This cannot be undone.",
+      actions: [
+        { label: "Delete everything", style: "destructive", onPress: async () => {
           try { await supabase.rpc("delete_my_account"); } catch { /* row already gone */ }
           await signOut();
         } },
       ],
-    );
+    });
   }
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [loaded, setLoaded] = useState(false);

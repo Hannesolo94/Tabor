@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -61,7 +61,7 @@ export default function DM() {
   async function send() {
     const body = input.trim();
     if (!body || !id || !userId) return;
-    if (violatesGuidelines(body)) { Alert.alert("Keep it honoring", "That message breaks the community guidelines."); return; }
+    if (violatesGuidelines(body)) { sheet({ title: "Keep it honoring", message: "That message breaks the community guidelines.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     setInput("");
     const tmpId = `tmp-${Date.now()}`;
     setMessages((prev) => [...prev, { id: tmpId, body: "", author_id: userId, created_at: new Date().toISOString() }]);
@@ -70,7 +70,7 @@ export default function DM() {
     const cipher = otherPub ? await encryptDM(otherPub, body) : null;
     const { error } = await sendDm(id, userId, cipher ?? body); // ciphertext when keys present
     const m = sendErrorMessage(error);
-    if (m) { setMessages((prev) => prev.filter((x) => x.id !== tmpId)); Alert.alert("Not sent", m); }
+    if (m) { setMessages((prev) => prev.filter((x) => x.id !== tmpId)); sheet({ title: "Not sent", message: m, actions: [{ label: "Got it", style: "cancel" }] }); }
   }
 
   async function sendMediaRef(ref: MediaRef) {
@@ -86,14 +86,14 @@ export default function DM() {
   }
   async function pickMedia() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert("Permission needed", "Allow photo access to share media."); return; }
+    if (!perm.granted) { sheet({ title: "Permission needed", message: "Allow photo access to share media.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images", "videos"], quality: 0.6, videoMaxDuration: 60 });
     if (res.canceled || !res.assets?.[0] || !userId) return;
     const a = res.assets[0];
     const isVideo = a.type === "video";
     const ext = isVideo ? "mp4" : a.uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
     const url = await uploadChatMedia(userId, a.uri, ext, a.mimeType || (isVideo ? "video/mp4" : "image/jpeg"));
-    if (!url) { Alert.alert("Upload failed", "Try again."); return; }
+    if (!url) { sheet({ title: "Upload failed", message: "Try again.", actions: [{ label: "Got it", style: "cancel" }] }); return; }
     await sendMediaRef({ t: isVideo ? "video" : "image", url });
   }
   function attach() {
@@ -108,7 +108,7 @@ export default function DM() {
     if (!m.author_id || m.author_id === userId || !userId) return;
     // include the decrypted text so moderators can act (you reveal it, not the server)
     sheet({ title: "Report this message?", actions: [
-      { label: "Report", style: "destructive", onPress: async () => { await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "dm", detail: text[m.id] }); Alert.alert("Reported", "Thank you. Our team will review it."); } },
+      { label: "Report", style: "destructive", onPress: async () => { await reportContent(userId, { messageId: m.id, targetUser: m.author_id ?? undefined, reason: "dm", detail: text[m.id] }); sheet({ title: "Reported", message: "Thank you. Our team will review it.", actions: [{ label: "Got it", style: "cancel" }] }); } },
       { label: "Cancel", style: "cancel" },
     ] });
   }
