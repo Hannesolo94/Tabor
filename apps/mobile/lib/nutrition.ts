@@ -72,15 +72,23 @@ export async function addCustomFood(userId: string, f: { name: string; brand?: s
   return data ? ({ source: "custom", ...data } as Food) : null;
 }
 
-export async function logFood(userId: string, meal: string, food: Food, qtyG: number, date: string) {
+export const FUEL_XP = 15;
+/** Logs food, and the FIRST log of each day grants XP (rewards the discipline of tracking,
+ *  not spammable). Returns { error } (callers check it) + the first-of-day flag. */
+export async function logFood(userId: string, meal: string, food: Food, qtyG: number, date: string): Promise<{ error: { message?: string } | null; firstToday: boolean; xp: number }> {
   const f = qtyG / 100;
-  return supabase.from("food_log").insert({
+  const { error } = await supabase.from("food_log").insert({
     user_id: userId, log_date: date, meal, qty_g: qtyG, name: food.name,
     kcal: Math.round((food.kcal_100g || 0) * f),
     protein: food.protein_100g != null ? +(food.protein_100g * f).toFixed(1) : null,
     carb: food.carb_100g != null ? +(food.carb_100g * f).toFixed(1) : null,
     fat: food.fat_100g != null ? +(food.fat_100g * f).toFixed(1) : null,
   });
+  if (error) return { error, firstToday: false, xp: 0 };
+  const { count } = await supabase.from("food_log").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("log_date", date);
+  const firstToday = (count ?? 0) === 1;
+  if (firstToday) await supabase.rpc("apply_quest_delta", { p_xp: FUEL_XP, p_stat: "STR", p_stat_delta: 1 });
+  return { error: null, firstToday, xp: FUEL_XP };
 }
 
 export async function getDiary(userId: string, date: string): Promise<LogRow[]> {

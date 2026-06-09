@@ -173,7 +173,7 @@ export function estimateCalories(minutes: number, weightKg: number | null): numb
   return Math.round(6 * (weightKg ?? 80) * (Math.max(0, minutes) / 60));
 }
 export async function grantWorkoutXp(xp: number): Promise<void> {
-  await supabase.rpc("apply_quest_delta", { p_xp: xp, p_stat: "str", p_stat_delta: 1 });
+  await supabase.rpc("apply_quest_delta", { p_xp: xp, p_stat: "STR", p_stat_delta: 1 });
 }
 export async function renameRoutine(routineId: string, name: string): Promise<void> {
   await supabase.from("routines").update({ name }).eq("id", routineId);

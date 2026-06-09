@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { getGoals, getDiary, deleteLog, searchFoods, logFood, saveGoals, type Goals, type LogRow, type Food } from "@/lib/nutrition";
 import { useActionSheet } from "@/components/ActionSheet";
+import { Celebration } from "@/components/Celebration";
 import { C, F } from "@/lib/theme";
 
 const MEALS = ["breakfast", "lunch", "dinner", "snack"];
@@ -110,6 +111,7 @@ function GoalSetup({ userId, initial, onDone }: { userId: string; initial: Goals
 function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals; rows: LogRow[]; today: string; onScan: () => void; onChange: () => void; userId: string }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Food[]>([]);
+  const [cel, setCel] = useState<number | null>(null);
   const sheet = useActionSheet();
   const sum = (k: keyof LogRow) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
   const kcal = sum("kcal"), protein = sum("protein"), carb = sum("carb"), fat = sum("fat");
@@ -119,12 +121,13 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
     sheet({
       title: food.name,
       message: "Log 100g to which meal?",
-      actions: MEALS.map((mm) => ({ label: mm[0].toUpperCase() + mm.slice(1), onPress: async () => { await logFood(userId, mm, food, 100, today); setQ(""); setResults([]); onChange(); } })),
+      actions: MEALS.map((mm) => ({ label: mm[0].toUpperCase() + mm.slice(1), onPress: async () => { const r = await logFood(userId, mm, food, 100, today); setQ(""); setResults([]); onChange(); if (r.firstToday) setCel(r.xp); } })),
     });
   }
   function remove(r: LogRow) { sheet({ title: "Remove?", message: r.name, actions: [{ label: "Remove", style: "destructive", onPress: async () => { await deleteLog(r.id); onChange(); } }] }); }
 
   return (
+    <>
     <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }}>
       {/* totals */}
       <View style={{ borderWidth: 1, borderColor: C.gold, borderRadius: 14, padding: 16, marginBottom: 16 }}>
@@ -166,6 +169,8 @@ function Diary({ goals, rows, today, onScan, onChange, userId }: { goals: Goals;
       })}
       <Text style={{ color: C.muted, fontSize: 9, fontFamily: F.mono, textAlign: "center", marginTop: 24 }}>DATA FROM OPEN FOOD FACTS (ODbL) · NOT MEDICAL ADVICE</Text>
     </ScrollView>
+    <Celebration visible={cel != null} xp={cel ?? undefined} title="[ FUEL TRACKED ]" message="The temple is fed. First log of the day. Keep tracking." onDone={() => setCel(null)} />
+    </>
   );
 }
 
