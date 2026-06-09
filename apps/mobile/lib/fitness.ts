@@ -22,7 +22,12 @@ export const EQUIPMENT = ["body only", "dumbbell", "barbell", "kettlebells", "ca
 
 export async function listExercises(opts: { q?: string; muscles?: string[]; equipment?: string }): Promise<Exercise[]> {
   let query = supabase.from("exercises").select("*").order("name", { ascending: true }).limit(120);
-  if (opts.q && opts.q.trim().length >= 2) query = query.ilike("name", `%${opts.q.trim()}%`);
+  if (opts.q && opts.q.trim().length >= 2) {
+    // treat spaces/hyphens as flexible so "push up", "push-up" and "pushup" all match
+    // "Push-Up", "Pushups", etc. (the dataset mixes hyphens, spaces, and joined words)
+    const pattern = "%" + opts.q.trim().replace(/[\s-]+/g, "%") + "%";
+    query = query.ilike("name", pattern);
+  }
   if (opts.muscles && opts.muscles.length) query = query.overlaps("primary_muscles", opts.muscles);
   if (opts.equipment) query = query.eq("equipment", opts.equipment);
   const { data } = await query;
