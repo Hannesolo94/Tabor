@@ -2,16 +2,30 @@
 // canonical form; this converts only at the UI layer. Preference is device-local.
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Localization from "expo-localization";
 
 export type UnitSystem = "metric" | "imperial";
 const KEY = "tabor.units";
 const LB_PER_KG = 2.20462, MI_PER_KM = 0.621371, IN_PER_CM = 0.393701;
 
+/** Best-guess default from the device locale: US measurement system -> imperial, else metric.
+ *  (UK is intentionally metric — UK gyms use kg.) Only used until the user picks in Settings. */
+function localeDefault(): UnitSystem {
+  try {
+    return Localization.getLocales()[0]?.measurementSystem === "us" ? "imperial" : "metric";
+  } catch { return "metric"; }
+}
+
 const Ctx = createContext<{ system: UnitSystem; setSystem: (s: UnitSystem) => void }>({ system: "metric", setSystem: () => {} });
 
 export function UnitsProvider({ children }: { children: ReactNode }) {
   const [system, setSystemState] = useState<UnitSystem>("metric");
-  useEffect(() => { AsyncStorage.getItem(KEY).then((v) => { if (v === "imperial" || v === "metric") setSystemState(v); }); }, []);
+  useEffect(() => {
+    AsyncStorage.getItem(KEY).then((v) => {
+      if (v === "imperial" || v === "metric") setSystemState(v); // explicit user choice wins
+      else setSystemState(localeDefault());                      // first run: default from device region
+    });
+  }, []);
   const setSystem = (s: UnitSystem) => { setSystemState(s); AsyncStorage.setItem(KEY, s).catch(() => {}); };
   return <Ctx.Provider value={{ system, setSystem }}>{children}</Ctx.Provider>;
 }
