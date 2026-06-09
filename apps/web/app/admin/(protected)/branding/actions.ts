@@ -11,18 +11,21 @@ export async function saveBrand(brand: Brand): Promise<void> {
   revalidatePath("/admin/branding");
 }
 
-export async function uploadDesignFile(formData: FormData): Promise<void> {
-  const file = formData.get("file") as File | null;
-  const folder = String(formData.get("folder") ?? "").trim() || null;
-  const sku = String(formData.get("sku") ?? "").trim() || null;
-  if (!file || file.size === 0) return;
+/** Step 1: mint a one-time signed upload URL so the browser uploads the (possibly large)
+ *  file DIRECTLY to Supabase — bypassing the 1MB server-action / ~4.5MB Vercel body limits. */
+export async function createUploadTicket(name: string): Promise<{ path: string; token: string } | { error: string }> {
   const admin = supabaseAdmin();
-  const ext = file.name.includes(".") ? file.name.split(".").pop() : "bin";
+  const ext = name.includes(".") ? name.split(".").pop() : "bin";
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const buf = Buffer.from(await file.arrayBuffer());
-  const { error } = await admin.storage.from("design-files").upload(path, buf, { contentType: file.type || "application/octet-stream", upsert: false });
-  if (error) return;
-  await admin.from("design_files").insert({ name: file.name, path, mime: file.type || null, size_bytes: file.size, product_sku: sku, folder });
+  const { data, error } = await admin.storage.from("design-files").createSignedUploadUrl(path);
+  if (error || !data) return { error: error?.message ?? "Could not start the upload." };
+  return { path: data.path, token: data.token };
+}
+
+/** Step 2: after the browser finishes the direct upload, record the file's metadata. */
+export async function recordDesignFile(input: { name: string; path: string; mime: string | null; size: number; sku: string | null; folder: string | null }): Promise<void> {
+  const admin = supabaseAdmin();
+  await admin.from("design_files").insert({ name: input.name, path: input.path, mime: input.mime, size_bytes: input.size, product_sku: input.sku || null, folder: input.folder || null });
   revalidatePath("/admin/branding");
 }
 

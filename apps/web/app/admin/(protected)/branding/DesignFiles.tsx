@@ -3,8 +3,10 @@
 // Design-file library for the admin Brand Kit. Stores store-SKU / product source
 // art plus freeform design files (AI, PSD, PDF, print-ready PNG). Presentation +
 // the two server actions only.
-import { useState } from "react";
-import { uploadDesignFile, deleteDesignFile } from "./actions";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { createUploadTicket, recordDesignFile, deleteDesignFile } from "./actions";
+import { supabaseBrowser } from "@/lib/supabase/client";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export interface DesignFile {
@@ -55,6 +57,29 @@ function extOf(file: DesignFile): string {
 
 export function DesignFiles({ files, products }: { files: DesignFile[]; products: { sku: string; name: string }[] }) {
   const [filter, setFilter] = useState<Filter>({ kind: "all" });
+  const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [folder, setFolder] = useState("");
+  const [sku, setSku] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function doUpload(e: React.FormEvent) {
+    e.preventDefault();
+    const sb = supabaseBrowser();
+    if (!file || !sb) { setErr("Pick a file first."); return; }
+    setUploading(true); setErr(null);
+    try {
+      const ticket = await createUploadTicket(file.name);
+      if ("error" in ticket) { setErr(ticket.error); setUploading(false); return; }
+      const { error } = await sb.storage.from("design-files").uploadToSignedUrl(ticket.path, ticket.token, file);
+      if (error) { setErr(error.message); setUploading(false); return; }
+      await recordDesignFile({ name: file.name, path: ticket.path, mime: file.type || null, size: file.size, sku: sku || null, folder: folder || null });
+      setFile(null); setFolder(""); setSku(""); if (fileRef.current) fileRef.current.value = "";
+      setUploading(false); router.refresh();
+    } catch (ex) { setErr(ex instanceof Error ? ex.message : "Upload failed."); setUploading(false); }
+  }
 
   const productName = (sku: string | null): string | null => {
     if (!sku) return null;
@@ -83,25 +108,17 @@ export function DesignFiles({ files, products }: { files: DesignFile[]; products
       </div>
 
       {/* Upload */}
-      <form action={uploadDesignFile} className="admin-card" style={{ ...cardStyle, marginBottom: 20, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-        <input
-          type="file"
-          name="file"
-          required
-          style={{ ...inputStyle, padding: "7px 11px", maxWidth: 280 }}
-        />
-        <input
-          name="folder"
-          placeholder="Folder (optional, e.g. Tees, Logos)"
-          style={{ ...inputStyle, minWidth: 220 }}
-        />
-        <select name="sku" defaultValue="" style={{ ...inputStyle, minWidth: 180 }}>
+      <form onSubmit={doUpload} className="admin-card" style={{ ...cardStyle, marginBottom: 20, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+        <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required style={{ ...inputStyle, padding: "7px 11px", maxWidth: 280 }} />
+        <input value={folder} onChange={(e) => setFolder(e.target.value)} placeholder="Folder (optional, e.g. Tees, Logos)" style={{ ...inputStyle, minWidth: 220 }} />
+        <select value={sku} onChange={(e) => setSku(e.target.value)} style={{ ...inputStyle, minWidth: 180 }}>
           <option value="">No product</option>
           {products.map((p) => (
             <option key={p.sku} value={p.sku}>{p.name}</option>
           ))}
         </select>
-        <button type="submit" style={goldButton}>Upload</button>
+        <button type="submit" disabled={uploading || !file} style={{ ...goldButton, opacity: uploading || !file ? 0.6 : 1 }}>{uploading ? "Uploading…" : "Upload"}</button>
+        {err && <span style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", width: "100%" }}>{err}</span>}
       </form>
 
       {/* Filters */}
