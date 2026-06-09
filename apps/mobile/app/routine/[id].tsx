@@ -4,8 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { getRoutineExercises, deleteRoutine, removeExerciseFromRoutine, moveRoutineExercises, logWorkout, inputKind, type RoutineExercise, type SetEntry } from "@/lib/fitness";
+import { getRoutineExercises, deleteRoutine, removeExerciseFromRoutine, moveRoutineExercises, logWorkout, saveRoutineSets, getLatestBodyweight, workoutXp, estimateCalories, grantWorkoutXp, inputKind, type RoutineExercise, type SetEntry, type SavedSet } from "@/lib/fitness";
 import { useActionSheet } from "@/components/ActionSheet";
+import { Celebration } from "@/components/Celebration";
 import { todayKey } from "@/lib/quests";
 import { C, F } from "@/lib/theme";
 
@@ -29,7 +30,11 @@ export default function RoutineDetail() {
   const [logs, setLogs] = useState<Record<string, Row[]>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [bodyweight, setBodyweight] = useState<number | null>(null);
+  const [celebrate, setCelebrate] = useState<{ sets: SetEntry[]; xp: number } | null>(null);
+  const [mins, setMins] = useState("");
   const sheet = useActionSheet();
+  const rowToSaved = (r: Row): SavedSet => ({ reps: r.reps, weight: r.weight, time: r.time, distance: r.distance });
 
   useEffect(() => {
     if (!id) return;
@@ -39,13 +44,20 @@ export default function RoutineDetail() {
       const init: Record<string, Row[]> = {};
       for (const it of x) {
         const kind = inputKind(it.exercise?.category, it.exercise?.equipment);
-        const prefill = kind === "reps_weight" || kind === "reps" ? parseReps(it.reps) : "";
-        init[it.id] = Array.from({ length: Math.max(1, it.sets || 1) }, () => emptyRow(prefill));
+        if (it.last_sets && it.last_sets.length) {
+          // load last session's numbers back so the user can match or beat them
+          init[it.id] = it.last_sets.map((s) => ({ reps: s.reps ?? "", weight: s.weight ?? "", time: s.time ?? "", distance: s.distance ?? "" }));
+        } else {
+          const prefill = kind === "reps_weight" || kind === "reps" ? parseReps(it.reps) : "";
+          init[it.id] = Array.from({ length: Math.max(1, it.sets || 1) }, () => emptyRow(prefill));
+        }
       }
       setLogs(init);
       setLoading(false);
     });
   }, [id]);
+
+  useEffect(() => { if (userId) getLatestBodyweight(userId).then(setBodyweight); }, [userId]);
 
   function setCell(itemId: string, idx: number, field: keyof Row, val: string) {
     setLogs((prev) => {
@@ -110,16 +122,26 @@ export default function RoutineDetail() {
         }
       });
     }
-    await logWorkout(userId, name, Math.max(20, items.length * 8), sets, todayKey());
+    // persist the entered numbers so they load back next session (progressive overload)
+    await saveRoutineSets(items.map((it) => ({ id: it.id, sets: (logs[it.id] ?? []).map(rowToSaved) })));
+    const xp = workoutXp(sets.length);
+    await grantWorkoutXp(xp);
     setSaving(false);
-    sheet({
-      title: "Workout logged",
-      message: sets.length ? `Logged ${sets.length} ${sets.length === 1 ? "set" : "sets"}. Your charts just grew.` : "Well fought. The body is forged.",
-      actions: [
-        { label: "See progress", onPress: () => router.replace("/progress") },
-        { label: "Done", onPress: () => router.back() },
-      ],
-    });
+    setMins(String(Math.max(20, items.length * 8)));
+    setCelebrate({ sets, xp });
+  }
+
+  async function finishCelebration(logEffort: boolean) {
+    const cel = celebrate;
+    setCelebrate(null);
+    if (!userId || !cel) return;
+    const m = parseInt(mins, 10) || Math.max(20, items.length * 8);
+    await logWorkout(userId, name, m, cel.sets, todayKey(), logEffort ? estimateCalories(m, bodyweight) : null);
+    router.replace("/progress");
+  }
+  async function saveOnly() {
+    await saveRoutineSets(items.map((it) => ({ id: it.id, sets: (logs[it.id] ?? []).map(rowToSaved) })));
+    sheet({ title: "Saved", message: "Your numbers are saved. They will load back next time so you can match or beat them.", actions: [{ label: "Got it", style: "cancel" }] });
   }
   function confirmDelete() {
     sheet({
@@ -133,7 +155,10 @@ export default function RoutineDetail() {
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 16 }}>
         <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>‹</Text></Pressable>
-        {!generated && <Pressable onPress={confirmDelete} hitSlop={10}><Text style={{ color: C.red, fontSize: 11, fontFamily: F.mono, letterSpacing: 1 }}>DELETE</Text></Pressable>}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
+          <Pressable onPress={saveOnly} hitSlop={10}><Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono, letterSpacing: 1 }}>SAVE</Text></Pressable>
+          {!generated && <Pressable onPress={confirmDelete} hitSlop={10}><Text style={{ color: C.red, fontSize: 11, fontFamily: F.mono, letterSpacing: 1 }}>DELETE</Text></Pressable>}
+        </View>
       </View>
       <ScrollView contentContainerStyle={{ padding: 22, paddingTop: 0, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
         <Text style={{ color: C.ivory, fontSize: 26, fontFamily: F.head }}>{name}</Text>
@@ -211,6 +236,27 @@ export default function RoutineDetail() {
           </Pressable>
         )}
       </ScrollView>
+
+      <Celebration
+        visible={!!celebrate}
+        xp={celebrate?.xp}
+        title="[ WORKOUT FORGED ]"
+        message="Your numbers are saved. Next session they load back, so you can match or beat them."
+        doneLabel="Save & see progress"
+        onDone={() => finishCelebration(true)}
+      >
+        <View style={{ borderWidth: 1, borderColor: C.glassBorder, borderRadius: 12, padding: 14, backgroundColor: C.glassSoft }}>
+          <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, letterSpacing: 1, marginBottom: 9 }}>LOG YOUR TIME · FOR YOUR CHARTS</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <TextInput value={mins} onChangeText={(v) => setMins(v.replace(/[^0-9]/g, ""))} keyboardType="numeric" placeholder="min" placeholderTextColor={C.muted} style={cell} />
+            <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.mono }}>min</Text>
+            <Text style={{ color: C.gold, fontSize: 13, fontFamily: F.mono, marginLeft: "auto" }}>≈ {estimateCalories(parseInt(mins, 10) || 0, bodyweight)} kcal</Text>
+          </View>
+          <Pressable onPress={() => finishCelebration(false)} hitSlop={6} style={{ marginTop: 12, alignSelf: "center" }}>
+            <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, letterSpacing: 1 }}>SKIP · JUST LOG THE SETS</Text>
+          </Pressable>
+        </View>
+      </Celebration>
     </SafeAreaView>
   );
 }

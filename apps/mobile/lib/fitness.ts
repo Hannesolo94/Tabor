@@ -7,7 +7,8 @@ export interface Exercise {
   primary_muscles: string[]; secondary_muscles: string[]; instructions: string[]; image_url: string | null; video_url: string | null; mechanic: string | null; force: string | null;
 }
 export interface Routine { id: string; name: string; focus: string | null; generated: boolean }
-export interface RoutineExercise { id: string; exercise_id: string; sets: number; reps: string; rest: number; sort: number; exercise?: Exercise }
+export interface SavedSet { reps?: string; weight?: string; time?: string; distance?: string }
+export interface RoutineExercise { id: string; exercise_id: string; sets: number; reps: string; rest: number; sort: number; last_sets?: SavedSet[] | null; exercise?: Exercise }
 
 // Browseable muscle groups -> dataset muscle names
 export const MUSCLE_GROUPS: { label: string; muscles: string[] }[] = [
@@ -134,7 +135,7 @@ export async function getRoutines(userId: string): Promise<Routine[]> {
   return (data as Routine[]) ?? [];
 }
 export async function getRoutineExercises(routineId: string): Promise<RoutineExercise[]> {
-  const { data } = await supabase.from("routine_exercises").select("id, exercise_id, sets, reps, rest, sort, exercise:exercises(*)").eq("routine_id", routineId).order("sort", { ascending: true });
+  const { data } = await supabase.from("routine_exercises").select("id, exercise_id, sets, reps, rest, sort, last_sets, exercise:exercises(*)").eq("routine_id", routineId).order("sort", { ascending: true });
   return (data as unknown as RoutineExercise[]) ?? [];
 }
 export async function createRoutine(userId: string, name: string): Promise<string | null> {
@@ -153,6 +154,26 @@ export async function removeExerciseFromRoutine(routineExerciseId: string): Prom
 }
 export async function moveRoutineExercises(orderedIds: string[]): Promise<void> {
   await Promise.all(orderedIds.map((id, i) => supabase.from("routine_exercises").update({ sort: i }).eq("id", id)));
+}
+/** Persist the last entered numbers per routine exercise (progressive overload). */
+export async function saveRoutineSets(updates: { id: string; sets: SavedSet[] }[]): Promise<void> {
+  await Promise.all(updates.map((u) => supabase.from("routine_exercises").update({ last_sets: u.sets }).eq("id", u.id)));
+}
+/** Latest logged bodyweight (kg) for the calorie estimate; null if never logged. */
+export async function getLatestBodyweight(userId: string): Promise<number | null> {
+  const { data } = await supabase.from("body_metrics").select("weight").eq("user_id", userId).order("day", { ascending: false }).limit(1).maybeSingle();
+  return data?.weight != null ? Number(data.weight) : null;
+}
+/** XP for a completed workout: scales with sets logged, capped so daily quests still matter. */
+export function workoutXp(setsLogged: number): number {
+  return Math.max(20, Math.min(80, 20 + setsLogged * 4));
+}
+/** Estimate calories burned. MET ~6 (mixed training) x bodyweight(kg) x hours. */
+export function estimateCalories(minutes: number, weightKg: number | null): number {
+  return Math.round(6 * (weightKg ?? 80) * (Math.max(0, minutes) / 60));
+}
+export async function grantWorkoutXp(xp: number): Promise<void> {
+  await supabase.rpc("apply_quest_delta", { p_xp: xp, p_stat: "str", p_stat_delta: 1 });
 }
 export async function renameRoutine(routineId: string, name: string): Promise<void> {
   await supabase.from("routines").update({ name }).eq("id", routineId);
@@ -219,10 +240,10 @@ export interface SetEntry { exercise_id: string; exercise_name: string; set_inde
 export interface DayPoint { day: string; value: number }
 const dayAgo = (n: number) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
 
-export async function logWorkout(userId: string, name: string, mins: number, sets: SetEntry[], day: string): Promise<void> {
+export async function logWorkout(userId: string, name: string, mins: number, sets: SetEntry[], day: string, calories?: number | null): Promise<void> {
   const done = sets.filter((s) => s.reps > 0 || (s.duration_sec ?? 0) > 0 || (s.distance_m ?? 0) > 0);
   const volume = done.reduce((a, s) => a + (s.reps || 0) * (s.weight || 0), 0);
-  const { data: w } = await supabase.from("workouts").insert({ user_id: userId, name, mins, day, meta: { sets: done.length, volume } }).select("id").maybeSingle();
+  const { data: w } = await supabase.from("workouts").insert({ user_id: userId, name, mins, calories: calories ?? null, day, meta: { sets: done.length, volume } }).select("id").maybeSingle();
   if (!done.length) return;
   await supabase.from("set_logs").insert(done.map((s) => ({ user_id: userId, workout_id: w?.id, exercise_id: s.exercise_id, exercise_name: s.exercise_name, set_index: s.set_index, reps: s.reps || null, weight: s.weight || null, duration_sec: s.duration_sec ?? null, distance_m: s.distance_m ?? null, day })));
   // bump PRs with best estimated 1RM (Epley) per lift this session
@@ -238,6 +259,12 @@ export async function getVolumeByDay(userId: string, days = 30): Promise<DayPoin
   const { data } = await supabase.from("set_logs").select("day, reps, weight").eq("user_id", userId).gte("day", dayAgo(days));
   const map: Record<string, number> = {};
   for (const r of data ?? []) map[r.day] = (map[r.day] || 0) + (r.reps || 0) * (Number(r.weight) || 0);
+  return Object.entries(map).map(([day, value]) => ({ day, value })).sort((a, b) => a.day.localeCompare(b.day));
+}
+export async function getCaloriesByDay(userId: string, days = 30): Promise<DayPoint[]> {
+  const { data } = await supabase.from("workouts").select("day, calories").eq("user_id", userId).gte("day", dayAgo(days));
+  const map: Record<string, number> = {};
+  for (const r of data ?? []) if (r.calories) map[r.day] = (map[r.day] || 0) + Number(r.calories);
   return Object.entries(map).map(([day, value]) => ({ day, value })).sort((a, b) => a.day.localeCompare(b.day));
 }
 export async function getTrackedLifts(userId: string): Promise<string[]> {

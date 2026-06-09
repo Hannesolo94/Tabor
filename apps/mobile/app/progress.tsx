@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator } from 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useAuth } from "@/lib/auth";
-import { getVolumeByDay, getTrackedLifts, getLiftProgress, getBodyweightSeries, logBodyweight, getPRs, type DayPoint, type PR } from "@/lib/fitness";
+import { getVolumeByDay, getCaloriesByDay, getTrackedLifts, getLiftProgress, getBodyweightSeries, logBodyweight, getPRs, type DayPoint, type PR } from "@/lib/fitness";
 import { todayKey } from "@/lib/quests";
 import { LineChart, BarChart } from "@/components/Charts";
 import { C, F } from "@/lib/theme";
@@ -14,6 +14,7 @@ export default function Progress() {
   const userId = session?.user.id;
   const [loading, setLoading] = useState(true);
   const [volume, setVolume] = useState<DayPoint[]>([]);
+  const [cals, setCals] = useState<DayPoint[]>([]);
   const [lifts, setLifts] = useState<string[]>([]);
   const [lift, setLift] = useState<string | null>(null);
   const [liftSeries, setLiftSeries] = useState<DayPoint[]>([]);
@@ -24,8 +25,8 @@ export default function Progress() {
   useFocusEffect(useCallback(() => {
     if (!userId) return;
     (async () => {
-      const [v, l, b, p] = await Promise.all([getVolumeByDay(userId), getTrackedLifts(userId), getBodyweightSeries(userId), getPRs(userId)]);
-      setVolume(v); setLifts(l); setBw(b); setPrs(p);
+      const [v, cal, l, b, p] = await Promise.all([getVolumeByDay(userId), getCaloriesByDay(userId), getTrackedLifts(userId), getBodyweightSeries(userId), getPRs(userId)]);
+      setVolume(v); setCals(cal); setLifts(l); setBw(b); setPrs(p);
       const first = l[0] ?? null; setLift(first);
       if (first) setLiftSeries(await getLiftProgress(userId, first));
       setLoading(false);
@@ -50,6 +51,10 @@ export default function Progress() {
       <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
         <Section title="TRAINING VOLUME · 30 DAYS" hint="total reps × weight lifted per day">
           <BarChart data={volume} unit=" kg" />
+        </Section>
+
+        <Section title="CALORIES BURNED · 30 DAYS" hint="estimated from your logged workout time">
+          <BarChart data={cals} unit=" kcal" />
         </Section>
 
         <Section title="STRENGTH · EST. 1RM" hint={lift ? lift : "your tracked lifts appear here"}>

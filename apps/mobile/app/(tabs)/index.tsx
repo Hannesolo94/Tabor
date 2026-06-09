@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal }
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useActionSheet, type SheetAction } from "@/components/ActionSheet";
+import { Celebration } from "@/components/Celebration";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
@@ -32,6 +33,7 @@ export default function Quests() {
   const sealAnim = useRef(new Animated.Value(0)).current;
   const prevLevel = useRef<number | null>(null);
   const [rankUp, setRankUp] = useState(false);
+  const [questCel, setQuestCel] = useState<{ xp: number; pillar: string } | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -80,6 +82,7 @@ export default function Quests() {
     setQuests((prev) => prev.map((x) => (x.id === q.id ? { ...x, done } : x)));
     setXpOffset((o) => o + (done ? q.xp : -q.xp));
     toggleQuest(userId, q, done).catch(() => {});
+    if (done) setQuestCel({ xp: q.xp, pillar: q.pillar });
   }
 
   // tapping a quest does the relevant thing: open the passage, log the movement, or confirm
@@ -187,6 +190,14 @@ export default function Quests() {
           <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 28 }}>TAP TO CONTINUE</Text>
         </Pressable>
       </Modal>
+
+      <Celebration
+        visible={!!questCel}
+        xp={questCel?.xp}
+        title="[ QUEST COMPLETE ]"
+        message={questCel ? `${questCel.pillar} cleared. The climb continues, Son of Fire.` : undefined}
+        onDone={() => setQuestCel(null)}
+      />
     </SafeAreaView>
   );
 }
