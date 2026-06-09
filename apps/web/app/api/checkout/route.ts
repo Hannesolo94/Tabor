@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProductBySku } from "@/lib/products-db";
 import { getRegion } from "@/lib/region";
 import { REGIONS } from "@/lib/region";
+import { computeShipping } from "@/lib/shipping";
 import { startPayment } from "@/lib/payments";
 import { sendEmail, emailShell } from "@/lib/email";
 import { sameOrigin } from "@/lib/http";
@@ -72,7 +73,8 @@ export async function POST(req: Request) {
     discountUsed = Number(d.used_count) || 0;
   }
 
-  const shippingAmount = 0; // flat/free for now; real rates land with the gateway + shipping zones
+  // flat-rate shipping (USD $11.99 worldwide / free US over $100; ZAR R150 / free over R1800)
+  const shippingAmount = computeShipping(region, String(shipping.country ?? ""), subtotal);
   const total = Math.max(0, subtotal - discountAmount + shippingAmount);
 
   // create order (pending payment)

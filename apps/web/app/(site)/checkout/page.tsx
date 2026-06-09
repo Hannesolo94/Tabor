@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { track } from "@/lib/track";
+import { computeShipping, isUS, SHIPPING } from "@/lib/shipping";
+import type { RegionId } from "@/lib/region";
 import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
 
 const COUNTRIES = ["South Africa", "United States", "United Kingdom", "Canada", "Australia", "Namibia", "Botswana", "Other"];
@@ -14,7 +16,15 @@ const COUNTRIES = ["South Africa", "United States", "United Kingdom", "Canada", 
 export default function CheckoutPage() {
   const { lines, total, count, clear } = useCart();
   const sym = lines[0]?.symbol ?? "$";
+  const region: RegionId = sym === "R" ? "ZA" : "INTL";
+  const sub = Number(total) || 0;
   const [form, setForm] = useState({ email: "", name: "", line1: "", line2: "", city: "", province: "", postal: "", country: "South Africa" });
+  const shippingAmt = lines.length ? computeShipping(region, form.country, sub) : 0;
+  const grandTotal = sub + shippingAmt;
+  // nudge toward the free-shipping threshold (US only on INTL; everyone on ZA)
+  const cfg = SHIPPING[region];
+  const freeEligible = !cfg.freeOnlyUS || isUS(form.country);
+  const toFree = freeEligible && shippingAmt > 0 ? cfg.freeOver - sub : 0;
   const [discount, setDiscount] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -118,15 +128,23 @@ export default function CheckoutPage() {
               <div style={{ display: "flex", gap: 8, margin: "14px 0" }}>
                 <input placeholder="Discount code" aria-label="Discount code" value={discount} onChange={(e) => setDiscount(e.target.value)} style={{ ...inp, flex: 1 }} />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontFamily: MONO, fontSize: 15, color: "#E8E2D5" }}>
-                <span>SUBTOTAL</span><span style={{ color: GOLD }}>{sym}{total}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontFamily: MONO, fontSize: 14, color: "#C3BDB1" }}>
+                <span>SUBTOTAL</span><span>{sym}{sub.toFixed(2)}</span>
               </div>
-              <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginTop: 6 }}>DISCOUNT + SHIPPING CONFIRMED ON THE NEXT STEP</div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 7, fontFamily: MONO, fontSize: 14, color: "#C3BDB1" }}>
+                <span>SHIPPING</span><span>{shippingAmt === 0 ? "FREE" : `${sym}${shippingAmt.toFixed(2)}`}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 11, paddingTop: 11, borderTop: `1px solid ${GOLD}29`, fontFamily: MONO, fontSize: 16, color: "#E8E2D5" }}>
+                <span>TOTAL</span><span style={{ color: GOLD }}>{sym}{grandTotal.toFixed(2)}</span>
+              </div>
+              {toFree > 0
+                ? <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.08em", marginTop: 8 }}>ADD {sym}{toFree.toFixed(2)} FOR FREE SHIPPING</div>
+                : <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginTop: 8 }}>DISCOUNT APPLIED ON THE NEXT STEP</div>}
 
               {error && <p style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", letterSpacing: "0.04em", marginTop: 14 }}>{error}</p>}
 
               <button type="submit" disabled={busy} style={{ width: "100%", marginTop: 18, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "16px", cursor: busy ? "wait" : "pointer", opacity: busy ? 0.6 : 1 }}>
-                {busy ? "Placing order…" : `Place order · ${sym}${total}`}
+                {busy ? "Placing order…" : `Place order · ${sym}${grandTotal.toFixed(2)}`}
               </button>
               <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.1em", textAlign: "center", marginTop: 12, lineHeight: 1.6 }}>SHIPS WORLDWIDE · PRINTED ON DEMAND</div>
             </div>
