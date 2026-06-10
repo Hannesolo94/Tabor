@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { TaborSeal } from "@/components/TaborSeal";
 import { LogoutButton } from "./LogoutButton";
+import { DeployIndicator } from "./DeployIndicator";
 import { AdminNav } from "./AdminNav";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
@@ -68,6 +69,7 @@ export function AdminShell({ email, name, role, children }: { email?: string; na
         </form>
         <AdminNav groups={groups} />
         <div style={{ borderTop: "1px solid rgba(201,169,97,0.14)", paddingTop: 14, marginTop: 14 }}>
+          <div style={{ marginBottom: 12 }}><DeployIndicator /></div>
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.06em", marginBottom: 4 }}>{(name || "Admin").toUpperCase()}</div>
           <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", marginBottom: 10, wordBreak: "break-all" }}>{email}</div>
           <LogoutButton />

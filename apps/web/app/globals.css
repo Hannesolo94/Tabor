@@ -205,3 +205,8 @@ button {
   height: 100% !important;
   display: block;
 }
+/* deploy status radial loader */
+@keyframes tabor-spin { to { transform: rotate(360deg); } }
+.deploy-spin { animation: tabor-spin 0.85s linear infinite; }
+@keyframes tabor-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.deploy-pulse { animation: tabor-pulse 1.6s ease-in-out infinite; }
