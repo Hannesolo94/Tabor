@@ -164,8 +164,8 @@ export function PostComposer({ post, media }: { post: PostData; media: MediaCard
       <div style={card}>
         <label style={lbl}>Publish to</label>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-          {([["app", "📱 App feed"], ["email", "✉️ Email"], ["blog", "🌐 Website blog"], ["instagram", "Instagram (soon)"], ["tiktok", "TikTok (soon)"]] as [keyof PostTargets, string][]).map(([k, label]) => {
-            const on = targets[k]; const disabled = k === "instagram" || k === "tiktok";
+          {([["app", "📱 App feed"], ["email", "✉️ Email"], ["blog", "🌐 Website blog"], ["instagram", "Instagram"], ["tiktok", "TikTok"]] as [keyof PostTargets, string][]).map(([k, label]) => {
+            const on = targets[k]; const disabled = false;
             return (
               <button key={k} type="button" disabled={disabled} onClick={() => !disabled && toggleTarget(k)} style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.04em", padding: "11px 16px", borderRadius: 12, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.45 : 1, color: on ? "#1a1408" : "#C3BDB1", fontWeight: on ? 700 : 400, background: on ? "linear-gradient(180deg, #f0d89a, #c9a961)" : "rgba(201,169,97,0.06)", border: `1px solid ${on ? "transparent" : `${GOLD}33`}` }}>{on ? "✓ " : ""}{label}</button>
             );

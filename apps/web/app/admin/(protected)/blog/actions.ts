@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { publishToSocial } from "@/lib/zernio";
 import { slugify } from "@/lib/slug";
 import { logAudit } from "@/lib/audit";
 
@@ -130,12 +131,21 @@ export async function requestChanges(formData: FormData): Promise<void> {
 /** Publish to the chosen destinations (blog + app feed here; email send is its own action). */
 export async function publishPost(id: string): Promise<void> {
   const sb = await supabaseServer();
-  const { data: post } = await sb.from("posts").select("published_at, app_published_at, targets").eq("id", id).maybeSingle();
+  const { data: post } = await sb.from("posts").select("published_at, app_published_at, targets, body, type").eq("id", id).maybeSingle();
   if (!post) return;
   const targets = (post.targets ?? {}) as PostTargets;
   const patch: Record<string, unknown> = { status: "published", updated_at: new Date().toISOString() };
   if (!post.published_at) patch.published_at = new Date().toISOString();
   if (targets.app && !post.app_published_at) patch.app_published_at = new Date().toISOString();
+
+  // cross-post to Instagram / TikTok via Zernio (only the platforms ticked)
+  if (targets.instagram || targets.tiktok) {
+    const { data: media } = await sb.from("post_media").select("kind, url, sort").eq("post_id", id).order("sort", { ascending: true });
+    const platforms = [targets.instagram ? "instagram" : null, targets.tiktok ? "tiktok" : null].filter(Boolean) as string[];
+    const r = await publishToSocial({ content: String(post.body ?? ""), media: (media ?? []).map((m) => ({ kind: m.kind, url: m.url })), platforms, isReel: post.type === "reel" });
+    patch.social_status = r.status || null;
+  }
+
   await sb.from("posts").update(patch).eq("id", id);
   await logAudit("post.publish", "post", id, { targets });
   revalidatePath("/admin/blog");
