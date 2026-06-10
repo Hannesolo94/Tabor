@@ -176,7 +176,7 @@ export function PostComposer({ post, media }: { post: PostData; media: MediaCard
 
       {/* actions */}
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <button type="button" onClick={() => doSave(false)} disabled={saving || pubbing} style={ghost}>{saving ? "Saving…" : "Save draft"}</button>
+        <button type="button" onClick={() => doSave(false)} disabled={saving || pubbing} style={ghost}>{saving ? "Generating…" : "Generate"}</button>
         <button type="button" onClick={() => doSave(true)} disabled={saving || pubbing} style={gold}>{pubbing ? "Publishing…" : post.status === "published" ? "Update + republish" : "Publish"}</button>
         {msg && <span style={{ fontFamily: MONO, fontSize: 11, color: msg.includes("✓") ? "#7BBF7B" : "#C03A3A", letterSpacing: "0.04em" }}>{msg}</span>}
         <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginLeft: "auto" }}>{post.status === "published" ? "● LIVE" : "○ DRAFT"}</span>
