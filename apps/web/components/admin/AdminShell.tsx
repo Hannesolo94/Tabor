@@ -30,7 +30,7 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
     { label: "Branding", href: "/admin/branding" },
     { label: "Marketing", href: "/admin/marketing" },
     { label: "Pages", href: "/admin/content" },
-    { label: "Blog", href: "/admin/blog" },
+    { label: "Content Studio", href: "/admin/blog" },
   ] },
   { section: "Community", items: [
     { label: "Broadcast", href: "/admin/community" },
