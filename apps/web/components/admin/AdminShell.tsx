@@ -34,7 +34,6 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
     { label: "Content Studio", href: "/admin/blog" },
   ] },
   { section: "Community", items: [
-    { label: "Broadcast", href: "/admin/community" },
     { label: "Moderation", href: "/admin/moderation" },
     { label: "Tickets", href: "/admin/tickets" },
     { label: "Giveaways", href: "/admin/giveaways" },
@@ -50,12 +49,18 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
   ] },
 ];
 
-// Moderators only see the dashboard + community/safety tools.
-const MOD_HREFS = new Set(["/admin", "/admin/community", "/admin/moderation", "/admin/tickets", "/admin/giveaways"]);
+// Moderators only see the dashboard + community/safety tools. Broadcast lives in
+// the Content Studio now, so moderators get a direct link to that tab.
+const MOD_HREFS = new Set(["/admin", "/admin/moderation", "/admin/tickets", "/admin/giveaways"]);
 
 export function AdminShell({ email, name, role, children }: { email?: string; name?: string | null; role?: string; children: React.ReactNode }) {
   const groups = role === "moderator"
-    ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => MOD_HREFS.has(i.href)) })).filter((g) => g.items.length)
+    ? NAV_GROUPS.map((g) => ({
+        ...g,
+        items: g.section === "Community"
+          ? [{ label: "Broadcast", href: "/admin/blog/broadcast" }, ...g.items.filter((i) => MOD_HREFS.has(i.href))]
+          : g.items.filter((i) => MOD_HREFS.has(i.href)),
+      })).filter((g) => g.items.length)
     : NAV_GROUPS;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "248px 1fr", minHeight: "100vh" }}>

@@ -4,6 +4,7 @@ import { promoteDuePosts } from "@/lib/content-schedule";
 import { createPost, approveAndPublish, requestChanges, cancelSchedule } from "./actions";
 import { SocialBadge } from "./SocialBadge";
 import { ContentCalendar } from "./ContentCalendar";
+import { StudioTabs } from "./StudioTabs";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,7 @@ export default async function AdminBlog() {
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ STUDIO ]</div>
         <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Content Studio</h1>
         <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "6px 0 0", maxWidth: 640 }}>One composer, many destinations. Build a post or draft one from a brief. Drafts land in Ready for Review for your approval before anything goes live.</p>
+        <StudioTabs active="posts" />
       </div>
 
       <div style={{ display: "grid", gap: 22 }}>

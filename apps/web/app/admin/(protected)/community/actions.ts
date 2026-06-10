@@ -47,7 +47,7 @@ export async function sendBroadcast(formData: FormData): Promise<void> {
 
   await admin.from("broadcasts").insert({ title, body, deep_link: deepLink, sent_by: user?.email ?? "admin", audience: ids.length });
   await logAudit("broadcast.send", "broadcast", undefined, { title, audience: ids.length, emailed: alsoEmail });
-  revalidatePath("/admin/community");
+  revalidatePath("/admin/blog/broadcast");
 }
 
 /** Send a test email to the signed-in admin to verify the email provider works. */
@@ -57,5 +57,5 @@ export async function sendTestEmail(): Promise<void> {
   if (!user?.email) return;
   const res = await sendEmail(user.email, "TABOR email test", emailShell("Email is live", "If you are reading this, your email provider is connected and working. The brotherhood can now reach members by email."));
   await logAudit("email.test", "email", user.email, { ok: res.ok, error: res.error });
-  revalidatePath("/admin/community");
+  revalidatePath("/admin/blog/broadcast");
 }
