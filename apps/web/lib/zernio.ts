@@ -21,7 +21,7 @@ async function zernioAccounts(key: string): Promise<ZAccount[]> {
 export interface SocialMedia { kind: string; url: string }
 
 /** Publish a post to the connected accounts for the given platforms. Returns a human-readable status. */
-export async function publishToSocial(opts: { content: string; media: SocialMedia[]; platforms: string[]; isReel?: boolean }): Promise<{ ok: boolean; status: string }> {
+export async function publishToSocial(opts: { content: string; media: SocialMedia[]; platforms: string[]; isReel?: boolean }): Promise<{ ok: boolean; status: string; postId?: string }> {
   const want = opts.platforms.filter((p) => p === "instagram" || p === "tiktok");
   if (!want.length) return { ok: true, status: "" };
   const key = await zernioKey();
@@ -49,8 +49,33 @@ export async function publishToSocial(opts: { content: string; media: SocialMedi
     });
     const j = await res.json().catch(() => ({}));
     if (res.status >= 300 || j.error) return { ok: false, status: `Social: ${j.error?.message ?? j.message ?? `Zernio ${res.status}`}` };
-    return { ok: true, status: `Posted to ${targets.map((t) => t.platform).join(" + ")}.` };
+    const postId = j.post?._id ?? j.post?.id ?? j._id ?? j.id ?? j.data?._id;
+    return { ok: true, status: `Posted to ${targets.map((t) => t.platform).join(" + ")}.`, postId: postId ? String(postId) : undefined };
   } catch {
     return { ok: false, status: "Social: could not reach Zernio." };
   }
+}
+
+export interface SocialStatus { state: string; platforms: { platform: string; status: string; url?: string }[] }
+
+/** Live status of a Zernio post (publishing / published / failed, per platform). */
+export async function getSocialStatus(zernioPostId: string): Promise<SocialStatus | null> {
+  const key = await zernioKey();
+  if (!key) return null;
+  try {
+    let po: Record<string, unknown> | undefined;
+    const single = await fetch(`${BASE}/posts/${zernioPostId}`, { headers: { Authorization: `Bearer ${key}` } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    po = single?.post ?? single?.data ?? (single && !single.error ? single : undefined);
+    if (!po) {
+      const list = await fetch(`${BASE}/posts?limit=10`, { headers: { Authorization: `Bearer ${key}` } }).then((r) => r.json()).catch(() => null);
+      const arr = list?.posts ?? list?.data ?? (Array.isArray(list) ? list : []);
+      po = (arr as Record<string, unknown>[]).find((p) => String(p._id ?? p.id) === zernioPostId);
+    }
+    if (!po) return null;
+    const rawPlat = (po.platforms ?? po.results ?? []) as Record<string, unknown>[];
+    return {
+      state: String(po.status ?? po.state ?? "unknown"),
+      platforms: rawPlat.map((pl) => ({ platform: String(pl.platform ?? pl.network ?? "?"), status: String(pl.status ?? pl.state ?? "?"), url: (pl.url ?? pl.permalink ?? pl.postUrl) as string | undefined })),
+    };
+  } catch { return null; }
 }

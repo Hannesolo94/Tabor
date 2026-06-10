@@ -144,6 +144,7 @@ export async function publishPost(id: string): Promise<void> {
     const platforms = [targets.instagram ? "instagram" : null, targets.tiktok ? "tiktok" : null].filter(Boolean) as string[];
     const r = await publishToSocial({ content: String(post.body ?? ""), media: (media ?? []).map((m) => ({ kind: m.kind, url: m.url })), platforms, isReel: post.type === "reel" });
     patch.social_status = r.status || null;
+    if (r.postId) patch.social_post_id = r.postId;
   }
 
   await sb.from("posts").update(patch).eq("id", id);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { createPost, approveAndPublish, requestChanges } from "./actions";
+import { SocialBadge } from "./SocialBadge";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -105,7 +106,8 @@ function Section({ title, rows, live }: { title: string; rows: Row[]; live?: boo
               <span style={{ fontFamily: MONO, fontSize: 8, color: GOLD, border: `1px solid ${GOLD}55`, borderRadius: 6, padding: "2px 6px", letterSpacing: "0.06em", textTransform: "uppercase", flexShrink: 0 }}>{p.type ?? "static"}</span>
               <span style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</span>
             </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+              {live ? <SocialBadge postId={p.id} /> : null}
               <span style={{ display: "flex", gap: 5 }}>{destIcons(p.targets ?? {})}</span>
               <span style={{ fontFamily: MONO, fontSize: 9, color: live ? "#7BBF7B" : "#8A847A", letterSpacing: "0.08em" }}>{live ? "● LIVE" : "○ DRAFT"}</span>
             </span>
