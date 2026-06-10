@@ -12,36 +12,36 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
     { label: "Dashboard", href: "/admin" },
     { label: "Assistant", href: "/admin/assistant" },
   ] },
-  { section: "Commerce", items: [
+  { section: "Products", items: [
     { label: "Products", href: "/admin/products" },
     { label: "Collections", href: "/admin/collections" },
     { label: "Discounts", href: "/admin/discounts" },
     { label: "Suppliers", href: "/admin/suppliers" },
   ] },
-  { section: "Orders & Customers", items: [
+  { section: "Sales", items: [
     { label: "Orders", href: "/admin/orders" },
     { label: "Returns", href: "/admin/returns" },
     { label: "Customers", href: "/admin/customers" },
     { label: "Reviews", href: "/admin/reviews" },
   ] },
-  { section: "Content", items: [
+  { section: "Design & Marketing", items: [
+    { label: "Branding", href: "/admin/branding" },
+    { label: "Marketing", href: "/admin/marketing" },
     { label: "Pages", href: "/admin/content" },
     { label: "Blog", href: "/admin/blog" },
-    { label: "Branding", href: "/admin/branding" },
   ] },
   { section: "Community", items: [
     { label: "Broadcast", href: "/admin/community" },
     { label: "Moderation", href: "/admin/moderation" },
     { label: "Tickets", href: "/admin/tickets" },
     { label: "Giveaways", href: "/admin/giveaways" },
-  ] },
-  { section: "Growth", items: [
-    { label: "Marketing", href: "/admin/marketing" },
     { label: "Donations", href: "/admin/donations" },
   ] },
   { section: "System", items: [
     { label: "Admins", href: "/admin/admins" },
     { label: "Settings", href: "/admin/settings" },
+  ] },
+  { section: "Audit", items: [
     { label: "Audit Log", href: "/admin/audit" },
     { label: "Audit Report", href: "/admin/audit-report" },
   ] },
