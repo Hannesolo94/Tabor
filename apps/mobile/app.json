@@ -39,7 +39,8 @@
           "photosPermission": "TABOR uses your photos so you can attach screenshots to a bug or feature report."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-video"
     ],
     "extra": {
       "router": {},

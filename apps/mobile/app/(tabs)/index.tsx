@@ -116,10 +116,15 @@ export default function Quests() {
       <ScrollView onScroll={tb?.onScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 22, paddingBottom: 40 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 4, fontFamily: F.mono }}>[ THE SYSTEM ]</Text>
-          <Pressable onPress={() => router.push("/notifications")} hitSlop={10}>
-            <Text style={{ fontSize: 20 }}>🔔</Text>
-            {unread > 0 && <View style={{ position: "absolute", top: -3, right: -5, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: C.red, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{unread > 9 ? "9+" : unread}</Text></View>}
-          </Pressable>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 18 }}>
+            <Pressable onPress={() => router.push("/feed")} hitSlop={10}>
+              <Text style={{ fontSize: 20 }}>📜</Text>
+            </Pressable>
+            <Pressable onPress={() => router.push("/notifications")} hitSlop={10}>
+              <Text style={{ fontSize: 20 }}>🔔</Text>
+              {unread > 0 && <View style={{ position: "absolute", top: -3, right: -5, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: C.red, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{unread > 9 ? "9+" : unread}</Text></View>}
+            </Pressable>
+          </View>
         </View>
         <Text style={{ color: C.ivory, fontSize: 28, fontWeight: "800", fontFamily: F.head, marginTop: 6 }}>Daily Quest</Text>
         <Text style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>{profile?.name ? `${profile.name}, the` : "The"} climb continues.{profile?.cls ? ` ${String(profile.cls)}.` : ""}</Text>
