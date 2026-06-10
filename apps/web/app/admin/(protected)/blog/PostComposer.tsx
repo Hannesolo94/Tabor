@@ -6,7 +6,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { createMediaUpload, savePost, publishPost, type PostTargets, type MediaCard } from "./actions";
+import { createMediaUpload, savePost, publishPost, draftFromBrief, type PostTargets, type MediaCard } from "./actions";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 const TYPES = ["static", "carousel", "video", "reel", "gif", "mixed"];
@@ -34,8 +34,23 @@ export function PostComposer({ post, media }: { post: PostData; media: MediaCard
   const [cards, setCards] = useState<Slot[]>(pad3(media.length ? media : []));
   const [saving, setSaving] = useState(false);
   const [pubbing, setPubbing] = useState(false);
+  const [drafting, setDrafting] = useState(false);
   const [msg, setMsg] = useState("");
   const fileRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
+  async function doDraft() {
+    if (cards.some((m) => m?.url === "__uploading__")) { setMsg("Wait for uploads to finish."); return; }
+    if (!brief.trim()) { setMsg("Add a brief first."); return; }
+    setDrafting(true); setMsg("");
+    // persist the brief + media so Claude can see them, then draft
+    await savePost({ id: post.id, title, slug, excerpt, body, cover_image: post.cover_image ?? "", author, type, brief, targets, media: collectMedia() });
+    const r = await draftFromBrief(post.id);
+    setDrafting(false);
+    if (!r.ok) { setMsg(r.error || "Draft failed."); return; }
+    if (r.draft) { setTitle(r.draft.title); setExcerpt(r.draft.excerpt ?? ""); setBody(r.draft.body); }
+    setMsg("Drafted ✓ Review it below, then publish");
+    setTimeout(() => setMsg(""), 4000);
+  }
 
   const kindOf = (f: File) => (f.type.includes("gif") ? "gif" : f.type.startsWith("video") ? "video" : "image");
 
@@ -74,8 +89,12 @@ export function PostComposer({ post, media }: { post: PostData; media: MediaCard
 
       {/* brief / draft-from-upload */}
       <div style={card}>
-        <label style={lbl}>Brief — drop a rough note, I can draft the caption from your uploads</label>
-        <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="e.g. 'New Risen Knight tee dropped, want a hype post, scripture about rising, 3 photos of the back print'…" style={{ ...inp, minHeight: 64, resize: "vertical" }} />
+        <label style={lbl}>Brief — drop a rough note + your media, then draft the caption from it</label>
+        <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="e.g. 'New Risen Knight tee dropped, want a hype post, scripture about rising, link the product'…" style={{ ...inp, minHeight: 64, resize: "vertical" }} />
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+          <button type="button" onClick={doDraft} disabled={drafting} style={{ ...gold, padding: "10px 16px" }}>{drafting ? "Drafting…" : "✨ Draft from brief"}</button>
+        </div>
+        <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", letterSpacing: "0.06em", marginTop: 8 }}>WRITES THE CAPTION FROM YOUR BRIEF + IMAGES, THEN QUEUES IT FOR REVIEW. NEEDS THE ANTHROPIC KEY IN SETTINGS &gt; INTEGRATIONS.</div>
       </div>
 
       {/* card-sequence media */}
