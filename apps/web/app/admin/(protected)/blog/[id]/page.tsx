@@ -1,53 +1,36 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
-import { updatePost, deletePost } from "../actions";
-import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
+import { deletePost, type PostTargets, type MediaCard } from "../actions";
+import { PostComposer } from "../PostComposer";
+import { GOLD, MONO, CINZEL } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditPost({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const sb = await supabaseServer();
-  const { data: p } = await sb.from("posts").select("*").eq("id", id).maybeSingle();
+  const [{ data: p }, { data: mediaRows }] = await Promise.all([
+    sb.from("posts").select("*").eq("id", id).maybeSingle(),
+    sb.from("post_media").select("kind, url, poster_url").eq("post_id", id).order("sort", { ascending: true }),
+  ]);
   if (!p) notFound();
-
-  const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 14, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "11px 13px", width: "100%" };
-  const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4, display: "block" };
+  const media: MediaCard[] = (mediaRows ?? []).map((m) => ({ kind: m.kind, url: m.url, poster_url: m.poster_url }));
 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link href="/admin/blog" style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.12em", textDecoration: "none" }}>← BLOG</Link>
+        <Link href="/admin/blog" style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.12em", textDecoration: "none" }}>← CONTENT</Link>
         {p.status === "published" && <Link href={`/blog/${p.slug}`} target="_blank" style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.12em", textDecoration: "none" }}>VIEW ON SITE ↗</Link>}
       </div>
-      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: "#E8E2D5", margin: "14px 0 20px" }}>Edit Post</h1>
+      <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: "#E8E2D5", margin: "14px 0 20px" }}>Compose</h1>
 
-      <form action={updatePost} style={{ display: "grid", gap: 14, maxWidth: 720 }}>
-        <input type="hidden" name="id" value={p.id} />
-        <div><label style={lbl}>Title</label><input name="title" defaultValue={p.title} style={inp} /></div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div><label style={lbl}>Slug (URL)</label><input name="slug" defaultValue={p.slug} style={inp} /></div>
-          <div><label style={lbl}>Author</label><input name="author" defaultValue={p.author ?? "TABOR"} style={inp} /></div>
-        </div>
-        <div><label style={lbl}>Cover image URL</label><input name="cover_image" defaultValue={p.cover_image ?? ""} placeholder="https://…" style={inp} /></div>
-        <div><label style={lbl}>Excerpt (1-2 lines, shown in lists + SEO)</label><input name="excerpt" defaultValue={p.excerpt ?? ""} style={inp} /></div>
-        <div>
-          <label style={lbl}>Body — supports markdown: # heading, **bold**, *italic*, - bullets, &gt; quote, [link](url)</label>
-          <textarea name="body" defaultValue={p.body} rows={18} style={{ ...inp, resize: "vertical", lineHeight: 1.6, fontFamily: "ui-monospace, monospace", fontSize: 13 }} />
-        </div>
-        <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-          <label style={{ fontFamily: MONO, fontSize: 11, color: "#C3BDB1" }}><span style={lbl}>Status</span>
-            <select name="status" defaultValue={p.status} style={inp}>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </label>
-          <button type="submit" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "12px 22px", cursor: "pointer", alignSelf: "end" }}>Save</button>
-        </div>
-      </form>
+      <PostComposer
+        post={{ id: p.id, title: p.title, slug: p.slug, excerpt: p.excerpt, body: p.body, cover_image: p.cover_image, author: p.author, type: p.type, brief: p.brief, targets: (p.targets ?? null) as PostTargets | null, status: p.status }}
+        media={media}
+      />
 
-      <form action={deletePost} style={{ marginTop: 28, paddingTop: 16, borderTop: "1px solid rgba(192,58,58,0.25)" }}>
+      <form action={deletePost} style={{ marginTop: 30, paddingTop: 16, borderTop: "1px solid rgba(192,58,58,0.25)" }}>
         <input type="hidden" name="id" value={p.id} />
         <button type="submit" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C03A3A", background: "rgba(192,58,58,0.06)", border: "1px solid rgba(192,58,58,0.4)", borderRadius: 12, padding: "10px 16px", cursor: "pointer" }}>Delete post</button>
       </form>
