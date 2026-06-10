@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { createPost, approveAndPublish, requestChanges } from "./actions";
+import { promoteDuePosts } from "@/lib/content-schedule";
+import { createPost, approveAndPublish, requestChanges, cancelSchedule } from "./actions";
 import { SocialBadge } from "./SocialBadge";
+import { ContentCalendar } from "./ContentCalendar";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +16,7 @@ const goldBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpa
 const ghostBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C3BDB1", background: "rgba(201,169,97,0.06)", border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "9px 14px", cursor: "pointer" };
 const DEST: [string, string][] = [["app", "📱"], ["email", "✉️"], ["blog", "🌐"], ["instagram", "IG"], ["tiktok", "TT"]];
 
-interface Row { id: string; title: string; slug: string; status: string; type: string | null; targets: Record<string, boolean> | null; body: string; excerpt: string | null }
+interface Row { id: string; title: string; slug: string; status: string; type: string | null; targets: Record<string, boolean> | null; body: string; excerpt: string | null; scheduled_for: string | null; published_at: string | null }
 
 function destIcons(t: Record<string, boolean>) {
   return DEST.filter(([k]) => t[k]).map(([k, icon]) => (
@@ -23,12 +25,17 @@ function destIcons(t: Record<string, boolean>) {
 }
 
 export default async function AdminBlog() {
+  await promoteDuePosts(); // flip due scheduled posts to published (re-runs on every auto-refresh)
   const sb = await supabaseServer();
-  const { data } = await sb.from("posts").select("id, title, slug, status, type, targets, body, excerpt, updated_at").order("updated_at", { ascending: false });
+  const { data } = await sb.from("posts").select("id, title, slug, status, type, targets, body, excerpt, scheduled_for, published_at, updated_at").order("updated_at", { ascending: false });
   const posts = (data ?? []) as Row[];
   const review = posts.filter((p) => p.status === "review");
   const drafts = posts.filter((p) => p.status === "draft");
+  const scheduled = posts.filter((p) => p.status === "scheduled").sort((a, b) => new Date(a.scheduled_for ?? 0).getTime() - new Date(b.scheduled_for ?? 0).getTime());
   const published = posts.filter((p) => p.status === "published");
+  const calItems = posts
+    .filter((p) => (p.status === "scheduled" && p.scheduled_for) || (p.status === "published" && p.published_at))
+    .map((p) => ({ id: p.id, title: p.title, status: p.status, when: (p.status === "scheduled" ? p.scheduled_for : p.published_at) as string, type: p.type ?? "static" }));
 
   return (
     <div>
@@ -39,6 +46,40 @@ export default async function AdminBlog() {
       </div>
 
       <div style={{ display: "grid", gap: 22 }}>
+        {/* Live content calendar */}
+        <ContentCalendar items={calItems} />
+
+        {/* Scheduled queue */}
+        {scheduled.length > 0 && (
+          <div>
+            <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.14em", marginBottom: 10 }}>🕒 SCHEDULED · {scheduled.length}</div>
+            <div className="admin-card" style={{ ...cardStyle, padding: "8px 20px 10px" }}>
+              {scheduled.map((p, i) => (
+                <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "13px 0", borderTop: i ? "1px solid rgba(255,255,255,0.05)" : "none", flexWrap: "wrap" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 8, color: GOLD, border: `1px solid ${GOLD}55`, borderRadius: 6, padding: "2px 6px", letterSpacing: "0.06em", textTransform: "uppercase", flexShrink: 0 }}>{p.type ?? "static"}</span>
+                    <Link href={`/admin/blog/${p.id}`} style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</Link>
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                    <span style={{ display: "flex", gap: 5 }}>{destIcons(p.targets ?? {})}</span>
+                    <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.06em" }}>
+                      {p.scheduled_for ? new Date(p.scheduled_for).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : ""}
+                    </span>
+                    <form action={approveAndPublish} style={{ display: "inline" }}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <button type="submit" style={{ ...ghostBtn, padding: "6px 10px", fontSize: 9 }}>Publish now</button>
+                    </form>
+                    <form action={cancelSchedule} style={{ display: "inline" }}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <button type="submit" style={{ ...ghostBtn, padding: "6px 10px", fontSize: 9, color: "#C03A3A", borderColor: "rgba(192,58,58,0.4)" }}>Cancel</button>
+                    </form>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Ready for review */}
         {review.length > 0 && (
           <div>

@@ -26,7 +26,7 @@ export default async function EditPost({ params }: { params: Promise<{ id: strin
       <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 26, color: "#E8E2D5", margin: "14px 0 20px" }}>Compose</h1>
 
       <PostComposer
-        post={{ id: p.id, title: p.title, slug: p.slug, excerpt: p.excerpt, body: p.body, cover_image: p.cover_image, author: p.author, type: p.type, brief: p.brief, targets: (p.targets ?? null) as PostTargets | null, status: p.status }}
+        post={{ id: p.id, title: p.title, slug: p.slug, excerpt: p.excerpt, body: p.body, cover_image: p.cover_image, author: p.author, type: p.type, brief: p.brief, targets: (p.targets ?? null) as PostTargets | null, status: p.status, scheduled_for: p.scheduled_for ?? null }}
         media={media}
       />
 

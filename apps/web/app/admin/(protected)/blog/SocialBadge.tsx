@@ -5,7 +5,8 @@
 import { useEffect, useRef, useState } from "react";
 import { MONO } from "@/lib/ui";
 
-const PUBLISHING = new Set(["publishing", "processing", "pending", "queued", "scheduled", "loading"]);
+const PUBLISHING = new Set(["publishing", "processing", "pending", "queued", "loading"]);
+const SCHEDULED = new Set(["scheduled"]);
 const FAILED = new Set(["failed", "error"]);
 
 export function SocialBadge({ postId }: { postId: string }) {
@@ -24,7 +25,10 @@ export function SocialBadge({ postId }: { postId: string }) {
         const s = String(j.state ?? "").toLowerCase();
         const plist = (j.platforms ?? []) as { status: string }[];
         const stillGoing = PUBLISHING.has(s) || plist.some((p) => PUBLISHING.has(String(p.status).toLowerCase()));
+        const queued = SCHEDULED.has(s) || plist.some((p) => SCHEDULED.has(String(p.status).toLowerCase()));
+        // actively publishing: poll fast; queued for later: check back slowly
         if (j.state !== "none" && stillGoing) timer.current = setTimeout(poll, 7000);
+        else if (j.state !== "none" && queued) timer.current = setTimeout(poll, 60000);
       } catch { if (alive) timer.current = setTimeout(poll, 12000); }
     };
     poll();
@@ -35,15 +39,18 @@ export function SocialBadge({ postId }: { postId: string }) {
   const s = state.toLowerCase();
   const failed = FAILED.has(s) || plats.some((p) => FAILED.has(String(p.status).toLowerCase()));
   const publishing = !failed && (PUBLISHING.has(s) || plats.some((p) => PUBLISHING.has(String(p.status).toLowerCase())));
-  const color = failed ? "#C03A3A" : publishing ? "#5B9BD5" : "#7BBF7B";
-  const label = failed ? "SOCIAL FAILED" : publishing ? "PUBLISHING" : "SOCIAL LIVE";
+  const queued = !failed && !publishing && (SCHEDULED.has(s) || plats.some((p) => SCHEDULED.has(String(p.status).toLowerCase())));
+  const color = failed ? "#C03A3A" : publishing ? "#5B9BD5" : queued ? "#C9A961" : "#7BBF7B";
+  const label = failed ? "SOCIAL FAILED" : publishing ? "PUBLISHING" : queued ? "SOCIAL QUEUED" : "SOCIAL LIVE";
   const tip = plats.map((p) => `${p.platform}: ${p.status}`).join(" · ") || state;
 
   return (
     <span title={tip} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
       {publishing
         ? <span className="deploy-spin" style={{ width: 11, height: 11, borderRadius: 999, border: "2px solid rgba(91,155,213,0.25)", borderTopColor: color, boxSizing: "border-box", display: "inline-block" }} />
-        : <span style={{ width: 8, height: 8, borderRadius: 999, background: color, boxShadow: `0 0 7px ${color}`, display: "inline-block" }} />}
+        : queued
+          ? <span style={{ fontSize: 10, lineHeight: 1 }}>🕒</span>
+          : <span style={{ width: 8, height: 8, borderRadius: 999, background: color, boxShadow: `0 0 7px ${color}`, display: "inline-block" }} />}
       <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.1em", color, fontWeight: 600 }}>{label}</span>
     </span>
   );

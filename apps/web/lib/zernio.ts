@@ -20,8 +20,8 @@ async function zernioAccounts(key: string): Promise<ZAccount[]> {
 
 export interface SocialMedia { kind: string; url: string }
 
-/** Publish a post to the connected accounts for the given platforms. Returns a human-readable status. */
-export async function publishToSocial(opts: { content: string; media: SocialMedia[]; platforms: string[]; isReel?: boolean }): Promise<{ ok: boolean; status: string; postId?: string }> {
+/** Publish (or, with scheduledFor, schedule inside Zernio) a post to the connected accounts. */
+export async function publishToSocial(opts: { content: string; media: SocialMedia[]; platforms: string[]; isReel?: boolean; scheduledFor?: string; timezone?: string }): Promise<{ ok: boolean; status: string; postId?: string }> {
   const want = opts.platforms.filter((p) => p === "instagram" || p === "tiktok");
   if (!want.length) return { ok: true, status: "" };
   const key = await zernioKey();
@@ -41,19 +41,36 @@ export async function publishToSocial(opts: { content: string; media: SocialMedi
     return { platform: t.platform, accountId: t.id, platformSpecificData };
   });
 
+  // Zernio handles its own scheduling: pass scheduledFor + timezone and it fires
+  // the post to the platforms at that moment. No cron needed on our side.
+  const when = opts.scheduledFor
+    ? { publishNow: false, scheduledFor: opts.scheduledFor, timezone: opts.timezone || "UTC" }
+    : { publishNow: true };
+
   try {
     const res = await fetch(`${BASE}/posts`, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ content: opts.content, mediaItems, platforms, publishNow: true }),
+      body: JSON.stringify({ content: opts.content, mediaItems, platforms, ...when }),
     });
     const j = await res.json().catch(() => ({}));
     if (res.status >= 300 || j.error) return { ok: false, status: `Social: ${j.error?.message ?? j.message ?? `Zernio ${res.status}`}` };
     const postId = j.post?._id ?? j.post?.id ?? j._id ?? j.id ?? j.data?._id;
-    return { ok: true, status: `Posted to ${targets.map((t) => t.platform).join(" + ")}.`, postId: postId ? String(postId) : undefined };
+    const verb = opts.scheduledFor ? "Scheduled for" : "Posted to";
+    return { ok: true, status: `${verb} ${targets.map((t) => t.platform).join(" + ")}.`, postId: postId ? String(postId) : undefined };
   } catch {
     return { ok: false, status: "Social: could not reach Zernio." };
   }
+}
+
+/** Best-effort delete of a Zernio post (used when a scheduled post is cancelled or re-scheduled). */
+export async function deleteSocialPost(zernioPostId: string): Promise<boolean> {
+  const key = await zernioKey();
+  if (!key) return false;
+  try {
+    const res = await fetch(`${BASE}/posts/${zernioPostId}`, { method: "DELETE", headers: { Authorization: `Bearer ${key}` } });
+    return res.ok;
+  } catch { return false; }
 }
 
 export interface SocialStatus { state: string; platforms: { platform: string; status: string; url?: string }[] }

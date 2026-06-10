@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail, emailShell } from "@/lib/email";
 import { sendExpoPush } from "@/lib/push";
+import { promoteDuePosts } from "@/lib/content-schedule";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,9 @@ export async function GET(req: Request) {
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  // backstop for the Content Studio: flip any due scheduled posts to published
+  await promoteDuePosts().catch(() => 0);
 
   const admin = supabaseAdmin();
   const today = new Date().toISOString().slice(0, 10);

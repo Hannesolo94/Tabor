@@ -17,7 +17,7 @@ export interface FeedPost {
 }
 export interface FeedComment { id: string; user_id: string; body: string; created_at: string; name: string; avatar_url: string | null }
 
-interface PostRow { id: string; title: string; body: string; excerpt: string | null; author: string | null; type: string | null; cover_image: string | null; published_at: string | null; targets: { app?: boolean } | null }
+interface PostRow { id: string; title: string; body: string; excerpt: string | null; author: string | null; type: string | null; cover_image: string | null; published_at: string | null; scheduled_for?: string | null; targets: { app?: boolean } | null }
 
 async function hydrate(posts: PostRow[], userId: string): Promise<FeedPost[]> {
   const ids = posts.map((p) => p.id);
@@ -41,7 +41,7 @@ async function hydrate(posts: PostRow[], userId: string): Promise<FeedPost[]> {
     const rec = rxBy.get(p.id) ?? {};
     return {
       id: p.id, title: p.title, body: p.body, excerpt: p.excerpt, author: p.author, type: p.type ?? "static",
-      cover_image: p.cover_image, published_at: p.published_at,
+      cover_image: p.cover_image, published_at: p.published_at ?? p.scheduled_for ?? null,
       media: mediaBy.get(p.id) ?? [], reactions: rec, reactionCount: Object.values(rec).reduce((s, n) => s + n, 0),
       myReaction: mineBy.get(p.id) ?? null, commentCount: ccBy.get(p.id) ?? 0,
     };
@@ -49,14 +49,18 @@ async function hydrate(posts: PostRow[], userId: string): Promise<FeedPost[]> {
 }
 
 export async function getFeed(userId: string): Promise<FeedPost[]> {
-  const { data } = await supabase.from("posts").select("id, title, body, excerpt, author, type, cover_image, published_at, targets")
-    .eq("status", "published").order("published_at", { ascending: false }).limit(50);
-  const appPosts = (data ?? []).filter((p) => (p as PostRow).targets?.app) as PostRow[];
+  // published posts, plus scheduled posts whose time has arrived (they go live on the
+  // dot; the dashboard sweep flips their status to published shortly after)
+  const nowIso = new Date().toISOString();
+  const { data } = await supabase.from("posts").select("id, title, body, excerpt, author, type, cover_image, published_at, scheduled_for, targets")
+    .or(`status.eq.published,and(status.eq.scheduled,scheduled_for.lte.${nowIso})`).limit(50);
+  const liveAt = (p: PostRow) => new Date(p.published_at ?? p.scheduled_for ?? 0).getTime();
+  const appPosts = ((data ?? []) as PostRow[]).filter((p) => p.targets?.app).sort((a, b) => liveAt(b) - liveAt(a));
   return hydrate(appPosts, userId);
 }
 
 export async function getPost(id: string, userId: string): Promise<FeedPost | null> {
-  const { data } = await supabase.from("posts").select("id, title, body, excerpt, author, type, cover_image, published_at, targets").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("posts").select("id, title, body, excerpt, author, type, cover_image, published_at, scheduled_for, targets").eq("id", id).maybeSingle();
   if (!data) return null;
   return (await hydrate([data as PostRow], userId))[0] ?? null;
 }

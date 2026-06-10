@@ -26,7 +26,7 @@ export default async function BlogIndex() {
                 <Link key={p.id} href={`/blog/${p.slug}`} className="tabor-lift" style={{ textDecoration: "none", border: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", overflow: "hidden", display: "block" }}>
                   {p.cover_image && <div style={{ aspectRatio: "16/9", background: `#15151A url(${p.cover_image}) center/cover` }} />}
                   <div style={{ padding: "18px 20px" }}>
-                    <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em" }}>{p.published_at ? new Date(p.published_at).toISOString().slice(0, 10) : ""}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em" }}>{(p.published_at ?? p.scheduled_for) ? new Date((p.published_at ?? p.scheduled_for) as string).toISOString().slice(0, 10) : ""}</div>
                     <h2 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 20, color: "#E8E2D5", margin: "6px 0 8px" }}>{p.title}</h2>
                     {p.excerpt && <p style={{ fontFamily: BODY, fontSize: 14, color: "#9A948A", margin: 0, lineHeight: 1.55 }}>{p.excerpt}</p>}
                   </div>
