@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useActionSheet } from "@/components/ActionSheet";
-import { traditionOf, type Tradition } from "@/lib/disciplines";
+import { traditionOf, orthodoxCalendarOf, type Tradition, type OrthodoxCalendar } from "@/lib/disciplines";
 import { syncLiturgicalReminders } from "@/lib/litReminders";
 import { useUnits } from "@/lib/units";
 import { C, F } from "@/lib/theme";
@@ -53,6 +53,7 @@ export default function Settings() {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [loaded, setLoaded] = useState(false);
   const [trad, setTrad] = useState<Tradition>("protestant");
+  const [orthoCal, setOrthoCal] = useState<OrthodoxCalendar>("new");
   const [supportReminder, setSupportReminder] = useState(true);
   const u = useUnits();
 
@@ -61,10 +62,11 @@ export default function Settings() {
 
   useEffect(() => {
     if (!userId) return;
-    supabase.from("profiles").select("notif_prefs, denomination").eq("user_id", userId).maybeSingle().then(({ data }) => {
+    supabase.from("profiles").select("notif_prefs, denomination, orthodox_calendar").eq("user_id", userId).maybeSingle().then(({ data }) => {
       const p = (data?.notif_prefs ?? {}) as Partial<Prefs>;
       setPrefs({ push: { ...DEFAULTS.push, ...(p.push ?? {}) }, email: { ...DEFAULTS.email, ...(p.email ?? {}) } });
       setTrad(traditionOf(data?.denomination ?? null));
+      setOrthoCal(orthodoxCalendarOf(data?.denomination ?? null, (data as { orthodox_calendar?: string | null })?.orthodox_calendar));
       setLoaded(true);
     });
   }, [userId]);
@@ -75,7 +77,12 @@ export default function Settings() {
   }
   const setPush = (k: keyof Prefs["push"], v: boolean) => save({ ...prefs, push: { ...prefs.push, [k]: v } });
   const setEmail = (k: keyof Prefs["email"], v: boolean) => save({ ...prefs, email: { ...prefs.email, [k]: v } });
-  const setFeasts = (v: boolean) => { setPush("feasts", v); syncLiturgicalReminders(v, trad).catch(() => {}); };
+  const setFeasts = (v: boolean) => { setPush("feasts", v); syncLiturgicalReminders(v, trad, orthoCal === "old", orthoCal === "oriental").catch(() => {}); };
+  async function pickOrthoCal(c: OrthodoxCalendar) {
+    setOrthoCal(c);
+    if (userId) await supabase.from("profiles").update({ orthodox_calendar: c }).eq("user_id", userId);
+    syncLiturgicalReminders(prefs.push.feasts, trad, c === "old", c === "oriental").catch(() => {});
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.black }}>
@@ -99,6 +106,21 @@ export default function Settings() {
           Announcements from the brotherhood are always delivered. Phone push activates with the published app; email reminders send once the email provider is connected.
         </Text>
         {!loaded ? null : null}
+
+        {trad === "orthodox" && (
+          <>
+            <Text style={sec}>CHURCH CALENDAR</Text>
+            <View style={{ gap: 8, marginTop: 4 }}>
+              {([["new", "New Calendar", "Greek, Antiochian, OCA, Romanian (Nativity Dec 25)"], ["old", "Old Calendar", "Russian, ROCOR, Serbian, Jerusalem, Athos (+13 days)"], ["oriental", "Oriental Orthodox", "Coptic, Armenian, Ethiopian, Syriac (own calendar)"]] as const).map(([val, title, sub]) => (
+                <Pressable key={val} onPress={() => pickOrthoCal(val)} style={{ paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: orthoCal === val ? C.gold : C.line, backgroundColor: orthoCal === val ? "rgba(201,169,97,0.12)" : "transparent" }}>
+                  <Text style={{ color: orthoCal === val ? C.gold : C.ivory, fontFamily: F.bodyMid, fontSize: 14 }}>{orthoCal === val ? "● " : ""}{title}</Text>
+                  <Text style={{ color: C.muted, fontFamily: F.body, fontSize: 11.5, marginTop: 2 }}>{sub}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={{ color: C.muted, fontSize: 11, lineHeight: 17, fontFamily: F.body, marginTop: 8 }}>Pascha and the moveable feasts are shared by all. This sets the fixed feasts and fasts (Nativity, Dormition, and the rest).</Text>
+          </>
+        )}
 
         <Text style={sec}>MEASUREMENTS</Text>
         <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>

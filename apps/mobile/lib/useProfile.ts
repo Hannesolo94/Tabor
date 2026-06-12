@@ -18,7 +18,7 @@ export function useProfile() {
 
   // Every profile column except `email` (which is column-revoked from the client for
   // privacy). The user's own email comes from the auth session, not this table.
-  const COLS = "user_id, name, avatar_url, believer, cls, denomination, journey, fitness_level, equipment, goals, xp, stats, streak, best_streak, freezes, last_active, ai_opt_in, notif_prefs, settings, onboarded, role, created_at, updated_at, faith, char_class, handle, banned, public_key, days_per_week, dob, tos_accepted_at, consent, silenced_until, baseline_reps, limitations, baseline, difficulty, disciplines, bio, last_read, recent_emojis";
+  const COLS = "user_id, name, avatar_url, believer, cls, denomination, journey, fitness_level, equipment, goals, xp, stats, streak, best_streak, freezes, last_active, ai_opt_in, notif_prefs, settings, onboarded, role, created_at, updated_at, faith, char_class, handle, banned, public_key, days_per_week, dob, tos_accepted_at, consent, silenced_until, baseline_reps, limitations, baseline, difficulty, disciplines, bio, last_read, recent_emojis, orthodox_calendar";
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser();

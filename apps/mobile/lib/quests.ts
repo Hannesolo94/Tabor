@@ -4,7 +4,7 @@
 // progression. Quests escalate as the user levels up ("progress pushes it").
 import { supabase } from "./supabase";
 import { levelFromXp } from "./game";
-import { generateDisciplineQuests, traditionOf, type Tradition } from "./disciplines";
+import { generateDisciplineQuests, traditionOf, orthodoxCalendarOf, type Tradition } from "./disciplines";
 import { liturgicalContext } from "./liturgical";
 
 // core quests gate the day-seal; everything else is a bonus discipline
@@ -177,7 +177,7 @@ export async function loadToday(userId: string): Promise<Quest[]> {
   const { count: todayCount } = await supabase.from("quests").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("day", day);
   if ((todayCount ?? 0) > 0) return list;        // already generated today -> show the list
   if (list.length > BACKLOG_CAP) return list;    // paused: clear some before more arrive
-  const { data: prof } = await supabase.from("profiles").select("fitness_level, equipment, goals, dob, baseline, difficulty, denomination, disciplines, xp").eq("user_id", userId).maybeSingle();
+  const { data: prof } = await supabase.from("profiles").select("fitness_level, equipment, goals, dob, baseline, difficulty, denomination, disciplines, xp, orthodox_calendar").eq("user_id", userId).maybeSingle();
   const level = levelFromXp(Number(prof?.xp) || 0);
   // scripture advances with completion: how many Word quests they've finished
   const { count } = await supabase.from("quests").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("quest_key", "word").eq("done", true);
@@ -192,7 +192,8 @@ export async function loadToday(userId: string): Promise<Quest[]> {
       weight_kg = (ng?.weight_kg as number) ?? null; protein_target = (ng?.protein_target as number) ?? null;
     }
     const denom = (prof as { denomination?: string })?.denomination;
-    const lit = liturgicalContext(new Date(), traditionOf(denom));
+    const cal = orthodoxCalendarOf(denom, (prof as { orthodox_calendar?: string | null })?.orthodox_calendar);
+    const lit = liturgicalContext(new Date(), traditionOf(denom), cal === "old");
     disc = generateDisciplineQuests({ denomination: denom, goals: (prof as Gen)?.goals, disciplines: prefs, weight_kg, protein_target }, dayIndex(), new Date().getDay(), lit.fasting ? lit.note : null);
   }
   const rows = [...core, ...disc].map((q) => ({ ...q, user_id: userId, day, done: false, progress: 0 }));

@@ -46,7 +46,7 @@ const FAST_TYPES = [
 const FAST_WINDOWS = ["16:8", "18:6", "20:4"];
 
 // step keys in order (gate + underage + saving are special)
-type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | "denomination" | "fitness" | "equipment" | "calibration" | "goal" | "days" | "class" | "disciplines" | "saving";
+type Step = "intro" | "age" | "underage" | "covenant" | "faith" | "faithgate" | "denomination" | "jurisdiction" | "fitness" | "equipment" | "calibration" | "goal" | "days" | "class" | "disciplines" | "saving";
 
 export default function Onboarding() {
   const router = useRouter();
@@ -59,6 +59,7 @@ export default function Onboarding() {
   const [marketing, setMarketing] = useState(false);
   const [faith, setFaith] = useState<Faith>(null);
   const [denomination, setDenomination] = useState<string | null>(null);
+  const [orthodoxCalendar, setOrthodoxCalendar] = useState<string | null>(null);
   const [fitness, setFitness] = useState<string | null>(null);
   const [equipment, setEquipment] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
@@ -96,7 +97,7 @@ export default function Onboarding() {
     else if (fastType === "religious" || fastType === "custom") disciplines.fasting = { type: fastType };
     const { error: e } = await supabase.from("profiles").update({
       believer: faith === "believer" ? "yes" : "seeking",
-      faith, denomination,
+      faith, denomination, orthodox_calendar: orthodoxCalendar,
       cls, char_class: cls,
       fitness_level: fitness, equipment, goals: goal ? [goal] : [], days_per_week: days,
       dob: year ? `${year}-01-01` : null,
@@ -189,8 +190,20 @@ export default function Onboarding() {
             <Text style={tag}>[ YOUR TRADITION ]</Text>
             <Text style={title}>Where do you worship?</Text>
             <Text style={body}>This helps us tailor prayers and lessons. Optional.</Text>
-            {DENOMINATIONS.map((d) => <Choice key={d} label={d} selected={denomination === d} onPress={() => { setDenomination(d); setStep("fitness"); }} />)}
+            {DENOMINATIONS.map((d) => <Choice key={d} label={d} selected={denomination === d} onPress={() => { setDenomination(d); setStep(d === "Orthodox" ? "jurisdiction" : "fitness"); }} />)}
             <Pressable onPress={() => { setDenomination(null); setStep("fitness"); }} style={{ marginTop: 6, alignItems: "center" }}><Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body }}>Skip</Text></Pressable>
+          </View>
+        )}
+
+        {step === "jurisdiction" && (
+          <View>
+            <Text style={tag}>[ YOUR JURISDICTION ]</Text>
+            <Text style={title}>Which calendar do you keep?</Text>
+            <Text style={body}>Pascha is shared by all Orthodox. This sets the fixed feasts and fasts so they match your church.</Text>
+            <Choice label="New Calendar (Revised Julian)" sub="Greek, Antiochian, OCA, Romanian, Bulgarian" selected={orthodoxCalendar === "new"} onPress={() => { setOrthodoxCalendar("new"); setStep("fitness"); }} />
+            <Choice label="Old Calendar (Julian)" sub="Russian, ROCOR, Serbian, Jerusalem, Mount Athos" selected={orthodoxCalendar === "old"} onPress={() => { setOrthodoxCalendar("old"); setStep("fitness"); }} />
+            <Choice label="Oriental Orthodox" sub="Coptic, Armenian, Ethiopian, Syriac" selected={orthodoxCalendar === "oriental"} onPress={() => { setOrthodoxCalendar("oriental"); setStep("fitness"); }} />
+            <Pressable onPress={() => { setOrthodoxCalendar(null); setStep("fitness"); }} style={{ marginTop: 6, alignItems: "center" }}><Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body }}>Not sure — decide later</Text></Pressable>
           </View>
         )}
 

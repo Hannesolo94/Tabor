@@ -143,8 +143,8 @@ function feastOf(date: Date, trad: Tradition): Feast | null {
   return null;
 }
 
-export function dailyOffice(date: Date, trad: Tradition): DailyOffice {
-  const lit = liturgicalContext(date, trad);
+export function dailyOffice(date: Date, trad: Tradition, old = false): DailyOffice {
+  const lit = liturgicalContext(date, trad, old);
   const season = lit.season === "Ordinary" ? null : lit.season;
   const inLent = /lent/i.test(lit.season);
   const feast = feastOf(date, trad);

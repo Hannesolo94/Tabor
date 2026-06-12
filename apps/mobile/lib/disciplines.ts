@@ -26,6 +26,19 @@ export function traditionOf(denom?: string | null): Tradition {
   if (/pentecost|charismat|spirit.?filled|assemblies of god|apostolic/.test(d)) return "pentecostal";
   return "protestant"; // baptist, methodist, lutheran, reformed, evangelical, adventist, messianic, non-denom
 }
+
+// Within Orthodoxy: which calendar drives the fixed feasts/fasts. 'old' = Julian
+// (+13 days), 'oriental' = a different communion (Coptic/Armenian/Ethiopian/Syriac)
+// whose detailed calendar is its own track. An explicit profile pref wins; otherwise
+// we infer from the jurisdiction named in the denomination.
+export type OrthodoxCalendar = "new" | "old" | "oriental";
+export function orthodoxCalendarOf(denom?: string | null, pref?: string | null): OrthodoxCalendar {
+  if (pref === "new" || pref === "old" || pref === "oriental") return pref;
+  const d = (denom || "").toLowerCase();
+  if (/copt|armenian|ethiop|eritre|syriac|oriental|malankara|tewahedo/.test(d)) return "oriental";
+  if (/russia|moscow|rocor|serbian?|georgian?|jerusalem|athos|athonite|old.?calendar|old.?style|genuine|ukrainian/.test(d)) return "old";
+  return "new"; // Greek, Antiochian, OCA, Romanian, Bulgarian, generic "Orthodox"
+}
 /** Day of worship: 6 = Saturday for Seventh-day Adventist / Messianic / sabbatarian, else 0 = Sunday. */
 export function sabbathDayOf(denom?: string | null): number {
   return /adventist|seventh.?day|messianic|hebrew.?roots|sabbatarian/.test((denom || "").toLowerCase()) ? 6 : 0;

@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { traditionOf, type Tradition } from "@/lib/disciplines";
+import { traditionOf, orthodoxCalendarOf, type Tradition } from "@/lib/disciplines";
 import { yearEvents, dayEvents, upcoming, isFastDay, iso } from "@/lib/calendar";
 import { C, F } from "@/lib/theme";
 
@@ -31,6 +31,8 @@ export default function Calendar() {
   const { session } = useAuth();
   const userId = session?.user.id;
   const [trad, setTrad] = useState<Tradition | null>(null);
+  const [oldCal, setOldCal] = useState(false);
+  const [oriental, setOriental] = useState(false);
   const [view, setView] = useState<"month" | "week">("month");
   const today = useMemo(localToday, []);
   const [cursor, setCursor] = useState<Date>(today);
@@ -38,24 +40,27 @@ export default function Calendar() {
 
   useEffect(() => {
     (async () => {
-      let denom: string | null = null;
-      if (userId) { const { data } = await supabase.from("profiles").select("denomination").eq("user_id", userId).maybeSingle(); denom = data?.denomination ?? null; }
+      let denom: string | null = null, pref: string | null = null;
+      if (userId) { const { data } = await supabase.from("profiles").select("denomination, orthodox_calendar").eq("user_id", userId).maybeSingle(); denom = data?.denomination ?? null; pref = (data as { orthodox_calendar?: string | null })?.orthodox_calendar ?? null; }
       setTrad(traditionOf(denom));
+      const cal = orthodoxCalendarOf(denom, pref);
+      setOldCal(cal === "old");
+      setOriental(cal === "oriental");
     })();
   }, [userId]);
 
   const cells = useMemo(() => gridFor(view, cursor), [view, cursor]);
   const feastDays = useMemo(() => {
-    if (!trad) return new Set<string>();
+    if (!trad || oriental) return new Set<string>();
     const years = new Set(cells.map((d) => d.getUTCFullYear()));
     const s = new Set<string>();
-    for (const y of years) for (const e of yearEvents(y, trad)) if (e.kind === "feast") s.add(e.start);
+    for (const y of years) for (const e of yearEvents(y, trad, oldCal)) if (e.kind === "feast") s.add(e.start);
     return s;
-  }, [trad, cells]);
+  }, [trad, cells, oldCal, oriental]);
 
   const shift = (dir: number) => setCursor((c) => (view === "week" ? addDays(c, dir * 7) : new Date(Date.UTC(c.getUTCFullYear(), c.getUTCMonth() + dir, 1))));
-  const selEvents = trad ? dayEvents(selected, trad) : [];
-  const next = trad ? upcoming(today, trad, 8) : [];
+  const selEvents = trad && !oriental ? dayEvents(selected, trad, oldCal) : [];
+  const next = trad && !oriental ? upcoming(today, trad, 8, oldCal) : [];
   const label = view === "month" ? `${MONTHS[cursor.getUTCMonth()]} ${cursor.getUTCFullYear()}` : `Week of ${fmtFull(addDays(cursor, -cursor.getUTCDay()))}`;
   const rows = view === "month" ? Array.from({ length: 6 }, (_, r) => cells.slice(r * 7, r * 7 + 7)) : [cells];
 
@@ -77,6 +82,15 @@ export default function Calendar() {
       <ScrollView contentContainerStyle={{ padding: 22, paddingTop: 0, paddingBottom: 60 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 3, fontFamily: F.mono }}>[ THE CHURCH YEAR ]</Text>
         <Text style={{ color: C.ivory, fontSize: 26, fontFamily: F.head, marginTop: 6 }}>Liturgical Calendar</Text>
+        {trad === "orthodox" && !oriental && (
+          <Text style={{ color: C.muted, fontSize: 11, fontFamily: F.mono, marginTop: 4 }}>{oldCal ? "OLD CALENDAR (JULIAN)" : "NEW CALENDAR (REVISED JULIAN)"} · change in Settings</Text>
+        )}
+        {oriental && (
+          <View style={{ marginTop: 14, borderWidth: 1, borderColor: C.gold, backgroundColor: "rgba(201,169,97,0.08)", borderRadius: 14, padding: 16 }}>
+            <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 1, fontFamily: F.mono, marginBottom: 6 }}>ORIENTAL ORTHODOX</Text>
+            <Text style={{ color: C.text, fontSize: 13, lineHeight: 20, fontFamily: F.body }}>Your communion (Coptic, Armenian, Ethiopian, Syriac and others) keeps its own calendar and fasts. A detailed liturgical calendar for your tradition is in development, so we are not showing Eastern Orthodox dates here, which would be inaccurate. Your prayers and disciplines still work as normal.</Text>
+          </View>
+        )}
 
         {/* nav + grid */}
         <View style={{ marginTop: 18, borderWidth: 1, borderColor: C.glassBorder, backgroundColor: C.surface2, borderRadius: 16, padding: 14 }}>
@@ -96,7 +110,7 @@ export default function Calendar() {
                 const isToday = k === iso(today);
                 const isSel = k === iso(selected);
                 const feast = feastDays.has(k);
-                const fast = isFastDay(day, trad);
+                const fast = !oriental && isFastDay(day, trad, oldCal);
                 return (
                   <Pressable key={k} onPress={() => setSelected(day)} style={{ flex: 1, aspectRatio: 1, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: isSel ? "rgba(201,169,97,0.16)" : "transparent", borderWidth: isToday ? 1 : 0, borderColor: C.gold, margin: 1 }}>
                     <Text style={{ color: !inMonth ? C.line : isToday ? C.gold : C.ivory, fontSize: 13, fontFamily: F.mono }}>{day.getUTCDate()}</Text>

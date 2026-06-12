@@ -35,20 +35,24 @@ export function orthodoxEaster(year: number): Date {
 
 export interface LiturgicalContext { season: string; fasting: boolean; note: string | null }
 
-/** Season + fasting state for a date, by tradition. Covers the major fasts. */
-export function liturgicalContext(date: Date, trad: Tradition): LiturgicalContext {
+/** Season + fasting state for a date, by tradition. Covers the major fasts.
+ *  `old` = Orthodox Old Calendar (Julian): fixed-date fasts shift +13 days. */
+export function liturgicalContext(date: Date, trad: Tradition, old = false): LiturgicalContext {
   const y = date.getUTCFullYear();
   if (trad === "orthodox") {
     const pascha = orthodoxEaster(y);
     const greatLentStart = addDays(pascha, -48); // Clean Monday
     const holySat = addDays(pascha, -1);
     const pentecost = addDays(pascha, 49);
+    const fx = (yy: number, m: number, d: number) => (old ? addDays(utc(yy, m, d), 13) : utc(yy, m, d));
+    // a fixed-date fast, checked across the year boundary (Old Calendar Nativity Fast spills into January)
+    const inFixed = (m1: number, d1: number, m2: number, d2: number) =>
+      between(date, fx(y, m1, d1), fx(y, m2, d2)) || (old && between(date, fx(y - 1, m1, d1), fx(y - 1, m2, d2)));
     if (between(date, greatLentStart, holySat)) return { season: "Great Lent", fasting: true, note: "Great Lent: keep today's fast" };
-    // Fixed fasts on revised-Julian/civil dates, matching lib/calendar.ts (single source of truth)
-    if (between(date, utc(y, 11, 15), utc(y, 12, 24))) return { season: "Nativity Fast", fasting: true, note: "Nativity Fast: keep today's fast" };
-    if (between(date, utc(y, 8, 1), utc(y, 8, 14))) return { season: "Dormition Fast", fasting: true, note: "Dormition Fast: keep today's fast" };
-    // Apostles' Fast: Monday after All Saints (Pascha+57) to Jun 28 (eve of Ss Peter & Paul). Can be 0-length.
-    const apStart = addDays(pascha, 57), apEnd = utc(y, 6, 28);
+    if (inFixed(11, 15, 12, 24)) return { season: "Nativity Fast", fasting: true, note: "Nativity Fast: keep today's fast" };
+    if (inFixed(8, 1, 8, 14)) return { season: "Dormition Fast", fasting: true, note: "Dormition Fast: keep today's fast" };
+    // Apostles' Fast: Monday after All Saints (Pascha+57) to the eve of Ss Peter & Paul. Can be 0-length.
+    const apStart = addDays(pascha, 57), apEnd = fx(y, 6, 28);
     if (apStart.getTime() <= apEnd.getTime() && between(date, apStart, apEnd)) return { season: "Apostles' Fast", fasting: true, note: "Apostles' Fast: keep today's fast" };
     if (between(date, pascha, pentecost)) return { season: "Pascha", fasting: false, note: null }; // fast-free / feasting
     return { season: "Ordinary", fasting: false, note: null };

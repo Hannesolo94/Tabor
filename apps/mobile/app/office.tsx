@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { traditionOf } from "@/lib/disciplines";
+import { traditionOf, orthodoxCalendarOf } from "@/lib/disciplines";
 import { dailyOffice, type DailyOffice } from "@/lib/office";
 import { C, F } from "@/lib/theme";
 
@@ -17,12 +17,13 @@ export default function Office() {
 
   useEffect(() => {
     (async () => {
-      let denom: string | null = null;
+      let denom: string | null = null, pref: string | null = null;
       if (userId) {
-        const { data } = await supabase.from("profiles").select("denomination").eq("user_id", userId).maybeSingle();
+        const { data } = await supabase.from("profiles").select("denomination, orthodox_calendar").eq("user_id", userId).maybeSingle();
         denom = data?.denomination ?? null;
+        pref = (data as { orthodox_calendar?: string | null })?.orthodox_calendar ?? null;
       }
-      setOffice(dailyOffice(new Date(), traditionOf(denom)));
+      setOffice(dailyOffice(new Date(), traditionOf(denom), orthodoxCalendarOf(denom, pref) === "old"));
       setLoading(false);
     })();
   }, [userId]);
