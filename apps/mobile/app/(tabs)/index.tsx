@@ -34,6 +34,9 @@ export default function Quests() {
   const prevLevel = useRef<number | null>(null);
   const [rankUp, setRankUp] = useState(false);
   const [questCel, setQuestCel] = useState<{ xp: number; pillar: string } | null>(null);
+  // proof-per-pillar: quest id -> ms timestamp when its action was opened this session.
+  // A quest can't be sealed until it's been opened (and, for the Word, dwelt on).
+  const [opened, setOpened] = useState<Record<string, number>>({});
 
   const loadedDay = useRef("");
   const reloadToday = useCallback(() => {
@@ -85,35 +88,62 @@ export default function Quests() {
     }
   }, [allDone, sealed, userId, sealAnim]);
 
-  async function onToggle(q: Quest) {
-    if (!userId) return;
-    const done = !q.done;
-    setQuests((prev) => prev.map((x) => (x.id === q.id ? { ...x, done } : x)));
-    setXpOffset((o) => o + (done ? q.xp : -q.xp));
-    toggleQuest(userId, q, done).catch(() => {});
-    if (done) setQuestCel({ xp: q.xp, pillar: q.pillar });
+  const WORD_DWELL_MS = 40_000; // time in the passage before the Word can be sealed
+  const markOpened = (id: string) => setOpened((m) => ({ ...m, [id]: Date.now() }));
+
+  function complete(q: Quest) {
+    if (!userId || q.done) return;
+    setQuests((prev) => prev.map((x) => (x.id === q.id ? { ...x, done: true } : x)));
+    setXpOffset((o) => o + q.xp);
+    toggleQuest(userId, q, true).catch(() => {});
+    setQuestCel({ xp: q.xp, pillar: q.pillar });
+  }
+  function uncomplete(q: Quest) {
+    if (!userId || !q.done) return;
+    setQuests((prev) => prev.map((x) => (x.id === q.id ? { ...x, done: false } : x)));
+    setXpOffset((o) => o - q.xp);
+    toggleQuest(userId, q, false).catch(() => {});
+  }
+  // the seal is always a deliberate covenant, never a bare tap
+  function covenantSeal(q: Quest) {
+    sheet({
+      title: "Seal this quest?",
+      message: "Before God and your brothers: did you truly complete this? Your word is your bond.",
+      actions: [
+        { label: "Yes. On my honor.", onPress: () => complete(q) },
+        { label: "Not yet", style: "cancel" },
+      ],
+    });
   }
 
-  // tapping a quest does the relevant thing: open the passage, log the movement, or confirm
+  // tapping a quest opens its action; you can only seal it once you've engaged it
   async function openQuest(q: Quest) {
+    if (q.done) {
+      sheet({ title: q.title, message: q.sub || undefined, actions: [{ label: "Unseal (mark not done)", style: "destructive", onPress: () => uncomplete(q) }, { label: "Cancel", style: "cancel" }] });
+      return;
+    }
+    // The Word: open the passage, read it, then seal on your honor (after real dwell time)
     const m = q.quest_key === "word" ? q.title.match(/^Read\s+(.+)\s+(\d+)$/) : null;
     if (m) {
       const order = await bookOrderFor(m[1]);
+      const since = opened[q.id] ? Date.now() - opened[q.id] : -1;
+      const read = since >= WORD_DWELL_MS;
       const actions: SheetAction[] = [];
-      if (order) actions.push({ label: "Open passage", onPress: () => router.push(`/read/${order}?c=${m[2]}`) });
-      actions.push({ label: q.done ? "Mark not read" : "Mark as read", onPress: () => onToggle(q) });
+      if (order) actions.push({ label: since < 0 ? "Open passage" : "Open passage again", onPress: () => { markOpened(q.id); router.push(`/read/${order}?c=${m[2]}`); } });
+      if (read) actions.push({ label: "I have read it. On my honor.", onPress: () => covenantSeal(q) });
       actions.push({ label: "Cancel", style: "cancel" });
-      sheet({ title: q.title, message: "Take ground in the Word.", actions });
+      sheet({ title: q.title, message: read ? "Take ground in the Word." : since < 0 ? "Open the passage and read it before you seal it." : "Spend a little longer in the Word, then seal it.", actions });
       return;
     }
-    // every other quest opens its pillar's section (where one exists), then lets you mark it
+    // Other pillars: open the section first, then seal on your honor. Real-world tasks
+    // with no in-app destination go straight to the covenant seal.
     const dest = QUEST_DEST[q.quest_key];
+    const engaged = !dest || !!opened[q.id];
     const actions: SheetAction[] = [];
-    if (dest) actions.push({ label: dest.label, onPress: () => router.push(dest.href as never) });
-    if (q.quest_key === "body") actions.push({ label: "I did my own training", onPress: () => onToggle(q) });
-    actions.push({ label: q.done ? "Mark not done" : "Mark complete", onPress: () => onToggle(q) });
+    if (dest) actions.push({ label: opened[q.id] ? `${dest.label} again` : dest.label, onPress: () => { markOpened(q.id); router.push(dest.href as never); } });
+    if (engaged) actions.push({ label: "Seal it. On my honor.", onPress: () => covenantSeal(q) });
     actions.push({ label: "Cancel", style: "cancel" });
-    sheet({ title: q.title, message: q.sub || undefined, actions });
+    sheet({ title: q.title, message: engaged ? (q.sub || undefined) : "Open it and do it first, then seal it.", actions });
   }
 
   if (loading || pLoading) {
@@ -158,14 +188,14 @@ export default function Quests() {
           <Text style={{ color: C.ivory, fontSize: 13, letterSpacing: 3 }}>TODAY'S QUESTS</Text>
           <Text style={{ color: allDone ? C.gold : C.muted, fontSize: 10, fontFamily: F.mono }}>{core.filter((q) => q.done).length}/{core.length} CLEARED</Text>
         </View>
-        {core.map((q) => <QuestRow key={q.id} q={q} onOpen={openQuest} onToggle={onToggle} />)}
+        {core.map((q) => <QuestRow key={q.id} q={q} onOpen={openQuest} />)}
         {!allDone && core.length > 0 && (
           <Text style={{ color: C.muted, fontSize: 12, textAlign: "center", marginTop: 4 }}>Clear all {core.length} to seal the day and hold your streak.</Text>
         )}
         {bonus.length > 0 && (
           <>
             <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 3, fontFamily: F.mono, marginTop: 26, marginBottom: 10 }}>BONUS DISCIPLINES · OPTIONAL</Text>
-            {bonus.map((q) => <QuestRow key={q.id} q={q} onOpen={openQuest} onToggle={onToggle} />)}
+            {bonus.map((q) => <QuestRow key={q.id} q={q} onOpen={openQuest} />)}
           </>
         )}
 
@@ -225,13 +255,13 @@ const QUEST_DEST: Record<string, { label: string; href: string }> = {
   macro: { label: "Open fuel", href: "/fuel" },
 };
 
-function QuestRow({ q, onOpen, onToggle }: { q: Quest; onOpen: (q: Quest) => void; onToggle: (q: Quest) => void }) {
+function QuestRow({ q, onOpen }: { q: Quest; onOpen: (q: Quest) => void }) {
   return (
     <Pressable onPress={() => onOpen(q)} style={{ borderWidth: 1, borderColor: q.done ? C.gold : C.line, backgroundColor: C.surface2, padding: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", borderRadius: 12 }}>
-      {/* tap the circle to quick-toggle; tap the card to open the action */}
-      <Pressable onPress={() => onToggle(q)} hitSlop={10} style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
+      {/* indicator only — sealing happens through the quest's action, not a tap here */}
+      <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: q.done ? C.gold : C.muted, backgroundColor: q.done ? C.gold : "transparent", alignItems: "center", justifyContent: "center", marginRight: 14 }}>
         {q.done && <Text style={{ color: C.black, fontSize: 13, fontWeight: "900" }}>✓</Text>}
-      </Pressable>
+      </View>
       <View style={{ flex: 1 }}>
         <Text style={{ color: C.gold, fontSize: 10, letterSpacing: 2 }}>{q.pillar}</Text>
         <Text style={{ color: C.ivory, fontSize: 15, marginTop: 2, textDecorationLine: q.done ? "line-through" : "none" }}>{q.title}</Text>
