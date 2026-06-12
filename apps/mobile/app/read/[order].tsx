@@ -107,12 +107,6 @@ export default function Reader() {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderBottomWidth: 1, borderBottomColor: C.line }}>
         <Pressable onPress={() => router.back()} hitSlop={10}><Text style={{ color: C.gold, fontSize: 24 }}>‹</Text></Pressable>
         <Text style={{ color: C.ivory, fontSize: 18, fontFamily: F.head, flex: 1 }}>{book} {chapter}</Text>
-        {!audio.speaking && (
-          <Pressable onPress={() => audio.start(selected.size ? Math.min(...selected) : undefined)} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderColor: C.gold, borderRadius: 999, paddingVertical: 7, paddingHorizontal: 13 }}>
-            <Text style={{ color: C.gold, fontSize: 12 }}>▶</Text>
-            <Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 10, letterSpacing: 1 }}>LISTEN</Text>
-          </Pressable>
-        )}
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, borderBottomWidth: 1, borderBottomColor: C.line }} contentContainerStyle={{ padding: 10, gap: 6 }}>
@@ -123,26 +117,8 @@ export default function Reader() {
         ))}
       </ScrollView>
 
-      {audio.speaking && (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 9, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: C.line, backgroundColor: "rgba(201,169,97,0.07)" }}>
-          <Pressable onPress={() => (audio.paused ? audio.resume() : audio.pause())} hitSlop={8} style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ color: C.black, fontSize: 15 }}>{audio.paused ? "▶" : "❚❚"}</Text>
-          </Pressable>
-          <Pressable onPress={audio.stop} hitSlop={8} style={{ width: 38, height: 38, borderRadius: 19, borderWidth: 1, borderColor: C.line, alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ color: C.ivory, fontSize: 13 }}>■</Text>
-          </Pressable>
-          <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 10, flex: 1, letterSpacing: 0.5 }}>{audio.paused ? "PAUSED" : "READING"}{audio.current ? ` · v${audio.current}` : ""}</Text>
-          <Pressable onPress={cycleRate} hitSlop={6} style={{ borderWidth: 1, borderColor: C.line, borderRadius: 10, paddingVertical: 7, paddingHorizontal: 10 }}>
-            <Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>{audio.rate.toFixed(2).replace(/0$/, "")}x</Text>
-          </Pressable>
-          <Pressable onPress={pickVoice} hitSlop={6} style={{ borderWidth: 1, borderColor: C.line, borderRadius: 10, paddingVertical: 7, paddingHorizontal: 10 }}>
-            <Text style={{ color: C.gold, fontSize: 13 }}>🗣</Text>
-          </Pressable>
-        </View>
-      )}
-
       {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 30 }} /> : (
-        <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 22, paddingBottom: selected.size > 0 ? 180 : 50 }}>
+        <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 22, paddingBottom: selected.size > 0 ? 200 : 28 }}>
           <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, marginBottom: 14, letterSpacing: 1 }}>TAP VERSES TO SELECT · HIGHLIGHT OR SAVE</Text>
           {verses.map((v) => {
             const ref = refOf(v.verse);
@@ -164,8 +140,34 @@ export default function Reader() {
         </ScrollView>
       )}
 
+      {/* persistent text-to-voice bar: always sits at the bottom; play reads from the start */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 14, borderTopWidth: 1, borderTopColor: C.line, backgroundColor: "rgba(18,16,11,0.96)" }}>
+        {!audio.speaking ? (
+          <Pressable onPress={() => audio.start()} disabled={loading || verses.length === 0} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: C.gold, paddingVertical: 12, borderRadius: 12, opacity: loading || verses.length === 0 ? 0.5 : 1 }}>
+            <Text style={{ color: C.black, fontSize: 14 }}>▶</Text>
+            <Text style={{ color: C.black, fontFamily: F.head, fontSize: 13, letterSpacing: 1 }}>LISTEN TO THIS CHAPTER</Text>
+          </Pressable>
+        ) : (
+          <>
+            <Pressable onPress={() => (audio.paused ? audio.resume() : audio.pause())} hitSlop={6} style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ color: C.black, fontSize: 16 }}>{audio.paused ? "▶" : "❚❚"}</Text>
+            </Pressable>
+            <Pressable onPress={audio.stop} hitSlop={6} style={{ width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: C.line, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ color: C.ivory, fontSize: 13 }}>■</Text>
+            </Pressable>
+            <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 10, flex: 1, letterSpacing: 0.5 }}>{audio.paused ? "PAUSED" : "READING"}{audio.current ? ` · v${audio.current}` : ""}</Text>
+            <Pressable onPress={cycleRate} hitSlop={6} style={{ borderWidth: 1, borderColor: C.line, borderRadius: 10, paddingVertical: 9, paddingHorizontal: 11 }}>
+              <Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11 }}>{audio.rate.toFixed(2).replace(/0$/, "")}x</Text>
+            </Pressable>
+            <Pressable onPress={pickVoice} hitSlop={6} style={{ borderWidth: 1, borderColor: C.line, borderRadius: 10, paddingVertical: 9, paddingHorizontal: 11 }}>
+              <Text style={{ color: C.gold, fontSize: 13 }}>🗣</Text>
+            </Pressable>
+          </>
+        )}
+      </View>
+
       {selected.size > 0 && (
-        <View style={{ position: "absolute", left: 12, right: 12, bottom: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.gold, borderRadius: 6, padding: 14 }}>
+        <View style={{ position: "absolute", left: 12, right: 12, bottom: 78, backgroundColor: C.surface, borderWidth: 1, borderColor: C.gold, borderRadius: 6, padding: 14 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <Text style={{ color: C.gold, fontSize: 11, fontFamily: F.mono, letterSpacing: 1 }}>{selected.size} VERSE{selected.size > 1 ? "S" : ""} SELECTED</Text>
             <Pressable onPress={() => setSelected(new Set())} hitSlop={10}><Text style={{ color: C.muted, fontSize: 18 }}>✕</Text></Pressable>
