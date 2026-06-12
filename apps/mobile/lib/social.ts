@@ -25,8 +25,9 @@ export async function browseGuilds(): Promise<GuildRow[]> {
   const { data } = await supabase.from("guilds").select("id, name, tag, open").eq("open", true).order("created_at", { ascending: true });
   return (data as GuildRow[]) ?? [];
 }
-export async function joinGuild(guildId: string, userId: string): Promise<void> {
-  await supabase.from("guild_members").upsert({ guild_id: guildId, user_id: userId, role: "member" }, { onConflict: "guild_id,user_id", ignoreDuplicates: true });
+export async function joinGuild(guildId: string, _userId?: string): Promise<void> {
+  // SECURITY DEFINER RPC: reliable join (the direct guild_members upsert hit an RLS edge)
+  await supabase.rpc("join_guild", { p_guild_id: guildId });
 }
 export async function myGuilds(userId: string): Promise<GuildRow[]> {
   const { data: gm } = await supabase.from("guild_members").select("guild_id").eq("user_id", userId);

@@ -24,5 +24,6 @@ export async function deleteGiveaway(formData: FormData): Promise<void> {
   if (!id) return;
   const sb = await supabaseServer();
   await sb.from("giveaways").delete().eq("id", id);
+  await logAudit("giveaway.delete", "giveaway", id);
   revalidatePath("/admin/giveaways");
 }

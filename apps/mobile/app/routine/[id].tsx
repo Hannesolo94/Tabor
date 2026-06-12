@@ -126,11 +126,11 @@ export default function RoutineDetail() {
     }
     // persist the entered numbers so they load back next session (progressive overload)
     await saveRoutineSets(items.map((it) => ({ id: it.id, sets: (logs[it.id] ?? []).map(rowToSaved) })));
-    const xp = workoutXp(sets.length);
-    await grantWorkoutXp(xp);
     setSaving(false);
     setMins(String(Math.max(20, items.length * 8)));
-    setCelebrate({ sets, xp });
+    // XP is granted at finish, right after the workout is logged, so we never keep
+    // XP for a workout that was never recorded (e.g. if the app dies on this screen).
+    setCelebrate({ sets, xp: workoutXp(sets.length) });
   }
 
   async function finishCelebration(logEffort: boolean) {
@@ -139,6 +139,7 @@ export default function RoutineDetail() {
     if (!userId || !cel) return;
     const m = parseInt(mins, 10) || Math.max(20, items.length * 8);
     await logWorkout(userId, name, m, cel.sets, todayKey(), logEffort ? estimateCalories(m, bodyweight) : null);
+    await grantWorkoutXp(cel.xp); // durable log first, then XP
     router.replace("/progress");
   }
   async function saveOnly() {

@@ -4,9 +4,11 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getRegion, REGIONS } from "@/lib/region";
 import { sameOrigin } from "@/lib/http";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (!(await rateLimit(`donate:${clientIp(req)}`, 10, 60))) return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
   let b: { name?: string; email?: string; amount?: number; charity_id?: string; goal_id?: string; message?: string; anonymous?: boolean };
   try { b = await req.json(); } catch { return NextResponse.json({ error: "bad request" }, { status: 400 }); }
 

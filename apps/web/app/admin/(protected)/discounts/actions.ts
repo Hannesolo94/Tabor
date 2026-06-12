@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 
 function fields(formData: FormData) {
   const value_type = String(formData.get("value_type") ?? "percentage");
@@ -29,6 +30,7 @@ export async function saveDiscount(formData: FormData): Promise<void> {
   const sb = await supabaseServer();
   if (id) await sb.from("discount_codes").update(f).eq("id", id);
   else await sb.from("discount_codes").insert(f);
+  await logAudit(id ? "discount.update" : "discount.create", "discount", id || f.code, { code: f.code });
   revalidatePath("/admin/discounts");
   redirect("/admin/discounts");
 }
@@ -45,6 +47,7 @@ export async function deleteDiscount(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   const sb = await supabaseServer();
   await sb.from("discount_codes").delete().eq("id", id);
+  await logAudit("discount.delete", "discount", id);
   revalidatePath("/admin/discounts");
   redirect("/admin/discounts");
 }

@@ -203,11 +203,11 @@ export async function loadToday(userId: string): Promise<Quest[]> {
 // quest pillar -> RPG stat (STR/AGI/WIS/MANA)
 const STAT_BY_KEY: Record<string, string> = { body: "STR", word: "WIS", brother: "MANA" };
 
-/** Toggle a quest done/undone and atomically award/remove its XP + stat. */
+/** Toggle a quest done/undone and atomically award/remove its XP + stat (one RPC,
+ *  ownership-checked + idempotent, so it can never half-apply). */
 export async function toggleQuest(userId: string, quest: Quest, done: boolean): Promise<void> {
-  await supabase.from("quests").update({ done, progress: done ? 1 : 0 }).eq("id", quest.id);
   const stat = quest.stat ?? STAT_BY_KEY[quest.quest_key] ?? null;
-  await supabase.rpc("apply_quest_delta", { p_xp: done ? quest.xp : -quest.xp, p_stat: stat, p_stat_delta: stat ? (done ? 1 : -1) : 0 });
+  await supabase.rpc("toggle_quest", { p_quest_id: quest.id, p_done: done, p_xp: quest.xp, p_stat: stat });
 }
 
 /** Seal the day when all quests are done. Idempotent per day; bumps streak once. */

@@ -6,9 +6,11 @@ import { createClient } from "@supabase/supabase-js";
 import { omnisendAddContact } from "@/lib/omnisend";
 import { sendEmail, emailShell } from "@/lib/email";
 import { sameOrigin } from "@/lib/http";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (!(await rateLimit(`subscribe:${clientIp(req)}`, 10, 60))) return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
   let body: { email?: string; source?: string };
   try {
     body = await req.json();

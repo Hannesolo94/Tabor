@@ -3,11 +3,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sameOrigin } from "@/lib/http";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 const REASONS = new Set(["defect", "wrong_item", "sizing", "other"]);
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (!(await rateLimit(`returns:${clientIp(req)}`, 6, 60))) return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
   let b: { orderRef?: string; email?: string; reason?: string; detail?: string };
   try { b = await req.json(); } catch { return NextResponse.json({ error: "bad request" }, { status: 400 }); }
 

@@ -1,6 +1,7 @@
 // Global admin search — one box across products, customers, and reviews.
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -18,12 +19,15 @@ const row: React.CSSProperties = { display: "flex", justifyContent: "space-betwe
 export default async function AdminSearch({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const q = ((await searchParams).q ?? "").trim();
   const sb = await supabaseServer();
+  // profiles.email is column-revoked from the authenticated role (privacy), so the
+  // member search reads it via the service role. The page is already admin-gated.
+  const admin = supabaseAdmin();
 
   const [products, customers, profiles, reviews] = q
     ? await Promise.all([
         sb.from("products").select("sku, name, base_price, status").or(`name.ilike.%${q}%,sku.ilike.%${q}%`).limit(15),
         sb.from("waitlist").select("email, source").ilike("email", `%${q}%`).limit(15),
-        sb.from("profiles").select("email, name").or(`email.ilike.%${q}%,name.ilike.%${q}%`).limit(15),
+        admin.from("profiles").select("email, name").or(`email.ilike.%${q}%,name.ilike.%${q}%`).limit(15),
         sb.from("reviews").select("id, name, title, sku, status").or(`name.ilike.%${q}%,body.ilike.%${q}%,title.ilike.%${q}%`).limit(15),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];

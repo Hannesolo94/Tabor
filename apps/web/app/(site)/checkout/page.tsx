@@ -50,7 +50,13 @@ export default function CheckoutPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Checkout failed."); setBusy(false); return; }
-      if (data.redirectUrl) { window.location.href = data.redirectUrl; return; }
+      // only follow a real https payment URL (guards against a tampered/rogue redirect)
+      if (data.redirectUrl) {
+        let safe = false;
+        try { safe = new URL(data.redirectUrl).protocol === "https:"; } catch { safe = false; }
+        if (safe) { window.location.href = data.redirectUrl; return; }
+        setError("Payment could not start safely. Please try again."); setBusy(false); return;
+      }
       track("purchase", { value: data.total, meta: { orderId: data.orderId } });
       clear();
       setDone({ orderId: data.orderId, message: data.message });

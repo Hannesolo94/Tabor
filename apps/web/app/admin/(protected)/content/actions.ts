@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 
 export async function saveHero(formData: FormData): Promise<void> {
   const value = {
@@ -17,6 +18,7 @@ export async function saveHero(formData: FormData): Promise<void> {
   };
   const sb = await supabaseServer();
   await sb.from("content").upsert({ key: "hero_home", value });
+  await logAudit("content.hero", "content", "hero_home");
   revalidatePath("/admin/content");
   revalidatePath("/");
 }

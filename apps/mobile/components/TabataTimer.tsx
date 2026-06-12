@@ -48,6 +48,8 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
   const [left, setLeft] = useState(0);
   const [running, setRunning] = useState(false);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
+  const posRef = useRef({ idx: -1, left: 0 }); // source of truth while running
+  const lastRef = useRef(0);                   // wall-clock anchor of the last applied second
 
   const loadPresets = () => { if (userId) getTabataPresets(userId).then(setPresets); };
   useEffect(() => { loadPresets(); /* eslint-disable-next-line */ }, [userId]);
@@ -58,28 +60,44 @@ export function TabataTimer({ userId, onComplete }: { userId?: string; onComplet
   const totalLeft = cur ? totalDur - elapsedBefore - (cur.dur - left) : done ? 0 : totalDur;
   const moveOf = (cycle?: number) => (moves.length && cycle ? moves[(cycle - 1) % moves.length] : null);
 
+  // Wall-clock driven: each tick advances by the REAL seconds elapsed since the last
+  // applied second (cascading across segments), so a backgrounded/locked phone catches
+  // up correctly on resume instead of freezing or drifting.
   useEffect(() => {
     if (!running) { if (tick.current) clearInterval(tick.current); return; }
+    lastRef.current = Date.now();
     tick.current = setInterval(() => {
-      setLeft((l) => {
-        if (l > 1) { if (l <= 4) Vibration.vibrate(55); return l - 1; }
-        setIdx((i) => {
+      const now = Date.now();
+      let dt = Math.floor((now - lastRef.current) / 1000);
+      if (dt < 1) return;
+      lastRef.current += dt * 1000;
+      let { idx: i, left: l } = posRef.current;
+      while (dt > 0) {
+        if (l > dt) { l -= dt; dt = 0; }
+        else {
+          dt -= l;
           const next = i + 1;
-          if (next >= seq.length) { setRunning(false); onComplete(); Vibration.vibrate([0, 250, 120, 250]); return next; }
-          setLeft(seq[next].dur);
+          if (next >= seq.length) {
+            posRef.current = { idx: next, left: 0 }; setIdx(next); setLeft(0);
+            setRunning(false); onComplete(); Vibration.vibrate([0, 250, 120, 250]);
+            return;
+          }
+          i = next; l = seq[next].dur;
           Vibration.vibrate(seq[next].type === "work" ? 350 : 200);
-          return next;
-        });
-        return l;
-      });
-    }, 1000);
+        }
+      }
+      posRef.current = { idx: i, left: l };
+      setIdx(i); setLeft(l);
+      if (l > 0 && l <= 4) Vibration.vibrate(55);
+    }, 250);
     return () => { if (tick.current) clearInterval(tick.current); };
   }, [running, seq, onComplete]);
 
-  function start() { if (!seq.length) return; setIdx(0); setLeft(seq[0].dur); setRunning(true); Vibration.vibrate(300); }
-  function reset() { setRunning(false); setIdx(-1); setLeft(0); }
-  function skip() { setIdx((i) => { const n = i + 1; if (n >= seq.length) { setRunning(false); onComplete(); return n; } setLeft(seq[n].dur); return n; }); }
-  function back() { setIdx((i) => { const p = Math.max(0, i - 1); setLeft(seq[p].dur); return p; }); }
+  const seek = (i: number, l: number) => { posRef.current = { idx: i, left: l }; lastRef.current = Date.now(); setIdx(i); setLeft(l); };
+  function start() { if (!seq.length) return; seek(0, seq[0].dur); setRunning(true); Vibration.vibrate(300); }
+  function reset() { setRunning(false); seek(-1, 0); }
+  function skip() { const n = idx + 1; if (n >= seq.length) { setRunning(false); seek(n, 0); onComplete(); } else seek(n, seq[n].dur); }
+  function back() { const p = Math.max(0, idx - 1); seek(p, seq[p].dur); }
   function set<K extends keyof TabataConfig>(k: K, v: number) { setCfg((c) => ({ ...c, [k]: Math.max(0, v) })); }
   async function savePreset() {
     if (!userId) return;

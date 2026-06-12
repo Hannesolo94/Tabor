@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, ActivityIndicator, Modal, AppState } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useActionSheet, type SheetAction } from "@/components/ActionSheet";
@@ -7,7 +7,7 @@ import { Celebration } from "@/components/Celebration";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/lib/useProfile";
-import { loadToday, toggleQuest, sealDay, getDayFeedback, recordDayFeedback, CORE_KEYS, type Quest } from "@/lib/quests";
+import { loadToday, toggleQuest, sealDay, getDayFeedback, recordDayFeedback, todayKey, CORE_KEYS, type Quest } from "@/lib/quests";
 import { bookOrderFor } from "@/lib/scripture";
 import { levelProgress } from "@/lib/game";
 import { Seal } from "@/components/Seal";
@@ -35,15 +35,24 @@ export default function Quests() {
   const [rankUp, setRankUp] = useState(false);
   const [questCel, setQuestCel] = useState<{ xp: number; pillar: string } | null>(null);
 
-  useEffect(() => {
+  const loadedDay = useRef("");
+  const reloadToday = useCallback(() => {
     if (!userId) return;
+    loadedDay.current = todayKey();
     loadToday(userId).then((q) => {
       setQuests(q);
       setSealed(q.length > 0 && q.every((x) => x.done));
+      setXpOffset(0);
       setLoading(false);
     });
     getDayFeedback(userId).then(setFeedback);
   }, [userId]);
+  useEffect(() => { reloadToday(); }, [reloadToday]);
+  // if the app was left open past midnight, generate the new day's quests on return
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (s) => { if (s === "active" && userId && loadedDay.current !== todayKey()) reloadToday(); });
+    return () => sub.remove();
+  }, [userId, reloadToday]);
   // unread inbox badge for the bell, refreshed on focus
   useFocusEffect(useCallback(() => {
     if (!userId) return;

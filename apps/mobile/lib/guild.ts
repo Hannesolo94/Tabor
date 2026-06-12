@@ -17,14 +17,6 @@ export async function ensureGuild(userId: string): Promise<{ guildId: string | n
   return { guildId, channels: (ch as Channel[]) ?? [] };
 }
 
-export interface ExploreGuild { id: string; name: string; tag: string | null; members: number; joined: boolean }
-export async function exploreGuilds(): Promise<ExploreGuild[]> {
-  const { data } = await supabase.rpc("explore_guilds");
-  return (data as ExploreGuild[]) ?? [];
-}
-export async function joinGuild(guildId: string): Promise<void> {
-  await supabase.rpc("join_guild", { p_guild_id: guildId });
-}
 
 export async function loadChannels(guildId: string): Promise<Channel[]> {
   const { data } = await supabase.from("channels").select("id, name").eq("guild_id", guildId);

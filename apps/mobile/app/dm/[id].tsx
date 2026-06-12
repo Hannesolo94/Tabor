@@ -125,9 +125,10 @@ export default function DM() {
           {messages.length === 0 && <Text style={{ color: C.muted, fontSize: 13, textAlign: "center", marginTop: 30, fontFamily: F.body }}>Say the first word. Only the two of you can read this.</Text>}
           {messages.map((m) => {
             const mine = m.author_id === userId;
+            const media = parseMedia(text[m.id]);
             return (
               <Pressable key={m.id} onLongPress={() => report(m)} delayLongPress={350} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
-                {parseMedia(text[m.id]) ? <MediaBubble media={parseMedia(text[m.id])!} /> : (
+                {media ? <MediaBubble media={media} /> : (
                   <View style={{ backgroundColor: mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: C.line, padding: 11, borderRadius: 12 }}>
                     <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20, fontFamily: F.body }}>{text[m.id] ?? "…"}</Text>
                   </View>

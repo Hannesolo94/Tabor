@@ -271,10 +271,11 @@ export default function Guild() {
             {messages.length === 0 && <Text style={{ color: C.muted, fontSize: 13, textAlign: "center", marginTop: 30 }}>{mode === "board" ? "No announcements yet." : mode === "community" ? "Say hello. Meet a brother." : `No words yet in #${active?.name}. Break the silence.`}</Text>}
             {messages.map((m) => {
               const mine = m.author_id === userId;
+              const media = parseMedia(m.body);
               return (
                 <Pressable key={m.id} onLongPress={() => onMessagePress(m)} delayLongPress={300} style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "82%", marginBottom: 10 }}>
                   <Text style={{ color: mine ? C.gold : C.muted, fontSize: 10, letterSpacing: 1, marginBottom: 3, textAlign: mine ? "right" : "left" }}>{mine ? "YOU" : (m.author_id ? nameMap[m.author_id] ?? "Brother" : "System").toUpperCase()}</Text>
-                  {parseMedia(m.body) ? <MediaBubble media={parseMedia(m.body)!} /> : (
+                  {media ? <MediaBubble media={media} /> : (
                     <View style={{ backgroundColor: mode === "board" ? "rgba(201,169,97,0.10)" : mine ? "rgba(201,169,97,0.12)" : C.surface2, borderWidth: 1, borderColor: mode === "board" ? C.gold : C.line, padding: 11, borderRadius: 12 }}>
                       <Text style={{ color: C.ivory, fontSize: 14, lineHeight: 20 }}>{m.body}</Text>
                     </View>

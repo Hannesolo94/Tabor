@@ -10,12 +10,14 @@ import { computeShipping } from "@/lib/shipping";
 import { startPayment } from "@/lib/payments";
 import { sendEmail, emailShell } from "@/lib/email";
 import { sameOrigin } from "@/lib/http";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 interface InItem { sku: string; size?: string; qty?: number }
 interface Body { items?: InItem[]; email?: string; shipping?: Record<string, string>; discountCode?: string }
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (!(await rateLimit(`checkout:${clientIp(req)}`, 12, 60))) return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
 
   let body: Body;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "bad request" }, { status: 400 }); }

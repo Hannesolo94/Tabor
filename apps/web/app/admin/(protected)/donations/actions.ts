@@ -25,6 +25,7 @@ export async function saveGoal(formData: FormData): Promise<void> {
   };
   if (id) await sb.from("donation_goals").update(patch).eq("id", id);
   else await sb.from("donation_goals").insert({ ...patch, active: true });
+  await logAudit(id ? "donation_goal.update" : "donation_goal.create", "donation_goal", id || patch.title);
   revalidatePath("/admin/donations");
   revalidatePath("/give");
 }
@@ -34,6 +35,7 @@ export async function addCharity(formData: FormData): Promise<void> {
   if (!name) return;
   const sb = await supabaseServer();
   await sb.from("charities").insert({ name, blurb: String(formData.get("blurb") ?? "") || null });
+  await logAudit("charity.add", "charity", name);
   revalidatePath("/admin/donations");
   revalidatePath("/give");
 }
@@ -43,6 +45,7 @@ export async function toggleCharity(formData: FormData): Promise<void> {
   const active = formData.get("active") === "true";
   const sb = await supabaseServer();
   await sb.from("charities").update({ active: !active }).eq("id", id);
+  await logAudit("charity.toggle", "charity", id, { active: !active });
   revalidatePath("/admin/donations");
   revalidatePath("/give");
 }
