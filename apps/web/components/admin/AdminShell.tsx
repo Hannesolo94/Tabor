@@ -50,18 +50,13 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
   ] },
 ];
 
-// Moderators only see the dashboard + community/safety tools. Broadcast lives in
-// the Content Studio now, so moderators get a direct link to that tab.
+// Moderators only see the dashboard + safety tools. Broadcast is admin-only (it
+// messages every member), so it is not in this set.
 const MOD_HREFS = new Set(["/admin", "/admin/moderation", "/admin/tickets", "/admin/giveaways"]);
 
 export function AdminShell({ email, name, role, children }: { email?: string; name?: string | null; role?: string; children: React.ReactNode }) {
   const groups = role === "moderator"
-    ? NAV_GROUPS.map((g) => ({
-        ...g,
-        items: g.section === "Community"
-          ? [{ label: "Broadcast", href: "/admin/blog/broadcast" }, ...g.items.filter((i) => MOD_HREFS.has(i.href))]
-          : g.items.filter((i) => MOD_HREFS.has(i.href)),
-      })).filter((g) => g.items.length)
+    ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => MOD_HREFS.has(i.href)) })).filter((g) => g.items.length)
     : NAV_GROUPS;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "248px 1fr", minHeight: "100vh" }}>

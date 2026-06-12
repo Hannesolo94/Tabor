@@ -52,8 +52,14 @@ export async function getFeed(userId: string): Promise<FeedPost[]> {
   // published posts, plus scheduled posts whose time has arrived (they go live on the
   // dot; the dashboard sweep flips their status to published shortly after)
   const nowIso = new Date().toISOString();
+  // order newest-first server-side and only pull app-targeted posts, so a busy
+  // posts table can never starve the feed of recent entries.
   const { data } = await supabase.from("posts").select("id, title, body, excerpt, author, type, cover_image, published_at, scheduled_for, targets")
-    .or(`status.eq.published,and(status.eq.scheduled,scheduled_for.lte.${nowIso})`).limit(50);
+    .or(`status.eq.published,and(status.eq.scheduled,scheduled_for.lte.${nowIso})`)
+    .eq("targets->>app", "true")
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("scheduled_for", { ascending: false, nullsFirst: false })
+    .limit(50);
   const liveAt = (p: PostRow) => new Date(p.published_at ?? p.scheduled_for ?? 0).getTime();
   const appPosts = ((data ?? []) as PostRow[]).filter((p) => p.targets?.app).sort((a, b) => liveAt(b) - liveAt(a));
   return hydrate(appPosts, userId);

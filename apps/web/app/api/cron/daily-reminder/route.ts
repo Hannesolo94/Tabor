@@ -10,9 +10,11 @@ import { promoteDuePosts } from "@/lib/content-schedule";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  // Vercel Cron sends Authorization: Bearer <CRON_SECRET> when CRON_SECRET is set
+  // Vercel Cron sends Authorization: Bearer <CRON_SECRET>. Fail closed: if the
+  // secret is unset or the header does not match, reject (this route fans out
+  // thousands of emails, so it must never be openly triggerable).
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

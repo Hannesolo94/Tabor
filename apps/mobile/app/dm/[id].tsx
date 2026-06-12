@@ -21,7 +21,8 @@ export default function DM() {
   const [messages, setMessages] = useState<DmMsg[]>([]);
   const [text, setText] = useState<Record<string, string>>({}); // id -> decrypted plaintext
   const [input, setInput] = useState("");
-  const [otherPub, setOtherPub] = useState<string | null>(null);
+  // undefined = still fetching the partner's key; null = they have none (plaintext); string = key
+  const [otherPub, setOtherPub] = useState<string | null | undefined>(undefined);
   const [gifOpen, setGifOpen] = useState(false);
   const sheet = useActionSheet();
   const scroller = useRef<ScrollView>(null);
@@ -29,16 +30,16 @@ export default function DM() {
   useEffect(() => { if (uid) getPublicKey(uid).then(setOtherPub); }, [uid]);
 
   useEffect(() => {
-    if (!id || otherPub === null) return; // wait until we have the partner's key
+    if (!id || otherPub === undefined) return; // wait only while still fetching the key
     loadDm(id).then(async (m) => {
       setMessages(m);
       const map: Record<string, string> = {};
-      for (const msg of m) map[msg.id] = await decryptDM(otherPub, msg.body);
+      for (const msg of m) map[msg.id] = await decryptDM(otherPub ?? "", msg.body);
       setText(map);
       setTimeout(() => scroller.current?.scrollToEnd({ animated: false }), 60);
     });
     const unsub = subscribeDm(id, async (msg) => {
-      const plain = await decryptDM(otherPub, msg.body);
+      const plain = await decryptDM(otherPub ?? "", msg.body);
       setMessages((prev) => {
         if (prev.some((p) => p.id === msg.id)) return prev; // already have the real row
         // replace my own optimistic (tmp-) bubble instead of showing a duplicate

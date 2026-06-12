@@ -36,7 +36,15 @@ export default function Settings() {
       message: "This permanently erases your profile, progress, messages, and all data. This cannot be undone.",
       actions: [
         { label: "Delete everything", style: "destructive", onPress: async () => {
-          try { await supabase.rpc("delete_my_account"); } catch { /* row already gone */ }
+          // verify the wipe actually happened before signing out. supabase.rpc resolves
+          // with { error } on SQL/RLS failure (it does not throw), so we must check it.
+          try {
+            const { error } = await supabase.rpc("delete_my_account");
+            if (error) throw error;
+          } catch {
+            sheet({ title: "Delete failed", message: "We could not erase your account, so nothing was deleted. Check your connection and try again, or contact support.", actions: [{ label: "Got it", style: "cancel" }] });
+            return;
+          }
           await signOut();
         } },
       ],

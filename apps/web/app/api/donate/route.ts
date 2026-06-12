@@ -2,6 +2,7 @@
 // until then this records the intent (status 'pending') so the team can track it.
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getRegion, REGIONS } from "@/lib/region";
 import { sameOrigin } from "@/lib/http";
 
 export async function POST(req: Request) {
@@ -14,12 +15,14 @@ export async function POST(req: Request) {
   const email = String(b.email ?? "").trim().toLowerCase();
   if (!email.includes("@")) return NextResponse.json({ error: "A valid email is required." }, { status: 400 });
 
+  // currency follows the visitor's region, matching the amount they saw on the page
+  const region = await getRegion();
   const admin = supabaseAdmin();
   const { error } = await admin.from("donations").insert({
     name: String(b.name ?? "").trim() || null,
     email,
     amount,
-    currency: "ZAR",
+    currency: REGIONS[region].code,
     charity_id: b.charity_id || null,
     goal_id: b.goal_id || null,
     message: String(b.message ?? "").slice(0, 300) || null,

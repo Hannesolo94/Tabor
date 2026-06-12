@@ -55,8 +55,9 @@ export async function toggleReaction(messageId: string, userId: string, emoji: s
 }
 
 export async function loadMessages(channelId: string): Promise<Msg[]> {
-  const { data } = await supabase.from("messages").select("id, body, author_id, created_at").eq("channel_id", channelId).eq("hidden", false).order("created_at", { ascending: true }).limit(100);
-  return (data as Msg[]) ?? [];
+  // fetch the NEWEST 100 (descending), then flip to chronological for display
+  const { data } = await supabase.from("messages").select("id, body, author_id, created_at").eq("channel_id", channelId).eq("hidden", false).order("created_at", { ascending: false }).limit(100);
+  return ((data as Msg[]) ?? []).reverse();
 }
 
 export async function sendMessage(channelId: string, guildId: string, userId: string, body: string): Promise<{ error?: string; hidden?: boolean }> {

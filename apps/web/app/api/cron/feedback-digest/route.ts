@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 const TEAM_EMAIL = "haasrx@gmail.com";
 
 export async function GET(req: Request) {
+  // fail closed: require the cron secret (Vercel injects it on scheduled calls)
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const admin = supabaseAdmin();

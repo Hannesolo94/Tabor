@@ -38,8 +38,9 @@ export async function myGuilds(userId: string): Promise<GuildRow[]> {
 
 // DM messages
 export async function loadDm(threadId: string): Promise<DmMsg[]> {
-  const { data } = await supabase.from("messages").select("id, body, author_id, created_at").eq("dm_thread_id", threadId).order("created_at", { ascending: true }).limit(100);
-  return (data as DmMsg[]) ?? [];
+  // newest 100 (descending), flipped back to chronological for display
+  const { data } = await supabase.from("messages").select("id, body, author_id, created_at").eq("dm_thread_id", threadId).order("created_at", { ascending: false }).limit(100);
+  return ((data as DmMsg[]) ?? []).reverse();
 }
 export async function sendDm(threadId: string, userId: string, body: string): Promise<{ error?: string }> {
   // push (content-free, E2EE) is fired by a DB trigger after insert

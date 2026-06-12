@@ -28,7 +28,8 @@ export async function POST(req: Request) {
   const name = (b.name ?? "").trim();
   const body = (b.body ?? "").trim();
   const rating = Math.min(5, Math.max(1, Math.round(Number(b.rating) || 0)));
-  const media = Array.isArray(b.media) ? b.media.filter((m) => m.url) : [];
+  // only accept real http(s) media URLs (block javascript:/data: and other schemes)
+  const media = Array.isArray(b.media) ? b.media.filter((m) => /^https?:\/\//i.test(String(m.url ?? ""))) : [];
 
   if (!name || !body || !rating) return NextResponse.json({ error: "name, rating and review are required" }, { status: 400 });
   // marketing-use consent is required when uploading media

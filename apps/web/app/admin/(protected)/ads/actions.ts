@@ -6,21 +6,16 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { anthropicConfig } from "@/lib/anthropic-config";
+import { createUploadTicket } from "@/lib/storage-upload";
 import { logAudit } from "@/lib/audit";
 
 export interface AdMediaCard { kind: string; url: string; poster_url: string | null }
 export interface AdCopy { title: string; hook: string; primary_text: string; headline: string; cta: string }
 
-/** Signed upload URL so the browser uploads ad media directly to content-media. */
+/** Signed upload URL so the browser uploads ad media directly to content-media (ads/ prefix). */
 export async function createAdMediaUpload(name: string): Promise<{ path: string; token: string; publicUrl: string } | { error: string }> {
-  const admin = supabaseAdmin();
-  const ext = name.includes(".") ? name.split(".").pop() : "bin";
-  const path = `ads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { data, error } = await admin.storage.from("content-media").createSignedUploadUrl(path);
-  if (error || !data) return { error: error?.message ?? "Could not start the upload." };
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  return { path: data.path, token: data.token, publicUrl: `${base}/storage/v1/object/public/content-media/${data.path}` };
+  return createUploadTicket(name, "content-media", "ads");
 }
 
 // ---- campaigns ----
@@ -109,17 +104,8 @@ export async function deleteCreative(id: string): Promise<void> {
   revalidatePath("/admin/ads");
 }
 
-// ---- AI ad-copy drafting (same key/model plumbing as the Content Studio) ----
+// ---- AI ad-copy drafting (shared key/model plumbing with the Content Studio) ----
 const ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages";
-
-async function anthropicConfig(): Promise<{ key: string; model: string } | null> {
-  const admin = supabaseAdmin();
-  const { data } = await admin.from("integrations").select("secret, enabled, meta").eq("provider", "anthropic").maybeSingle();
-  const key = (data?.enabled && data?.secret) || process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
-  const model = ((data?.meta as { model?: string } | null)?.model) || process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
-  return { key: String(key), model };
-}
 
 const AD_SYSTEM = `You write direct-response ad copy for TABOR ("Sons of Fire"), a gamified Christian brotherhood and apparel/gear brand for men who game, train, and follow Jesus.
 Voice: bold, brotherly, conviction-first. Sell identity and brotherhood, not just product. Never corporate, never cringe, never preachy.

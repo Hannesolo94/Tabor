@@ -4,7 +4,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProductBySku } from "@/lib/products-db";
-import { getRegion } from "@/lib/region";
+import { regionForCountry } from "@/lib/region";
 import { REGIONS } from "@/lib/region";
 import { computeShipping } from "@/lib/shipping";
 import { startPayment } from "@/lib/payments";
@@ -30,7 +30,9 @@ export async function POST(req: Request) {
     if (!String(shipping[f] ?? "").trim()) return NextResponse.json({ error: `Shipping ${f} is required.` }, { status: 400 });
   }
 
-  const region = await getRegion();
+  // LOCK the price region to the shipping destination, not the browser cookie, so
+  // the cheaper ZA price book cannot be claimed on an international order.
+  const region = regionForCountry(String(shipping.country ?? ""));
   const cur = REGIONS[region];
 
   // recompute every line from the DB for this region
@@ -49,7 +51,6 @@ export async function POST(req: Request) {
   const admin = supabaseAdmin();
   let discountAmount = 0;
   let discountCode: string | null = null;
-  let discountUsed = 0;
   const code = String(body.discountCode ?? "").trim().toUpperCase();
   if (code) {
     const { data: d } = await admin.from("discount_codes")
@@ -70,7 +71,6 @@ export async function POST(req: Request) {
       ? Math.min(subtotal, Math.max(0, Number(d.amount) || 0))
       : Math.round(subtotal * (Number(d.percent) / 100) * 100) / 100;
     discountCode = d.code;
-    discountUsed = Number(d.used_count) || 0;
   }
 
   // flat-rate shipping (USD $11.99 worldwide / free US over $100; ZAR R150 / free over R1800)
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
   // start payment via the configured provider
   const pay = await startPayment({ id: order.id, total, currency: cur.code, email, region });
   await admin.from("orders").update({ payment_provider: pay.provider, payment_ref: pay.ref ?? null }).eq("id", order.id);
-  if (discountCode) await admin.from("discount_codes").update({ used_count: discountUsed + 1 }).eq("code", discountCode);
+  if (discountCode) await admin.rpc("bump_discount_use", { p_code: discountCode }); // atomic increment (no lost-update race)
 
   // order confirmation email (branded, best-effort — never blocks the order)
   try {

@@ -3,12 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { isCallerAdmin } from "@/lib/admin-guard";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, emailShell } from "@/lib/email";
 import { sendExpoPush } from "@/lib/push";
 
 /** Compose a community announcement and fan it out to every user's inbox. */
 export async function sendBroadcast(formData: FormData): Promise<void> {
+  if (!(await isCallerAdmin())) return; // mass message to every member: admin-only
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
   const deepLink = String(formData.get("deep_link") ?? "").trim() || null;
@@ -52,6 +54,7 @@ export async function sendBroadcast(formData: FormData): Promise<void> {
 
 /** Send a test email to the signed-in admin to verify the email provider works. */
 export async function sendTestEmail(): Promise<void> {
+  if (!(await isCallerAdmin())) return;
   const sb = await supabaseServer();
   const { data: { user } } = await sb.auth.getUser();
   if (!user?.email) return;

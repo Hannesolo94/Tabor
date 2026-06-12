@@ -3,8 +3,9 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 import { publishToSocial, deleteSocialPost } from "@/lib/zernio";
+import { anthropicConfig } from "@/lib/anthropic-config";
+import { createUploadTicket } from "@/lib/storage-upload";
 import { slugify } from "@/lib/slug";
 import { logAudit } from "@/lib/audit";
 
@@ -13,13 +14,7 @@ export interface MediaCard { kind: string; url: string; poster_url: string | nul
 
 /** Signed upload URL so the browser uploads media DIRECTLY to the public content-media bucket. */
 export async function createMediaUpload(name: string): Promise<{ path: string; token: string; publicUrl: string } | { error: string }> {
-  const admin = supabaseAdmin();
-  const ext = name.includes(".") ? name.split(".").pop() : "bin";
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { data, error } = await admin.storage.from("content-media").createSignedUploadUrl(path);
-  if (error || !data) return { error: error?.message ?? "Could not start the upload." };
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  return { path: data.path, token: data.token, publicUrl: `${base}/storage/v1/object/public/content-media/${data.path}` };
+  return createUploadTicket(name, "content-media");
 }
 
 /** Full save of a post: fields + type + brief + targets + the ordered media cards. */
@@ -51,15 +46,6 @@ export async function savePost(input: {
 
 // ---- AI draft-from-brief + review workflow ----
 const ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages";
-
-async function anthropicConfig(): Promise<{ key: string; model: string } | null> {
-  const admin = supabaseAdmin();
-  const { data } = await admin.from("integrations").select("secret, enabled, meta").eq("provider", "anthropic").maybeSingle();
-  const key = (data?.enabled && data?.secret) || process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
-  const model = ((data?.meta as { model?: string } | null)?.model) || process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
-  return { key: String(key), model };
-}
 
 const DRAFT_SYSTEM = `You write social and in-app feed posts for TABOR ("Sons of Fire"), a gamified Christian brotherhood and apparel/gear brand for men who game, train, and follow Jesus.
 Voice: warm but strong, conversational, brotherly, honest, encouraging. Masculine and faith-filled. Never corporate, never cringe, never preachy.
@@ -237,32 +223,6 @@ export async function createPost(formData: FormData): Promise<void> {
   const { data } = await sb.from("posts").insert({ title, slug }).select("id").single();
   revalidatePath("/admin/blog");
   if (data?.id) redirect(`/admin/blog/${data.id}`);
-}
-
-export async function updatePost(formData: FormData): Promise<void> {
-  const id = String(formData.get("id") ?? "");
-  const status = String(formData.get("status") ?? "draft");
-  const sb = await supabaseServer();
-  const patch: Record<string, unknown> = {
-    title: String(formData.get("title") ?? "").trim(),
-    slug: slugify(String(formData.get("slug") ?? "")),
-    excerpt: String(formData.get("excerpt") ?? "") || null,
-    body: String(formData.get("body") ?? ""),
-    cover_image: String(formData.get("cover_image") ?? "") || null,
-    author: String(formData.get("author") ?? "TABOR") || "TABOR",
-    status,
-    updated_at: new Date().toISOString(),
-  };
-  // stamp publish time the first time it goes live
-  if (status === "published") {
-    const { data: cur } = await sb.from("posts").select("published_at").eq("id", id).maybeSingle();
-    if (!cur?.published_at) patch.published_at = new Date().toISOString();
-  }
-  await sb.from("posts").update(patch).eq("id", id);
-  await logAudit("post.update", "post", id, { status });
-  revalidatePath("/admin/blog");
-  revalidatePath(`/admin/blog/${id}`);
-  revalidatePath("/blog");
 }
 
 export async function deletePost(formData: FormData): Promise<void> {
