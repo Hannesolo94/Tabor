@@ -116,6 +116,12 @@ export function useScriptureAudio(opts: {
 
   const setRate = useCallback((n: number) => { rateRef.current = n; setRateState(n); AsyncStorage.setItem(RATE_KEY, String(n)); }, []);
   const setVoice = useCallback((id: string | null) => { voiceRef.current = id; setVoiceState(id); AsyncStorage.setItem(VOICE_KEY, id ?? ""); }, []);
+  // speak a short sample in a given voice so the user can choose by ear
+  const previewVoice = useCallback((voiceId: string | null) => {
+    stopped.current = true; // halt any chapter read first
+    Speech.stop();
+    Speech.speak("In the beginning, God created the heavens and the earth.", { voice: voiceId ?? undefined, rate: rateRef.current });
+  }, []);
 
-  return { speaking, paused, current, rate, voice, voices, start, pause, resume, stop, setRate, setVoice };
+  return { speaking, paused, current, rate, voice, voices, start, pause, resume, stop, setRate, setVoice, previewVoice };
 }

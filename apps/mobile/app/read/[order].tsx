@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,6 +15,19 @@ const VERSION_KEY = "tabor.bible.version";
 const RATES = [0.8, 0.9, 1.0, 1.15, 1.3];
 
 const HL_COLORS = ["#c9a961", "#6fa8dc", "#7bb274", "#c77b9e"];
+
+// Friendly name for an opaque TTS voice id (e.g. "en-gb-x-gba-network"). The engines
+// don't expose gender, so previewing is how you tell them apart.
+const LANG_NAMES: Record<string, string> = {
+  "en-us": "English (US)", "en-gb": "English (UK)", "en-au": "English (Australia)",
+  "en-in": "English (India)", "en-ie": "English (Ireland)", "en-za": "English (South Africa)",
+  "en-ng": "English (Nigeria)", "en-ca": "English (Canada)", "en": "English",
+};
+function langLabel(language: string): string {
+  const k = (language || "").toLowerCase();
+  return LANG_NAMES[k] || LANG_NAMES[k.split("-")[0]] || language || "English";
+}
+const isHD = (v: { id: string; name: string }) => /network|enhanced|premium/i.test(v.id) || /network|enhanced|premium/i.test(v.name);
 
 export default function Reader() {
   const router = useRouter();
@@ -34,6 +47,7 @@ export default function Reader() {
   const [version, setVersion] = useState("kjv");
   const [versions, setVersions] = useState<BibleVersion[]>([]);
   const [fellBack, setFellBack] = useState(false);
+  const [voiceModal, setVoiceModal] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const verseY = useRef<Record<number, number>>({});
   const curVersion = versions.find((v) => v.code === version);
@@ -57,17 +71,22 @@ export default function Reader() {
   const goChapter = (n: number) => { if (audio.speaking) audio.stop(); setChapter(n); };
   const cycleRate = () => { const i = RATES.indexOf(audio.rate); audio.setRate(RATES[(i + 1) % RATES.length] ?? 1); };
   const pickVoice = () => {
-    if (!audio.voices.length) { sheet({ title: "Voices", message: "No extra voices found. iOS: add Enhanced voices in Settings > Accessibility > Spoken Content > Voices.", actions: [{ label: "OK", style: "cancel" }] }); return; }
-    sheet({
-      title: "Reading voice",
-      message: "Pick the voice for scripture narration.",
-      actions: [
-        { label: "Device default", onPress: () => audio.setVoice(null) },
-        ...audio.voices.slice(0, 12).map((v) => ({ label: `${v.name}${v.quality.toLowerCase().includes("enhanced") || v.quality === "3" ? " ✦" : ""}`, onPress: () => audio.setVoice(v.id) })),
-        { label: "Cancel", style: "cancel" as const },
-      ],
-    });
+    if (!audio.voices.length) { sheet({ title: "Voices", message: "No extra voices found on this device. You can add more in your phone's text-to-speech settings.", actions: [{ label: "OK", style: "cancel" }] }); return; }
+    audio.stop();
+    setVoiceModal(true);
   };
+  // group English voices by region, HD (online) first, numbered within each group
+  const voiceGroups = (() => {
+    const groups: { lang: string; voices: { id: string; name: string; language: string; hd: boolean; n: number }[] }[] = [];
+    const sorted = [...audio.voices].sort((a, b) => (isHD(b) ? 1 : 0) - (isHD(a) ? 1 : 0));
+    for (const v of sorted) {
+      const lang = langLabel(v.language);
+      let g = groups.find((x) => x.lang === lang);
+      if (!g) { g = { lang, voices: [] }; groups.push(g); }
+      g.voices.push({ id: v.id, name: v.name, language: v.language, hd: isHD(v), n: g.voices.length + 1 });
+    }
+    return groups;
+  })();
   const changeVersion = (code: string) => { audio.stop(); setVersion(code); AsyncStorage.setItem(VERSION_KEY, code); };
   const pickVersion = () => {
     if (versions.length <= 1) { sheet({ title: "Bible version", message: "More translations are on the way. The King James Version is available now.", actions: [{ label: "OK", style: "cancel" }] }); return; }
@@ -215,6 +234,46 @@ export default function Reader() {
           </View>
         </View>
       )}
+
+      {/* voice picker — preview each by ear, then choose */}
+      <Modal visible={voiceModal} transparent animationType="slide" onRequestClose={() => { audio.stop(); setVoiceModal(false); }}>
+        <Pressable onPress={() => { audio.stop(); setVoiceModal(false); }} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "flex-end" }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: C.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: C.line, maxHeight: "82%" }}>
+            <View style={{ alignItems: "center", paddingTop: 10 }}><View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: C.line }} /></View>
+            <View style={{ padding: 18, paddingBottom: 8 }}>
+              <Text style={{ color: C.ivory, fontFamily: F.head, fontSize: 18 }}>Reading voice</Text>
+              <Text style={{ color: C.muted, fontFamily: F.body, fontSize: 12.5, marginTop: 3, lineHeight: 18 }}>Tap ▶ to hear a voice, then pick it. Voices come from your phone and differ per device; the HD ones are the most natural. There are male and female voices here, so preview to find your fit.</Text>
+            </View>
+            <ScrollView contentContainerStyle={{ padding: 14, paddingTop: 0, paddingBottom: 30 }}>
+              <Pressable onPress={() => { audio.setVoice(null); setVoiceModal(false); }} style={{ flexDirection: "row", alignItems: "center", paddingVertical: 13, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: audio.voice === null ? C.gold : C.line, marginBottom: 6 }}>
+                <Text style={{ color: audio.voice === null ? C.gold : C.ivory, fontFamily: F.bodyMid, fontSize: 14, flex: 1 }}>{audio.voice === null ? "● " : ""}Device default</Text>
+              </Pressable>
+              {voiceGroups.map((g) => (
+                <View key={g.lang}>
+                  <Text style={{ color: C.muted, fontFamily: F.mono, fontSize: 10, letterSpacing: 1, marginTop: 12, marginBottom: 6 }}>{g.lang.toUpperCase()}</Text>
+                  {g.voices.map((v) => {
+                    const sel = audio.voice === v.id;
+                    return (
+                      <View key={v.id} style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <Pressable onPress={() => audio.previewVoice(v.id)} hitSlop={6} style={{ width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: C.gold, alignItems: "center", justifyContent: "center" }}>
+                          <Text style={{ color: C.gold, fontSize: 14 }}>▶</Text>
+                        </Pressable>
+                        <Pressable onPress={() => { audio.stop(); audio.setVoice(v.id); setVoiceModal(false); }} style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 13, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: sel ? C.gold : C.line }}>
+                          <Text style={{ color: sel ? C.gold : C.ivory, fontFamily: F.bodyMid, fontSize: 14, flex: 1 }}>{sel ? "● " : ""}Voice {v.n}</Text>
+                          {v.hd && <Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 9, letterSpacing: 1, borderWidth: 1, borderColor: C.gold, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>HD</Text>}
+                        </Pressable>
+                      </View>
+                    );
+                  })}
+                </View>
+              ))}
+            </ScrollView>
+            <Pressable onPress={() => { audio.stop(); setVoiceModal(false); }} style={{ padding: 16, alignItems: "center", borderTopWidth: 1, borderTopColor: C.line }}>
+              <Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 12, letterSpacing: 1.5 }}>DONE</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
