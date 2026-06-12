@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/lib/auth";
-import { getBooks, getChapter, getBookmarks, setBookmarks, getHighlights, setHighlights, removeHighlights, setLastRead, type Verse } from "@/lib/scripture";
+import { getBooks, getChapter, getVersions, getBookmarks, setBookmarks, getHighlights, setHighlights, removeHighlights, setLastRead, type Verse, type BibleVersion } from "@/lib/scripture";
 import { addNote } from "@/lib/notes";
 import { useScriptureAudio } from "@/lib/tts";
 import { useActionSheet } from "@/components/ActionSheet";
 import { C, F } from "@/lib/theme";
+
+const VERSION_KEY = "tabor.bible.version";
 
 const RATES = [0.8, 0.9, 1.0, 1.15, 1.3];
 
@@ -28,8 +31,12 @@ export default function Reader() {
   const [marks, setMarks] = useState<Set<string>>(new Set());
   const [highlights, setHls] = useState<Map<string, string>>(new Map());
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [version, setVersion] = useState("kjv");
+  const [versions, setVersions] = useState<BibleVersion[]>([]);
+  const [fellBack, setFellBack] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const verseY = useRef<Record<number, number>>({});
+  const curVersion = versions.find((v) => v.code === version);
 
   // text-to-voice: read the chapter aloud, optionally rolling into the next one
   const audio = useScriptureAudio({
@@ -61,6 +68,18 @@ export default function Reader() {
       ],
     });
   };
+  const changeVersion = (code: string) => { audio.stop(); setVersion(code); AsyncStorage.setItem(VERSION_KEY, code); };
+  const pickVersion = () => {
+    if (versions.length <= 1) { sheet({ title: "Bible version", message: "More translations are on the way. The King James Version is available now.", actions: [{ label: "OK", style: "cancel" }] }); return; }
+    sheet({
+      title: "Bible version",
+      message: "Choose your translation.",
+      actions: [
+        ...versions.map((v) => ({ label: `${v.name}${v.language !== "English" ? ` · ${v.language}` : ""}${v.code === version ? "  ●" : ""}`, onPress: () => changeVersion(v.code) })),
+        { label: "Cancel", style: "cancel" as const },
+      ],
+    });
+  };
 
   useEffect(() => { getBooks().then((bs) => { const b = bs.find((x) => x.book_order === bookOrder); if (b) { setBook(b.book); setChapters(b.chapters); } }); }, [bookOrder]);
   useEffect(() => {
@@ -69,9 +88,13 @@ export default function Reader() {
     getHighlights(userId).then((hs) => setHls(new Map(hs.map((h) => [h.ref, h.color]))));
   }, [userId]);
   useEffect(() => {
+    getVersions().then(setVersions);
+    AsyncStorage.getItem(VERSION_KEY).then((v) => { if (v) setVersion(v); });
+  }, []);
+  useEffect(() => {
     setLoading(true); setSelected(new Set());
-    getChapter(bookOrder, chapter).then((d) => { if (d.book) setBook(d.book); setVerses(d.verses); setLoading(false); });
-  }, [bookOrder, chapter]);
+    getChapter(bookOrder, chapter, version).then((d) => { if (d.book) setBook(d.book); setVerses(d.verses); setFellBack(d.fellBack); setLoading(false); });
+  }, [bookOrder, chapter, version]);
   // remember where we left off
   useEffect(() => { if (userId && book) setLastRead(userId, { order: bookOrder, chapter, book }); }, [userId, book, bookOrder, chapter]);
 
@@ -116,6 +139,14 @@ export default function Reader() {
           </Pressable>
         ))}
       </ScrollView>
+
+      {/* version selector — tap to change translation/language */}
+      <Pressable onPress={pickVersion} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: C.line }}>
+        <Text style={{ color: C.gold, fontFamily: F.mono, fontSize: 11, letterSpacing: 1.5 }}>{(curVersion?.abbrev ?? "KJV").toUpperCase()}</Text>
+        <Text style={{ color: C.muted, fontFamily: F.body, fontSize: 11 }}>{curVersion?.name ?? "King James Version"}</Text>
+        <Text style={{ color: C.gold, fontSize: 11 }}>▾</Text>
+      </Pressable>
+      {fellBack && <Text style={{ color: C.muted, fontSize: 10, fontFamily: F.mono, textAlign: "center", paddingVertical: 5 }}>NOT IN {(curVersion?.abbrev ?? "").toUpperCase()} · SHOWING KJV</Text>}
 
       {loading ? <ActivityIndicator color={C.gold} style={{ marginTop: 30 }} /> : (
         <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 22, paddingBottom: selected.size > 0 ? 200 : 28 }}>

@@ -17,9 +17,25 @@ export async function getBooks(): Promise<BookInfo[]> {
   return _books;
 }
 
-export async function getChapter(bookOrder: number, chapter: number): Promise<{ book: string; verses: Verse[] }> {
-  const { data } = await supabase.from("bible_verses").select("book, verse, text").eq("book_order", bookOrder).eq("chapter", chapter).order("verse", { ascending: true });
-  return { book: (data?.[0]?.book as string) ?? "", verses: (data ?? []).map((v) => ({ verse: v.verse, text: v.text })) };
+export interface BibleVersion { code: string; name: string; abbrev: string; language: string }
+let _versions: BibleVersion[] | null = null;
+export async function getVersions(): Promise<BibleVersion[]> {
+  if (_versions) return _versions;
+  const { data } = await supabase.from("bible_versions").select("code, name, abbrev, language").order("sort", { ascending: true });
+  _versions = (data as BibleVersion[])?.length ? (data as BibleVersion[]) : [{ code: "kjv", name: "King James Version", abbrev: "KJV", language: "English" }];
+  return _versions;
+}
+
+/** A chapter in the chosen version. If that version doesn't carry the book (e.g. the
+ *  Deuterocanon in a Protestant translation), falls back to the KJV and flags it. */
+export async function getChapter(bookOrder: number, chapter: number, version = "kjv"): Promise<{ book: string; verses: Verse[]; fellBack: boolean }> {
+  let { data } = await supabase.from("bible_verses").select("book, verse, text").eq("book_order", bookOrder).eq("chapter", chapter).eq("version", version).order("verse", { ascending: true });
+  let fellBack = false;
+  if ((!data || data.length === 0) && version !== "kjv") {
+    fellBack = true;
+    ({ data } = await supabase.from("bible_verses").select("book, verse, text").eq("book_order", bookOrder).eq("chapter", chapter).eq("version", "kjv").order("verse", { ascending: true }));
+  }
+  return { book: (data?.[0]?.book as string) ?? "", verses: (data ?? []).map((v) => ({ verse: v.verse, text: v.text })), fellBack };
 }
 
 export async function bookOrderFor(name: string): Promise<number | null> {
