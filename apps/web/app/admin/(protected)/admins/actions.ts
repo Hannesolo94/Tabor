@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { isCallerAdmin } from "@/lib/admin-guard";
+import { isCallerOwner } from "@/lib/admin-guard";
 import { sendEmail, emailShell } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
 
@@ -17,7 +17,7 @@ export interface InviteResult { ok: boolean; message: string }
  *  sets the role, and emails them sign-in details via Resend (our verified sender,
  *  so it actually lands — Supabase's own auth email is not configured). */
 export async function inviteStaff(_prev: InviteResult | null, formData: FormData): Promise<InviteResult> {
-  if (!(await isCallerAdmin())) return { ok: false, message: "Not authorized." };
+  if (!(await isCallerOwner())) return { ok: false, message: "Only the owner can manage staff." };
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const role = String(formData.get("role") ?? "admin");
   if (!email.includes("@") || !["admin", "moderator"].includes(role)) return { ok: false, message: "Enter a valid email and role." };
@@ -62,18 +62,19 @@ export async function inviteStaff(_prev: InviteResult | null, formData: FormData
     : { ok: true, message: `Account created for ${email} as ${roleLabel}, but the email failed (${sent.error}). Share the temporary password: ${tempPassword}` };
 }
 
-/** Revoke admin. Safeguards: cannot demote yourself, and never leave zero admins. */
+/** Revoke staff. OWNER ONLY. The owner can never be demoted (by anyone, including
+ *  themselves), so the founder can't be locked out by another admin. */
 export async function revokeAdmin(formData: FormData): Promise<void> {
-  if (!(await isCallerAdmin())) return; // only admins may revoke roles
+  if (!(await isCallerOwner())) return; // only the owner may revoke staff
   const userId = String(formData.get("user_id") ?? "");
   if (!userId) return;
   const sb = await supabaseServer();
   const { data: { user } } = await sb.auth.getUser();
   if (user?.id === userId) return; // never demote yourself
   const admin = supabaseAdmin();
-  const { count } = await admin.from("profiles").select("user_id", { count: "exact", head: true }).eq("role", "admin");
-  if ((count ?? 0) <= 1) return; // keep at least one admin
+  const { data: target } = await admin.from("profiles").select("is_owner").eq("user_id", userId).maybeSingle();
+  if (target?.is_owner) return; // the owner cannot be demoted
   await admin.from("profiles").update({ role: "user" }).eq("user_id", userId);
-  await logAudit("admin.revoke", "profile", userId, {});
+  await logAudit("staff.revoke", "profile", userId, {});
   revalidatePath("/admin/admins");
 }

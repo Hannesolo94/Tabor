@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { isCallerOwner } from "@/lib/admin-guard";
 import { omnisendAddContact } from "@/lib/omnisend";
 import { logAudit } from "@/lib/audit";
 
@@ -56,8 +57,9 @@ export async function deleteNote(formData: FormData): Promise<void> {
   revalidatePath(`/admin/customers/${encodeURIComponent(email)}`);
 }
 
-/** Hard delete: remove all data we hold for this email. */
+/** Hard delete: remove all data we hold for this email. OWNER ONLY (irreversible). */
 export async function deleteCustomer(formData: FormData): Promise<void> {
+  if (!(await isCallerOwner())) return; // wiping an account is owner-only
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return;
 

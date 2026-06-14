@@ -2,7 +2,7 @@
 // self-demotion and removing the last admin.
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { requireAdmin } from "@/lib/admin-guard";
+import { requireAdmin, isCallerOwner } from "@/lib/admin-guard";
 import { revokeAdmin } from "./actions";
 import { InviteForm } from "./InviteForm";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
@@ -14,12 +14,12 @@ const btnGhost: React.CSSProperties = { fontFamily: MONO, fontSize: 9.5, letterS
 
 export default async function Admins() {
   await requireAdmin();
+  const owner = await isCallerOwner();
   const sb = await supabaseServer();
   const { data: { user } } = await sb.auth.getUser();
   const admin = supabaseAdmin();
-  const { data: admins } = await admin.from("profiles").select("user_id, email, name, role").in("role", ["admin", "moderator"]).order("role").order("email");
+  const { data: admins } = await admin.from("profiles").select("user_id, email, name, role, is_owner").in("role", ["admin", "moderator"]).order("role").order("email");
   const list = admins ?? [];
-  const adminCount = list.filter((a) => a.role === "admin").length;
 
   return (
     <div>
@@ -27,33 +27,39 @@ export default async function Admins() {
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 6 }}>[ THE COUNCIL ]</div>
         <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Staff</h1>
         <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "6px 0 0", maxWidth: 600 }}>
-          <strong style={{ color: "#E8E2D5" }}>Admins</strong> have full access. <strong style={{ color: "#E8E2D5" }}>Moderators</strong> see only the dashboard + community tools (Moderation, Tickets, Giveaways) — not settings, keys, or staff. Invite by email: if they have no account, one is created and they get a sign-in email.
+          <strong style={{ color: "#E8E2D5" }}>Owner</strong> (you) controls staff, API keys, and account deletion. <strong style={{ color: "#E8E2D5" }}>Admins</strong> have full operational access but cannot manage staff or keys. <strong style={{ color: "#E8E2D5" }}>Moderators</strong> see only the dashboard + community tools. Only the owner can invite or remove staff.
         </p>
       </div>
 
-      <InviteForm />
+      {owner ? <InviteForm /> : (
+        <div className="admin-card" style={{ ...cardStyle, marginBottom: 22 }}>
+          <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: 0 }}>Only the <strong style={{ color: GOLD }}>owner</strong> can invite or remove staff. You can view the team below.</p>
+        </div>
+      )}
 
       <div className="admin-card" style={{ ...cardStyle, padding: 0, overflow: "hidden" }}>
         <div style={{ padding: "14px 20px 0" }}><div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em", textTransform: "uppercase" }}>Current staff · {list.length}</div></div>
         {list.map((a, i) => {
           const isSelf = a.user_id === user?.id;
-          const canRevoke = !isSelf && (a.role === "moderator" || adminCount > 1);
+          const label = a.is_owner ? "OWNER" : a.role === "admin" ? "ADMIN" : "MOD";
+          const labelColor = a.is_owner || a.role === "admin" ? GOLD : "#8A847A";
+          const canRevoke = owner && !isSelf && !a.is_owner; // only the owner revokes; never the owner
           return (
             <div key={a.user_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", marginTop: i === 0 ? 12 : 0 }}>
               <div>
-                <span style={{ fontFamily: MONO, fontSize: 8.5, color: a.role === "admin" ? GOLD : "#8A847A", letterSpacing: "0.1em", border: `1px solid ${a.role === "admin" ? GOLD : "#8A847A"}55`, borderRadius: 8, padding: "2px 6px", marginRight: 8 }}>{a.role === "admin" ? "ADMIN" : "MOD"}</span>
+                <span style={{ fontFamily: MONO, fontSize: 8.5, color: labelColor, letterSpacing: "0.1em", border: `1px solid ${labelColor}55`, borderRadius: 8, padding: "2px 6px", marginRight: 8 }}>{label}</span>
                 <span style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5" }}>{a.name || a.email}</span>
                 {a.name ? <span style={{ fontFamily: MONO, fontSize: 11, color: "#8A847A" }}> · {a.email}</span> : null}
                 {isSelf ? <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.1em" }}> · YOU</span> : null}
               </div>
               {canRevoke ? (
                 <form action={revokeAdmin}><input type="hidden" name="user_id" value={a.user_id} /><button style={btnGhost}>REVOKE</button></form>
-              ) : <span style={{ fontFamily: MONO, fontSize: 9, color: "#6e6a60" }}>{isSelf ? "—" : "LAST ADMIN"}</span>}
+              ) : <span style={{ fontFamily: MONO, fontSize: 9, color: "#6e6a60" }}>{a.is_owner ? "PROTECTED" : isSelf ? "—" : ""}</span>}
             </div>
           );
         })}
       </div>
-      <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#8A847A", marginTop: 14 }}>You cannot remove yourself, and the last admin cannot be removed (prevents lockout). Moderation of group chats lives under <strong>Community → Moderation</strong>; app support requests under <strong>Community → Tickets</strong>.</p>
+      <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#8A847A", marginTop: 14 }}>The owner cannot be removed or demoted by anyone, so you can never be locked out. Moderation of group chats lives under <strong>Community → Moderation</strong>; app support requests under <strong>Community → Tickets</strong>.</p>
     </div>
   );
 }

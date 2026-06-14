@@ -5,6 +5,7 @@
 // deployment env for security.
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { isCallerOwner } from "@/lib/admin-guard";
 import { slugify } from "@/lib/slug";
 import { sanitizePixels } from "@/lib/pixels-db";
 import { logAudit } from "@/lib/audit";
@@ -39,6 +40,7 @@ export async function savePixels(formData: FormData): Promise<void> {
 }
 
 export async function saveIntegration(formData: FormData): Promise<void> {
+  if (!(await isCallerOwner())) return; // API keys are owner-only
   const provider = String(formData.get("provider") ?? "");
   if (!provider) return;
   const patch: Record<string, unknown> = {
@@ -55,6 +57,7 @@ export async function saveIntegration(formData: FormData): Promise<void> {
 }
 
 export async function addIntegration(formData: FormData): Promise<void> {
+  if (!(await isCallerOwner())) return; // API keys are owner-only
   const label = String(formData.get("label") ?? "").trim();
   const secret = String(formData.get("secret") ?? "").trim();
   if (!label) return;
