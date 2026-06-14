@@ -12,12 +12,12 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
   const { data: { user } } = await sb.auth.getUser();
   if (!user) redirect("/admin/login");
 
-  const { data: profile } = await sb.from("profiles").select("role, name").eq("user_id", user.id).maybeSingle();
+  const { data: profile } = await sb.from("profiles").select("role, name, access").eq("user_id", user.id).maybeSingle();
   const role = profile?.role;
   if (role !== "admin" && role !== "moderator") redirect("/admin/login");
 
   return (
-    <AdminShell email={user.email} name={profile?.name} role={role}>
+    <AdminShell email={user.email} name={profile?.name} role={role} access={(profile?.access as string[] | null) ?? []}>
       {children}
     </AdminShell>
   );

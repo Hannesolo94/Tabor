@@ -6,6 +6,7 @@ import { LogoutButton } from "./LogoutButton";
 import { DeployIndicator } from "./DeployIndicator";
 import { AutoRefresh } from "./AutoRefresh";
 import { AdminNav } from "./AdminNav";
+import { allowedHrefs } from "@/lib/access";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
 // Grouped nav (IA audit). Routes are unchanged; only labels/grouping differ.
@@ -50,13 +51,12 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
   ] },
 ];
 
-// Moderators only see the dashboard + safety tools. Broadcast is admin-only (it
-// messages every member), so it is not in this set.
-const MOD_HREFS = new Set(["/admin", "/admin/moderation", "/admin/tickets", "/admin/giveaways"]);
-
-export function AdminShell({ email, name, role, children }: { email?: string; name?: string | null; role?: string; children: React.ReactNode }) {
+export function AdminShell({ email, name, role, access, children }: { email?: string; name?: string | null; role?: string; access?: string[]; children: React.ReactNode }) {
+  // Owner + admins see everything. A limited staff member (moderator) only sees the
+  // nav for the areas the owner assigned them (plus the dashboard).
+  const allowed = allowedHrefs(access);
   const groups = role === "moderator"
-    ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => MOD_HREFS.has(i.href)) })).filter((g) => g.items.length)
+    ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => allowed.has(i.href)) })).filter((g) => g.items.length)
     : NAV_GROUPS;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "248px 1fr", minHeight: "100vh" }}>

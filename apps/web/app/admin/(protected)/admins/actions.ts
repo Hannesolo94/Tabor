@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { isCallerOwner } from "@/lib/admin-guard";
+import { AREA_KEYS } from "@/lib/access";
 import { sendEmail, emailShell } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
 
@@ -60,6 +61,24 @@ export async function inviteStaff(_prev: InviteResult | null, formData: FormData
   return sent.ok
     ? { ok: true, message: `Invited ${email} as ${roleLabel}. Sign-in details emailed.` }
     : { ok: true, message: `Account created for ${email} as ${roleLabel}, but the email failed (${sent.error}). Share the temporary password: ${tempPassword}` };
+}
+
+/** Set a staff member's role + scoped access areas. OWNER ONLY. Admin role = full
+ *  access (areas ignored); moderator = limited to the chosen areas. */
+export async function setStaffAccess(formData: FormData): Promise<void> {
+  if (!(await isCallerOwner())) return;
+  const userId = String(formData.get("user_id") ?? "");
+  if (!userId) return;
+  const role = String(formData.get("role") ?? "moderator");
+  if (!["admin", "moderator"].includes(role)) return;
+  const areas = AREA_KEYS.filter((k) => formData.get(`area_${k}`) === "on");
+  const admin = supabaseAdmin();
+  const { data: target } = await admin.from("profiles").select("is_owner").eq("user_id", userId).maybeSingle();
+  if (!target || target.is_owner) return; // the owner is never changed here
+  await admin.from("profiles").update({ role, access: role === "admin" ? [] : areas }).eq("user_id", userId);
+  await logAudit("staff.access", "profile", userId, { role, areas });
+  revalidatePath("/admin/admins");
+  revalidatePath(`/admin/admins/${userId}`);
 }
 
 /** Revoke staff. OWNER ONLY. The owner can never be demoted (by anyone, including

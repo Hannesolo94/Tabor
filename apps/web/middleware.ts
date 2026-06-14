@@ -5,6 +5,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { REGION_COOKIE, regionForCountry } from "@/lib/region";
+import { canAccessPath } from "@/lib/access";
 
 const PUBLIC_ADMIN_PATHS = ["/admin/login", "/admin/setup", "/admin/auth"];
 
@@ -46,16 +47,15 @@ export async function middleware(request: NextRequest) {
           redirect.pathname = "/admin/login";
           return NextResponse.redirect(redirect);
         }
-        // role-aware gating: moderators may only reach the dashboard + community tools
-        const { data: prof } = await supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
+        // role-aware gating: a limited staff member (moderator) may only reach the
+        // dashboard, their account, and the areas the owner assigned (profiles.access).
+        const { data: prof } = await supabase.from("profiles").select("role, access").eq("user_id", user.id).maybeSingle();
         const role = prof?.role;
         if (role !== "admin" && role !== "moderator") {
           const r = request.nextUrl.clone(); r.pathname = "/admin/login"; return NextResponse.redirect(r);
         }
-        if (role === "moderator") {
-          const MOD_PREFIXES = ["/admin/account", "/admin/moderation", "/admin/tickets", "/admin/giveaways"];
-          const allowed = path === "/admin" || MOD_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
-          if (!allowed) { const r = request.nextUrl.clone(); r.pathname = "/admin/moderation"; return NextResponse.redirect(r); }
+        if (role === "moderator" && !canAccessPath(path, (prof?.access as string[] | null) ?? [])) {
+          const r = request.nextUrl.clone(); r.pathname = "/admin"; return NextResponse.redirect(r);
         }
       }
     }

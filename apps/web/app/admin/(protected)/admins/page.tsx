@@ -1,5 +1,6 @@
 // Admin management: grant/revoke admin access by email. Safeguards prevent
 // self-demotion and removing the last admin.
+import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireAdmin, isCallerOwner } from "@/lib/admin-guard";
@@ -48,9 +49,10 @@ export default async function Admins() {
             <div key={a.user_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", marginTop: i === 0 ? 12 : 0 }}>
               <div>
                 <span style={{ fontFamily: MONO, fontSize: 8.5, color: labelColor, letterSpacing: "0.1em", border: `1px solid ${labelColor}55`, borderRadius: 8, padding: "2px 6px", marginRight: 8 }}>{label}</span>
-                <span style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5" }}>{a.name || a.email}</span>
+                <Link href={`/admin/admins/${a.user_id}`} style={{ fontFamily: BODY, fontSize: 14, color: "#E8E2D5", textDecoration: "none" }}>{a.name || a.email}</Link>
                 {a.name ? <span style={{ fontFamily: MONO, fontSize: 11, color: "#8A847A" }}> · {a.email}</span> : null}
                 {isSelf ? <span style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.1em" }}> · YOU</span> : null}
+                <Link href={`/admin/admins/${a.user_id}`} style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.1em", textDecoration: "none", marginLeft: 8 }}>VIEW →</Link>
               </div>
               {canRevoke ? (
                 <form action={revokeAdmin}><input type="hidden" name="user_id" value={a.user_id} /><button style={btnGhost}>REVOKE</button></form>
