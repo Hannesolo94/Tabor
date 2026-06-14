@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
           const r = request.nextUrl.clone(); r.pathname = "/admin/login"; return NextResponse.redirect(r);
         }
         if (role === "moderator") {
-          const MOD_PREFIXES = ["/admin/moderation", "/admin/tickets", "/admin/giveaways"];
+          const MOD_PREFIXES = ["/admin/account", "/admin/moderation", "/admin/tickets", "/admin/giveaways"];
           const allowed = path === "/admin" || MOD_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
           if (!allowed) { const r = request.nextUrl.clone(); r.pathname = "/admin/moderation"; return NextResponse.redirect(r); }
         }

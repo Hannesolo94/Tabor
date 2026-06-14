@@ -74,7 +74,8 @@ export function AdminShell({ email, name, role, children }: { email?: string; na
           <div style={{ marginBottom: 12 }}><DeployIndicator /></div>
           <AutoRefresh seconds={60} />
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.06em", marginBottom: 4 }}>{(name || "Admin").toUpperCase()}</div>
-          <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", marginBottom: 10, wordBreak: "break-all" }}>{email}</div>
+          <div style={{ fontFamily: MONO, fontSize: 8.5, color: "#8A847A", marginBottom: 8, wordBreak: "break-all" }}>{email}</div>
+          <Link href="/admin/account" style={{ display: "block", fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.1em", textDecoration: "none", textTransform: "uppercase", marginBottom: 8 }}>Account &amp; password</Link>
           <LogoutButton />
           <Link href="/" style={{ display: "block", textAlign: "center", marginTop: 8, fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>View Site ↗</Link>
         </div>
