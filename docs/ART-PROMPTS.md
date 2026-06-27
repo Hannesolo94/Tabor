@@ -64,14 +64,22 @@ apps/web/lib/catalog.ts.
   #9FB8C9. Flavor: `ornate gothic baroque armor layered with scripture scrolls, purity
   seals and illuminated text, a hooded warrior-scholar, strong Warhammer 40,000
   grimdark-cathedral influence`. Intricate, liturgical, rewards a close look.
-- **The Pilgrim (seeker / the journey)** -> signature **DayZ**. Accent muted purple
-  #A88BC9. Flavor: `a rugged lone wanderer in worn layered travel gear and a deep hood, a
-  heavy pack and a long staff, weathered and humble on a long road, strong DayZ
-  survival-traveler influence`. Approachable, earthy, the start of the climb.
+- **The Pilgrim (newly awake to the spiritual war)** -> signature **DayZ** (MODERN
+  survival, not medieval). Accent muted purple #A88BC9. Flavor: `a lone soldier of the
+  faith in modern tactical military gear, a hooded combat jacket and plate carrier vest,
+  rugged and weathered, fighting a horde of shadowy horned demons, a cross-marked battle
+  rifle with holy light from the muzzle, strong DayZ modern-survival influence fused with
+  spiritual warfare`. RECAST: the newcomer thrown into enemy territory from day one,
+  surviving the fight before he is forged. Demons + chaos allowed. NOTE: the catalog
+  Pilgrim copy (apps/web/lib/catalog.ts) still reads "gentle newcomer" and should be
+  updated to this spiritual-warfare framing.
 
-VALIDATED: Sentinel/Halo locked (clean isolated guardian, minimal). Crusader/Doom locked
-(fiery faceless knight, chaos allowed). Next: validate Scribe/Warhammer + Pilgrim/DayZ,
-then build a full concept set per persona.
+VALIDATED (all four locked):
+- Sentinel/Halo: clean isolated guardian, minimal background.
+- Crusader/Doom: fiery faceless knight charging, chaos allowed.
+- Scribe/Warhammer (#2): hooded scripture-scholar, halo + illuminated gospel.
+- Pilgrim/DayZ: hooded tactical soldier with a cross-marked rifle vs a demon horde.
+Next: build a full concept set (~5) per persona.
 
 ---
 
