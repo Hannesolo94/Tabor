@@ -81,6 +81,75 @@ VALIDATED (all four locked):
 - Pilgrim/DayZ: hooded tactical soldier with a cross-marked rifle vs a demon horde.
 Next: build a full concept set (~5) per persona.
 
+## Full concept sets per persona (apparel-ready, copy-paste)
+Five concepts per collection: a hero figure, a crest/emblem, a quote/scripture piece, an
+action piece, and a minimal everyday mark. Each is complete (subject + IP flavor + style).
+For the framed/key-art version of any, swap "no border, no frame" for the ornate border.
+
+### SENTINEL / Halo (clean, isolated, quiet authority — gold accent)
+**S1. The Guardian (hero)**
+> A lone guardian standing watch on a stone plinth in clean sleek angular sci-fi power armor, a smooth visored Halo Spartan helm with a faint halo of light behind it, a tall spear and a cross-marked shield, a vertical shaft of divine light from above, a single small glowing golden cross emblem high above him; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, Eastern Orthodox Christian iconography fused with futuristic holy-knight sci-fi, sacred and restrained, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered symmetrical composition, isolated central figure on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**S2. Sentinel Crest (emblem)**
+> A centered symmetrical heraldic emblem with no human figure: a sleek angular sci-fi visored helm above two crossed spears and a cross-marked kite shield, clean and minimal, a small golden cross at the crown; fine-line engraving illustration, etched linework, crisp white linework on a pure black background, single restrained gold accent, Eastern Orthodox Christian iconography fused with futuristic holy-knight sci-fi, scratchboard and woodcut aesthetic, clean confident vector-ready lines, perfectly symmetrical, solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**S3. Hold The Line (action, restrained)**
+> A lone guardian in clean sleek sci-fi power armor and a visored Halo helm braced in a defensive stance behind a raised cross-marked shield, a thin blade of light across his feet, faint halo, a single small golden cross above; fine-line engraving illustration, dense cross-hatching, crisp white linework on a pure black background, single restrained gold accent, Eastern Orthodox Christian iconography fused with futuristic holy-knight sci-fi, sacred and restrained, scratchboard and woodcut aesthetic, clean vector-ready lines, centered composition, isolated central figure on solid black with clean negative space, no border, no frame, no gradients, no soft shading
+
+**S4. The Watch (contemplative)**
+> A guardian seen from behind in clean angular sci-fi power armor and a visored helm, looking up into a single vertical shaft of divine light, a faint halo of light around the helm, utterly still, a small golden cross high above; fine-line engraving illustration, etched linework, crisp white linework on a pure black background, single restrained gold accent, Eastern Orthodox Christian iconography fused with futuristic holy-knight sci-fi, quiet and sacred, scratchboard and woodcut aesthetic, clean vector-ready lines, centered composition, isolated figure on solid black with generous negative space, no border, no frame, no gradients, no soft shading
+
+**S5. Seal of the Sentinel (minimal mark)**
+> A single small minimal mark centered with vast negative space: a sleek angular sci-fi visored helm bearing a cross, fine clean engraved linework, crisp white on a pure black background, one tiny golden cross accent, scratchboard aesthetic, vector-ready lines, perfectly centered, solid pure black background, no border, no frame, no gradients, no soft shading
+
+### CRUSADER / Doom (brutal, fiery, motion — bronze accent; Gears of War secondary)
+**C1. The Slayer (hero)**
+> A relentless faceless warrior of raw strength in massive brutal blacked-out battle-plate with heavy pauldrons and runic cross engravings, wreathed in white fire and embers, gripping a great iron warhammer, charging through smoke, a single small glowing golden cross emblem above him, strong Doom Slayer influence; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, Eastern Orthodox Christian iconography fused with brutal gothic war-machine sci-fi, ferocious and unstoppable, dramatic fire-light, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered composition, isolated central figure on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**C2. Crusader Crest (emblem)**
+> A centered symmetrical heraldic emblem with no human figure: a brutal blacked-out great-helm above a burning cross and two crossed warhammers, runic engravings and rivets, a small golden flame at the crown; fine-line engraving illustration, etched linework, crisp white linework on a pure black background, single restrained gold accent, brutal gothic war-machine sci-fi fused with Orthodox iconography, scratchboard and woodcut aesthetic, clean vector-ready lines, perfectly symmetrical, solid pure black background, no border, no frame, no gradients, no soft shading
+
+**C3. Forged Not Bought (quote/action)**
+> A faceless warrior in massive brutal battle-plate pulling a white-hot glowing blade from a blazing forge and anvil, sparks erupting upward into the shape of a cross, raw strength, a single golden cross above; fine-line engraving illustration, dense cross-hatching, crisp white linework on a pure black background, single restrained gold accent, brutal gothic war-machine sci-fi fused with Orthodox iconography, fierce and resolute, scratchboard and woodcut aesthetic, clean vector-ready lines, centered composition, isolated central figure on solid black with clean negative space, no border, no frame, no gradients, no soft shading
+
+**C4. Into The Fire (action)**
+> A relentless faceless crusader in brutal blacked-out battle-plate mid-swing smashing a great warhammer through a wall of shadowy demonic figures, embers and white fire exploding outward, a single golden cross above, strong Doom Slayer influence; fine-line engraving illustration, dense cross-hatching, crisp white linework on a pure black background, single restrained gold accent, brutal gothic war-machine sci-fi fused with Orthodox iconography, ferocious and unstoppable, scratchboard and woodcut aesthetic, clean vector-ready lines, centered composition, isolated central figure on solid black with clean negative space, no border, no frame, no gradients, no soft shading
+
+**C5. Iron Mark (minimal)**
+> A single small minimal mark centered with vast negative space: a blacked-out armored gauntlet gripping a cross-hilt, or a heavy runic cross, fine clean engraved linework, crisp white on a pure black background, one tiny golden accent, scratchboard aesthetic, vector-ready lines, perfectly centered, solid pure black background, no border, no frame, no gradients, no soft shading
+
+### SCRIBE / Warhammer 40K (ornate, scripture, liturgical — blue-grey accent)
+**W1. The Warrior-Scholar (hero)**
+> A hooded warrior-scholar standing in quiet vigil, ornate gothic baroque armor layered with scripture scrolls, purity seals and illuminated Greek inscriptions, an open illuminated gospel with a small icon of Christ in one hand and a sheathed sword at his side, a radiant halo behind the hood, a single shaft of divine light, a small golden cross above, strong Warhammer 40,000 grimdark-cathedral influence; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, Eastern Orthodox Christian iconography fused with ornate gothic cathedral sci-fi, sacred and scholarly, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered symmetrical composition, isolated central figure on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**W2. Scribe Crest (emblem)**
+> A centered symmetrical heraldic emblem with no human figure: an open illuminated book above a downturned sword and a quill, framed by ornate scrollwork, Greek inscriptions and purity seals, a small golden cross at the crown; fine-line engraving illustration, etched linework, crisp white linework on a pure black background, single restrained gold accent, ornate gothic cathedral sci-fi fused with Orthodox iconography, scratchboard and woodcut aesthetic, clean vector-ready lines, perfectly symmetrical, solid pure black background, no border, no frame, no gradients, no soft shading
+
+**W3. Iron Sharpens Iron (quote)**
+> Two ornate longswords crossed point-up with fine scripture etched along both blades, an open illuminated book resting between the hilts, surrounded by delicate Greek inscriptions and scrollwork, a small golden cross above; fine-line engraving illustration, dense intricate linework, crisp white on a pure black background, single restrained gold accent, ornate gothic cathedral sci-fi fused with Orthodox iconography, sacred and scholarly, scratchboard and woodcut aesthetic, clean vector-ready lines, centered symmetrical composition, solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**W4. The Illuminated Word (scripture piece)**
+> A single ornate open gospel radiating shafts of light, a small Orthodox icon of Christ painted on the page, fine Greek scripture text and gold leaf, flanked by hanging purity-seal ribbons, a small golden cross above; fine-line engraving illustration, dense intricate linework, crisp white on a pure black background, single restrained gold accent, ornate gothic cathedral sci-fi fused with Orthodox iconography, sacred and luminous, scratchboard and woodcut aesthetic, clean vector-ready lines, centered symmetrical composition, solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**W5. Sacred Seal (minimal)**
+> A single small minimal mark centered with vast negative space: the Orthodox IC XC NIKA monogram with a small cross, fine clean engraved linework, crisp white on a pure black background, one tiny golden accent, scratchboard aesthetic, vector-ready lines, perfectly centered, solid pure black background, no border, no frame, no gradients, no soft shading
+
+### PILGRIM / DayZ (tactical, spiritual warfare, demons — purple accent; CoD secondary)
+**P1. Soldier of the Faith (hero)**
+> A lone soldier of the faith in modern tactical military gear, a hooded combat jacket and plate carrier vest, rugged and weathered, firing a cross-marked battle rifle with holy light bursting from the muzzle, standing firm against a horde of shadowy horned demons clawing out of black smoke, a faint halo behind the hood, a shaft of divine light breaking the darkness, a small golden cross above, strong DayZ modern-survival influence; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, Eastern Orthodox Christian iconography fused with modern tactical survival realism, embattled and resolute, dramatic divine light cutting through demonic shadow, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered composition, isolated central figure on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**P2. Pilgrim Crest (emblem)**
+> A centered symmetrical heraldic emblem with no human figure: a hooded tactical balaclava-skull above a cross and two crossed battle rifles, faint horned demon shadows behind, a small golden cross at the crown; fine-line engraving illustration, etched linework, crisp white linework on a pure black background, single restrained gold accent, modern tactical survival realism fused with Orthodox iconography, scratchboard and woodcut aesthetic, clean vector-ready lines, perfectly symmetrical, solid pure black background, no border, no frame, no gradients, no soft shading
+
+**P3. No One Climbs Alone (quote/action)**
+> Two brothers in modern tactical military gear and hoods standing back to back, both firing cross-marked rifles outward at a surrounding horde of shadowy horned demons, divine light above them, a small golden cross above; fine-line engraving illustration, dense cross-hatching, crisp white on a pure black background, single restrained gold accent, modern tactical survival realism fused with Orthodox iconography, embattled and united, scratchboard and woodcut aesthetic, clean vector-ready lines, centered symmetrical composition, isolated subjects on solid black with clean negative space, no border, no frame, no gradients, no soft shading
+
+**P4. First Light (scene)**
+> A lone soldier of the faith in tactical gear and a hood kneeling on one knee to reload a cross-marked rifle in a single shaft of dawn light, beaten but resolute, demonic shadows receding into the dark around him, a faint halo, a small golden cross above; fine-line engraving illustration, dense cross-hatching, crisp white on a pure black background, single restrained gold accent, modern tactical survival realism fused with Orthodox iconography, weary and faithful, scratchboard and woodcut aesthetic, clean vector-ready lines, centered composition, isolated central figure on solid black with clean negative space, no border, no frame, no gradients, no soft shading
+
+**P5. Mark of the Watch (minimal)**
+> A single small minimal mark centered with vast negative space: a cross-marked battle rifle crossed with a combat knife behind a small cross, or a tactical cross patch, fine clean engraved linework, crisp white on a pure black background, one tiny golden accent, scratchboard aesthetic, vector-ready lines, perfectly centered, solid pure black background, no border, no frame, no gradients, no soft shading
+
 ---
 
 ## 20 concepts (subject lines — append the STYLE TAIL to each)
