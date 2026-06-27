@@ -46,6 +46,33 @@ For a collectible framed piece like the Risen Knight, swap "no border, no frame"
 Use the SAME style tail on every prompt. That is what makes 20 different subjects read as
 ONE cohesive collection. Vary the SUBJECT line only.
 
+## Persona x Game IP (signature look per collection)
+The engraving style stays identical across all four personas (that is what unifies the
+brand). Only the ARMOR DESIGN and MOOD shift per persona, leaning hard into one game IP.
+In a prompt, lead the subject with the persona's flavor line below. Personas defined in
+apps/web/lib/catalog.ts.
+
+- **The Sentinel (guardian)** -> signature **Halo**, secondary CoD. Accent gold #C9A961.
+  Flavor: `clean sleek angular sci-fi power armor, a smooth visored helm with a faint
+  energy halo, a steadfast guardian holding the line, strong Halo Spartan influence`.
+  RULE: keep it MINIMAL and ISOLATED (figure on black, optional plinth). Nothing wasted.
+- **The Crusader (fighter / the iron)** -> signature **Doom**, secondary Gears of War.
+  Accent bronze #A8843E. Flavor: `massive brutal blacked-out battle-plate, heavy pauldrons,
+  runic cross engravings, a relentless faceless warrior wreathed in fire and embers, strong
+  Doom Slayer influence`. Chaos / fire / motion is allowed here.
+- **The Scribe (student / the Word)** -> signature **Warhammer 40,000**. Accent blue-grey
+  #9FB8C9. Flavor: `ornate gothic baroque armor layered with scripture scrolls, purity
+  seals and illuminated text, a hooded warrior-scholar, strong Warhammer 40,000
+  grimdark-cathedral influence`. Intricate, liturgical, rewards a close look.
+- **The Pilgrim (seeker / the journey)** -> signature **DayZ**. Accent muted purple
+  #A88BC9. Flavor: `a rugged lone wanderer in worn layered travel gear and a deep hood, a
+  heavy pack and a long staff, weathered and humble on a long road, strong DayZ
+  survival-traveler influence`. Approachable, earthy, the start of the climb.
+
+VALIDATED: Sentinel/Halo locked (clean isolated guardian, minimal). Crusader/Doom locked
+(fiery faceless knight, chaos allowed). Next: validate Scribe/Warhammer + Pilgrim/DayZ,
+then build a full concept set per persona.
+
 ---
 
 ## 20 concepts (subject lines — append the STYLE TAIL to each)
