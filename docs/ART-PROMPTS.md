@@ -10,19 +10,25 @@ Fine-line engraving. Mostly white linework on pure black. A single restrained go
 Eastern Orthodox Christian iconography fused with gothic military sci-fi (Warhammer 40K,
 Doom, Halo, Gears of War, CoD, DayZ). Sacred, heroic, forged.
 
-## STYLE TAIL (append this to every concept prompt)
+## STYLE TAIL (append this to every concept prompt — apparel-ready, no frame)
 > fine-line engraving illustration, dense cross-hatching and etched linework, crisp white
 > linework on a pure black background, high contrast monochrome with a single restrained
 > gold accent, Eastern Orthodox Christian iconography fused with gothic military science
 > fiction in the spirit of Warhammer 40,000, Doom, Halo and Gears of War, sacred and
 > heroic, dramatic divine light and god-rays, halos and nimbus light, scratchboard and
 > woodcut aesthetic, clean confident vector-ready lines, centered symmetrical composition,
-> built for dark apparel, no gradients, no soft shading
+> isolated central figure on a solid pure black background with clean negative space, no
+> border, no frame, built for dark apparel, no gradients, no soft shading
 
 ## NEGATIVE PROMPT (for SDXL / Phoenix models; Flux ignores negatives)
 > color, full color, photograph, realistic photo, 3d render, soft shading, smooth
 > gradients, grayscale midtones, blur, noise, jpeg artifacts, watermark, signature, text,
-> caption, extra limbs, deformed hands, low contrast, muddy, cluttered background
+> caption, extra limbs, deformed hands, low contrast, muddy, cluttered background, ornate
+> border, decorative frame
+
+## Optional framed version (key art / posters only, NOT apparel)
+For a collectible framed piece like the Risen Knight, swap "no border, no frame" for:
+"framed by a thin ornate engraved border with corner flourishes".
 
 ## Leonardo.ai settings
 - **Model:** Flux Dev (best line adherence) or Leonardo Phoenix 1.0. Avoid the anime/photo models.
