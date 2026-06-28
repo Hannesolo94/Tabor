@@ -227,11 +227,13 @@ AI garbles exact text, so the wordmark prompts are for exploring LETTERING STYLE
 final letterforms get drawn properly in vector by the artist. The icon/seal (no text) is
 the one AI nails.
 
-**Icon / seal (no text):**
-> A minimal circular brand emblem for an apparel brand, a sacred heraldic seal combining an upright cross, a sword, and a single flame, perfectly symmetrical and iconic, fine-line engraving, crisp white linework on a pure black background, a single restrained gold accent, Eastern Orthodox and heroic, scratchboard aesthetic, clean vector-ready lines, perfectly centered, no text, no border, no gradients, no soft shading
+**Icon / seal (no text)** — built on the REAL TABOR mark (mountain + cross + light, see
+apps/web/lib/brand.ts SEAL_SVG). NOT a sword (a sword is a warrior motif for the illustrations,
+not the brand seal).
+> A minimal circular brand medallion for an apparel brand called TABOR, a stylized two-peaked mountain (Mount Tabor) with a cross standing at its summit, crowned by three points of divine light and radiating rays of glory, small flames at the base for Sons of Fire, perfectly symmetrical and iconic, fine-line engraving, crisp white linework on a pure black background, a single restrained gold accent, Eastern Orthodox and sacred, scratchboard aesthetic, clean vector-ready lines, perfectly centered, no text, no border, no gradients, no soft shading
 
 **Full logo (traditional):**
-> A premium apparel brand logo, the wordmark "TABOR" in elegant engraved blackletter and classical Roman serif lettering, a small sacred seal of a cross, sword and flame centered above it, the small tagline "SONS OF FIRE" beneath, fine-line engraving aesthetic, crisp white on a pure black background, a single restrained gold accent, sacred and heroic, clean confident vector-ready letterforms, centered, no border, no gradients, no soft shading
+> A premium apparel brand logo, the wordmark "TABOR" in elegant engraved blackletter and classical Roman serif lettering, a small sacred seal of a two-peaked mountain with a cross at its summit crowned by rays of light centered above it, the small tagline "SONS OF FIRE" beneath, fine-line engraving aesthetic, crisp white on a pure black background, a single restrained gold accent, sacred and heroic, clean confident vector-ready letterforms, centered, no border, no gradients, no soft shading
 
 **Metal-band style logo:**
 > A heavy metal band style logotype reading "TABOR", aggressive spiky blackletter and brutal gothic lettering with razor-sharp serifs, interlocking strokes, and small flame and cross flourishes, intense and iconic in the spirit of Christian metalcore band logos, crisp white on a pure black background with faint embers, a single restrained gold accent, high contrast engraving aesthetic, centered, no border, no gradients, no soft shading
