@@ -150,6 +150,28 @@ For the framed/key-art version of any, swap "no border, no frame" for the ornate
 **P5. Mark of the Watch (minimal)**
 > A single small minimal mark centered with vast negative space: a cross-marked battle rifle crossed with a combat knife behind a small cross, or a tactical cross patch, fine clean engraved linework, crisp white on a pure black background, one tiny golden accent, scratchboard aesthetic, vector-ready lines, perfectly centered, solid pure black background, no border, no frame, no gradients, no soft shading
 
+## Anchor pieces (Christ + biblically accurate angels)
+Flagship designs. The angel types are mapped to the IP whose aesthetic they already share.
+
+REVERENCE NOTE: depicting Christ is sacred in Orthodoxy. Keep the cruciform halo + IC XC
+monogram, keep the posture dignified (militant Christ has precedent: King of Kings, Captain
+of the host, the Harrowing of Hell). RUN THE FINAL PAST THE ORTHODOX REVIEWER before selling.
+
+**A1. Christ the Commander (Orthodox icon + tactical)**
+> Jesus Christ as the commander of the heavenly host in the Eastern Orthodox icon tradition, a solemn reverent frontal pose, a cruciform halo behind his head and the IC XC monogram, long hair and beard, one hand raised in blessing, a dignified tactical plate carrier and chest rig worn over his robe, a cross-marked sword of light at his side, radiant divine light, gold cruciform halo accent; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, sacred Orthodox iconography fused with restrained modern tactical detail, holy and authoritative, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered symmetrical composition, isolated central figure on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**A2. Seraphim (Doom)** — six wings of living fire
+> A biblically accurate seraph, a towering six-winged angel of living fire, two wings covering the face, two covering the feet, two spread in flight, wreathed in roaring flame and embers, blazing and terrible, fused with brutal Doom-fire intensity, a single small golden cross above; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, biblically accurate Orthodox angelology fused with brutal fiery Doom energy, awesome and burning, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered symmetrical composition, isolated on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**A3. Cherubim (Warhammer 40K)** — four faces, many eyes
+> A biblically accurate cherub, a four-faced angel with the faces of a man, a lion, an ox and an eagle, four great wings, its form and wings covered in countless watching eyes, gleaming and ornate, layered with gothic baroque ornament and purity seals, alien and holy, strong Warhammer 40,000 cathedral influence, a single small golden cross above; fine-line engraving illustration, dense intricate cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, biblically accurate Orthodox angelology fused with ornate Warhammer 40,000 grimdark detail, awesome and otherworldly, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered symmetrical composition, isolated on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**A4. Ophanim / Thrones (Halo)** — wheels of eyes
+> A biblically accurate throne, an ophanim, great interlocking wheels within wheels of burning light, the rims covered in countless eyes, rotating and radiant, sleek and geometric, strong Halo ringworld sci-fi influence, a single small golden cross at the center; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, biblically accurate Orthodox angelology fused with clean geometric Halo sci-fi, awesome and cosmic, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered symmetrical composition, isolated on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
+**A5. Captain of the Host (DayZ)** — warrior angel, tactical
+> A biblically accurate warrior angel, the captain of the Lord's host, a towering winged man of war in modern tactical military gear over radiant robes, a hood and plate carrier, drawing a great cross-marked sword of fire, grim and resolute, standing ready for battle, strong DayZ modern-survival influence, a single small golden cross above; fine-line engraving illustration, dense cross-hatching and etched linework, crisp white linework on a pure black background, high contrast monochrome with a single restrained gold accent, biblically accurate Orthodox angelology fused with modern tactical survival realism, awesome and battle-ready, scratchboard and woodcut aesthetic, clean confident vector-ready lines, centered composition, isolated on a solid pure black background with clean negative space, no border, no frame, no gradients, no soft shading
+
 ---
 
 ## 20 concepts (subject lines — append the STYLE TAIL to each)
