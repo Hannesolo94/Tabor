@@ -241,6 +241,14 @@ not the brand seal).
 CROSS STANDARD (decided): the **Orthodox three-bar cross** (slanted lower footrest bar) is
 the brand standard everywhere: icon, full logo, metal logo, and the illustrations.
 
+LOGO DECIDED: the METAL logo is THE primary brand logo (Hannes's pick) — spiky white
+blackletter TABOR, Orthodox three-bar cross, twin peaks, orange/gold fire (made via GPT
+image model / ChatGPT). The simple mountain+cross+rays SEAL stays as the ICON / small-size
+mark (favicon, app icon, cap embroidery) since the metal logo won't read at tiny sizes.
+TOOL NOTE: GPT image = best for the metal logotype; Nano Banana 2 = best for the clean
+engraving art + the seal. Next: vectorize the metal logo + the seal (Fiverr artist), then I
+can swap the new mark across the codebase (app/site/admin/emails).
+
 VALIDATED: the icon/seal (mountain + cross + rays + flame + TABOR serif) is locked as the
 brand mark. Vectorize it, then it can replace the TaborSeal component across app/site/admin/emails.
 
