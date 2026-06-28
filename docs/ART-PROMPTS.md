@@ -232,11 +232,14 @@ apps/web/lib/brand.ts SEAL_SVG). NOT a sword (a sword is a warrior motif for the
 not the brand seal).
 > A minimal circular brand medallion for an apparel brand called TABOR, a stylized two-peaked mountain (Mount Tabor) with a cross standing at its summit, crowned by three points of divine light and radiating rays of glory, small flames at the base for Sons of Fire, perfectly symmetrical and iconic, fine-line engraving, crisp white linework on a pure black background, a single restrained gold accent, Eastern Orthodox and sacred, scratchboard aesthetic, clean vector-ready lines, perfectly centered, no text, no border, no gradients, no soft shading
 
-**Full logo (traditional):**
-> A premium apparel brand logo, the wordmark "TABOR" in elegant engraved blackletter and classical Roman serif lettering, a small sacred seal of a two-peaked mountain with a cross at its summit crowned by rays of light centered above it, the small tagline "SONS OF FIRE" beneath, fine-line engraving aesthetic, crisp white on a pure black background, a single restrained gold accent, sacred and heroic, clean confident vector-ready letterforms, centered, no border, no gradients, no soft shading
+**Full logo (traditional, stacked lockup)** — the official primary mark.
+> A premium apparel brand logo for "TABOR" in a stacked lockup: a fine-line engraved two-peaked mountain with a cross standing at its summit crowned by radiating rays of divine light, the wordmark TABOR in elegant engraved classical serif lettering directly below, a small flame beneath it for Sons of Fire, crisp white linework with a single restrained gold accent on a pure black background, sacred and heroic, scratchboard engraving aesthetic, clean confident vector-ready letterforms, centered symmetrical composition, no border, no gradients, no soft shading
 
-**Metal-band style logo:**
-> A heavy metal band style logotype reading "TABOR", aggressive spiky blackletter and brutal gothic lettering with razor-sharp serifs, interlocking strokes, and small flame and cross flourishes, intense and iconic in the spirit of Christian metalcore band logos, crisp white on a pure black background with faint embers, a single restrained gold accent, high contrast engraving aesthetic, centered, no border, no gradients, no soft shading
+**Metal-band style logo** — the merch weapon (big front/back logotype).
+> A heavy metal band style logo for "TABOR", the wordmark TABOR in aggressive spiky blackletter with razor-sharp interlocking serifs and jagged strokes, a two-peaked mountain and a cross worked into the lettering, flames and embers licking up around the letters, brutal and iconic in the spirit of Christian metalcore band logos like Carry the Fire, crisp white on a pure black background with a single restrained gold accent, high contrast engraving aesthetic, centered symmetrical, no border, no gradients, no soft shading
+
+VALIDATED: the icon/seal (mountain + cross + rays + flame + TABOR serif) is locked as the
+brand mark. Vectorize it, then it can replace the TaborSeal component across app/site/admin/emails.
 
 ## Handing to the human artist
 Give the artist the chosen AI concept plus this brief: keep the fine-line engraving feel,
