@@ -7,6 +7,7 @@ import { DeployIndicator } from "./DeployIndicator";
 import { AutoRefresh } from "./AutoRefresh";
 import { AdminNav } from "./AdminNav";
 import { allowedHrefs } from "@/lib/access";
+import { getPublicBrandLogos } from "@/lib/brand";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
 // Grouped nav (IA audit). Routes are unchanged; only labels/grouping differ.
@@ -51,10 +52,11 @@ const NAV_GROUPS: { section: string; items: { label: string; href: string }[] }[
   ] },
 ];
 
-export function AdminShell({ email, name, role, access, children }: { email?: string; name?: string | null; role?: string; access?: string[]; children: React.ReactNode }) {
+export async function AdminShell({ email, name, role, access, children }: { email?: string; name?: string | null; role?: string; access?: string[]; children: React.ReactNode }) {
   // Owner + admins see everything. A limited staff member (moderator) only sees the
   // nav for the areas the owner assigned them (plus the dashboard).
   const allowed = allowedHrefs(access);
+  const logo = await getPublicBrandLogos(); // same uploaded mark as the storefront
   const groups = role === "moderator"
     ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => allowed.has(i.href)) })).filter((g) => g.items.length)
     : NAV_GROUPS;
@@ -63,8 +65,18 @@ export function AdminShell({ email, name, role, access, children }: { email?: st
       {/* sidebar */}
       <aside style={{ borderRight: "1px solid rgba(201,169,97,0.16)", background: "linear-gradient(160deg, rgba(20,20,26,0.92), rgba(10,10,14,0.92))", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", boxShadow: "inset -1px 0 0 rgba(255,255,255,0.03)", padding: "22px 16px", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh" }}>
         <Link href="/admin" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 26 }}>
-          <TaborSeal id="admin-nav" size={26} />
-          <span style={{ fontFamily: PIRATA, fontSize: 22, color: GOLD }}>Tabor</span>
+          {logo.wordmark ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo.wordmark} alt="Tabor" style={{ height: Math.min(logo.wordmarkHeight || 30, 40), width: "auto", maxWidth: "100%", objectFit: "contain", display: "block" }} />
+          ) : (
+            <>
+              {logo.icon
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={logo.icon} alt="" style={{ width: 26, height: 26, objectFit: "contain", display: "block" }} />
+                : <TaborSeal id="admin-nav" size={26} />}
+              <span style={{ fontFamily: PIRATA, fontSize: 22, color: GOLD }}>Tabor</span>
+            </>
+          )}
         </Link>
         <form action="/admin/search" method="get" style={{ marginBottom: 16 }}>
           <input name="q" placeholder="Search…" aria-label="Search admin" style={{ width: "100%", fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "8px 10px" }} />
