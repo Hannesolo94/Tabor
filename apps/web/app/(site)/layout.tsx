@@ -14,13 +14,6 @@ import { getPixels } from "@/lib/pixels-db";
 import { getVisiblePersonas, getVisibleCollections, getVisibleCategories } from "@/lib/collections-db";
 import { getPublicBrandLogos } from "@/lib/brand";
 
-// Favicon follows the uploaded brand icon (managed in /admin/branding). Merges into the
-// root metadata; falls back to Next's default when no icon is set.
-export async function generateMetadata() {
-  const logos = await getPublicBrandLogos();
-  return logos.icon ? { icons: { icon: logos.icon } } : {};
-}
-
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [announcements, pixels, personas, collections, categories, logos] = await Promise.all([getAnnouncements(), getPixels(), getVisiblePersonas(), getVisibleCollections(), getVisibleCategories(), getPublicBrandLogos()]);
   return (
