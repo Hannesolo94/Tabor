@@ -4,6 +4,7 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { PirataOne_400Regular } from "@expo-google-fonts/pirata-one";
+import { MetalMania_400Regular } from "@expo-google-fonts/metal-mania";
 import { Cinzel_600SemiBold, Cinzel_700Bold } from "@expo-google-fonts/cinzel";
 import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from "@expo-google-fonts/inter";
 import { JetBrainsMono_400Regular } from "@expo-google-fonts/jetbrains-mono";
@@ -55,6 +56,7 @@ function RootNav() {
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     PirataOne_400Regular,
+    MetalMania_400Regular,
     Cinzel_600SemiBold, Cinzel_700Bold,
     Inter_400Regular, Inter_600SemiBold, Inter_700Bold,
     JetBrainsMono_400Regular,

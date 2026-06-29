@@ -3,7 +3,7 @@
 import { brand } from "@tabor/shared";
 
 export const F = {
-  display: "PirataOne_400Regular",
+  display: "MetalMania_400Regular", // metal-logo-matching display font (was PirataOne)
   head: "Cinzel_700Bold",
   headMid: "Cinzel_600SemiBold",
   body: "Inter_400Regular",

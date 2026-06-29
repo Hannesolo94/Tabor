@@ -35,6 +35,28 @@ button {
   font-family: inherit;
 }
 
+/* ── tactile press feedback on clickable controls (web + admin) ── */
+button,
+a,
+label,
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+  transition: transform 0.11s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.11s ease, opacity 0.11s ease, box-shadow 0.11s ease;
+}
+button:active:not(:disabled),
+[role="button"]:active,
+input[type="submit"]:active:not(:disabled),
+input[type="button"]:active:not(:disabled) {
+  transform: scale(0.955);
+  filter: brightness(0.9);
+}
+/* anchors are often inline (transform is ignored), so give CTAs a brightness/opacity press */
+a:active {
+  filter: brightness(0.85);
+  opacity: 0.92;
+}
+
 /* ── accessibility: visible keyboard focus ── */
 :focus-visible {
   outline: 2px solid #e8d08c;
