@@ -11,7 +11,7 @@ import { getHomeReviews } from "@/lib/reviews-db";
 import { Stars } from "@/components/reviews/Stars";
 import { AppButtons } from "@/components/site/AppButtons";
 import { getRegion } from "@/lib/region";
-import { GOLD, GOLD_LIGHT, MONO, PIRATA, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
+import { GOLD, GOLD_LIGHT, MONO, PIRATA, METAL, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +50,7 @@ export default async function Home() {
             <img src={hero.logo_url} alt="" style={{ height: hero.logo_height || 96, width: "auto", maxWidth: "90%", objectFit: "contain", margin: "0 auto 22px", display: "block" }} />
           )}
           {hero.eyebrow && <div style={{ fontFamily: MONO, fontSize: 12, color: GOLD, letterSpacing: "0.3em", marginBottom: 18 }}>[ {hero.eyebrow.toUpperCase()} ]</div>}
-          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(58px, 12vw, 150px)", color: "#E8E2D5", margin: 0, lineHeight: 0.88 }}>{hero.headline}</h1>
+          <h1 style={{ fontFamily: METAL, fontSize: "clamp(52px, 11vw, 132px)", color: "#E8E2D5", margin: 0, lineHeight: 0.95, letterSpacing: "0.01em" }}>{hero.headline}</h1>
           {hero.subcopy && (
             <p style={{ fontFamily: BODY, fontSize: "clamp(15px,2.4vw,19px)", color: "#B8B2A6", maxWidth: 580, margin: "22px auto 0", lineHeight: 1.6 }}>{hero.subcopy}</p>
           )}
