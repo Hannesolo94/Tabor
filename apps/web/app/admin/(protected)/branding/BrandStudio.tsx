@@ -96,29 +96,46 @@ export function BrandStudio({ brand, sealSvg, sealDark }: { brand: Brand; sealSv
         </div>
       </div>
 
-      {/* 1. LOGOS & MARKS */}
+      {/* 1. LOGOS & MARKS — shows the live uploaded logo/icon; falls back to the built-in seal */}
       <Card title="Logos & marks">
+        <p style={{ fontFamily: BODY, fontSize: 12.5, color: "#9A948A", margin: "0 0 14px", lineHeight: 1.55 }}>
+          Your live logo and icon are managed above in &ldquo;Logo &amp; icon.&rdquo; The built-in vector seal below is always available to download for print and partners.
+        </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, background: "#0A0A0A", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, padding: 20 }}>
-            <div className="brand-seal-fit" style={{ width: 140, height: 140 }} dangerouslySetInnerHTML={{ __html: sealSvg }} />
-            <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em" }}>ON BLACK</span>
+            {draft.logos.icon
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={draft.logos.icon} alt="Icon" style={{ width: 140, height: 140, objectFit: "contain" }} />
+              : <div className="brand-seal-fit" style={{ width: 140, height: 140 }} dangerouslySetInnerHTML={{ __html: sealSvg }} />}
+            <span style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.12em" }}>{draft.logos.icon ? "ICON · ON BLACK" : "SEAL · ON BLACK"}</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, background: checkered, borderRadius: 14, padding: 20 }}>
-            <div className="brand-seal-fit" style={{ width: 140, height: 140 }} dangerouslySetInnerHTML={{ __html: sealSvg }} />
-            <span style={{ fontFamily: MONO, fontSize: 9, color: "#3a3a3a", letterSpacing: "0.12em" }}>ON LIGHT</span>
+            {draft.logos.icon
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={draft.logos.icon} alt="Icon" style={{ width: 140, height: 140, objectFit: "contain" }} />
+              : <div className="brand-seal-fit" style={{ width: 140, height: 140 }} dangerouslySetInnerHTML={{ __html: sealSvg }} />}
+            <span style={{ fontFamily: MONO, fontSize: 9, color: "#3a3a3a", letterSpacing: "0.12em" }}>{draft.logos.icon ? "ICON · ON LIGHT" : "SEAL · ON LIGHT"}</span>
           </div>
         </div>
 
         {/* lockup */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 14, padding: "18px 20px", background: "#0A0A0A", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14 }}>
-          <div className="brand-seal-fit" style={{ width: 64, height: 64, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: sealSvg }} />
-          <div>
-            <div style={{ fontFamily: "Pirata One, serif", fontSize: 42, lineHeight: 1, color: "#E8E2D5", letterSpacing: "0.04em" }}>TABOR</div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.18em", marginTop: 6, textTransform: "uppercase" }}>{draft.statements.tagline}</div>
-          </div>
+          {draft.logos.wordmark ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={draft.logos.wordmark} alt="Tabor logo" style={{ height: 52, width: "auto", maxWidth: "100%", objectFit: "contain", display: "block" }} />
+          ) : (
+            <>
+              <div className="brand-seal-fit" style={{ width: 64, height: 64, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: sealSvg }} />
+              <div>
+                <div style={{ fontFamily: "Pirata One, serif", fontSize: 42, lineHeight: 1, color: "#E8E2D5", letterSpacing: "0.04em" }}>TABOR</div>
+                <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.18em", marginTop: 6, textTransform: "uppercase" }}>{draft.statements.tagline}</div>
+              </div>
+            </>
+          )}
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "#6F6A60", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 18, marginBottom: 8 }}>Built-in seal downloads</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <button type="button" style={ghostBtn} onClick={() => downloadText(sealSvg, "tabor-seal.svg", "image/svg+xml")}>SVG mark</button>
           <button type="button" style={ghostBtn} onClick={() => downloadText(sealDark, "tabor-seal-dark.svg", "image/svg+xml")}>SVG on black</button>
           <button type="button" style={ghostBtn} onClick={() => { void svgToPng(sealSvg, 512).then((b) => downloadBlob(b, "tabor-seal-512.png")); }}>PNG 512</button>
