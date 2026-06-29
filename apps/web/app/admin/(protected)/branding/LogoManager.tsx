@@ -9,13 +9,15 @@ import { useRouter } from "next/navigation";
 import { createLogoUploadTicket, saveLogos } from "./actions";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { BrandLogos } from "@/lib/brand";
-import { DEFAULT_WORDMARK_HEIGHT } from "@/lib/brand";
 import { TaborSeal } from "@/components/TaborSeal";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 type Slot = "icon" | "wordmark";
 const MIN_H = 24;
 const MAX_H = 80;
+// Kept in sync with DEFAULT_WORDMARK_HEIGHT in lib/brand.ts. Defined locally so this
+// client component never imports the server-only brand module (next/headers).
+const DEFAULT_WORDMARK_HEIGHT = 36;
 
 const cardStyle: React.CSSProperties = { background: "linear-gradient(160deg, rgba(32,32,40,0.7), rgba(15,15,20,0.6))", border: "1px solid rgba(201,169,97,0.14)", borderRadius: 16, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)", padding: "20px 22px" };
 const goldButton: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 10, padding: "9px 14px", cursor: "pointer" };
