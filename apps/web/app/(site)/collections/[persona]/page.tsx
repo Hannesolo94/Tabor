@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { PERSONAS, categoriesPresent, personaById } from "@/lib/catalog";
 import { getProducts } from "@/lib/products-db";
 import { getRegion } from "@/lib/region";
-import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
+import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ per
         <div style={{ position: "absolute", inset: 0, opacity: 0.05, display: "grid", placeItems: "center" }}><TaborSeal id="persona-bg" size={520} /></div>
         <div style={{ maxWidth: 900, margin: "0 auto", position: "relative" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, color: persona.accent, letterSpacing: "0.24em", textTransform: "uppercase" }}>{persona.tag}</div>
-          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(48px,9vw,96px)", color: "#E8E2D5", margin: "8px 0 18px", lineHeight: 0.9 }}>{persona.name}</h1>
+          <h1 style={{ fontFamily: METAL, fontSize: "clamp(48px,9vw,96px)", color: "#E8E2D5", margin: "8px 0 18px", lineHeight: 0.9 }}>{persona.name}</h1>
           <p style={{ fontFamily: BODY, fontSize: 16, color: "#C3BDB1", lineHeight: 1.7, maxWidth: 680 }}>{persona.meaning}</p>
           <div style={{ marginTop: 22, paddingTop: 20, borderTop: "1px solid rgba(201,169,97,0.14)", maxWidth: 680 }}>
             <div style={{ fontFamily: MONO, fontSize: 10, color: persona.accent, letterSpacing: "0.2em", marginBottom: 8 }}>THE DESIGN</div>

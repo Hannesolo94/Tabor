@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getCollectionBySlug } from "@/lib/collections-db";
 import { getRegion } from "@/lib/region";
-import { GOLD, MONO, PIRATA, BODY } from "@/lib/ui";
+import { GOLD, MONO, METAL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
       <section style={{ padding: "60px 24px 30px", borderBottom: "1px solid rgba(201,169,97,0.12)" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em", marginBottom: 10 }}>[ COLLECTION ]</div>
-          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(40px,8vw,84px)", color: "#E8E2D5", margin: 0, lineHeight: 0.95 }}>{collection.title}</h1>
+          <h1 style={{ fontFamily: METAL, fontSize: "clamp(40px,8vw,84px)", color: "#E8E2D5", margin: 0, lineHeight: 0.95 }}>{collection.title}</h1>
           {collection.description && <p style={{ fontFamily: BODY, fontSize: 15, color: "#9A948A", maxWidth: 600, margin: "14px 0 0", lineHeight: 1.6 }}>{collection.description}</p>}
         </div>
       </section>

@@ -12,7 +12,7 @@ import { getRegion } from "@/lib/region";
 import { getProductReviews, getReviewSummary } from "@/lib/reviews-db";
 import { ProductReviews } from "@/components/reviews/ProductReviews";
 import { Stars } from "@/components/reviews/Stars";
-import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
+import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +63,7 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
             <Link href={`/collections/${p.persona}`} style={{ fontFamily: MONO, fontSize: 10, color: persona?.accent ?? GOLD, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
               {persona?.name} · {persona?.tag}
             </Link>
-            <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(38px,7vw,64px)", color: "#E8E2D5", margin: "8px 0 6px", lineHeight: 0.95 }}>{p.name}</h1>
+            <h1 style={{ fontFamily: METAL, fontSize: "clamp(38px,7vw,64px)", color: "#E8E2D5", margin: "8px 0 6px", lineHeight: 0.95 }}>{p.name}</h1>
             <div style={{ fontFamily: MONO, fontSize: 16, color: GOLD, marginBottom: 6 }}>{p.currencySymbol}{p.price}</div>
             {summary.count > 0 && (
               <a href="#reviews" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 8 }}>

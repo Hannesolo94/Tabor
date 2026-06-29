@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { TaborSeal } from "@/components/TaborSeal";
-import { GOLD, MONO, PIRATA, CINZEL, BODY, SCRIPTURE, IVORY, MUTED, LINE } from "@/lib/ui";
+import { GOLD, MONO, METAL, CINZEL, BODY, SCRIPTURE, IVORY, MUTED, LINE } from "@/lib/ui";
 
 export const metadata = {
   title: "About · TABOR",
@@ -22,7 +22,7 @@ export default function About() {
           <TaborSeal id="about-seal" size={72} />
         </div>
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.28em", marginBottom: 14 }}>[ SONS OF FIRE ]</div>
-        <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(44px,9vw,84px)", color: IVORY, margin: "0 0 18px", lineHeight: 0.92 }}>About TABOR</h1>
+        <h1 style={{ fontFamily: METAL, fontSize: "clamp(44px,9vw,84px)", color: IVORY, margin: "0 0 18px", lineHeight: 0.92 }}>About TABOR</h1>
         <p style={{ fontFamily: SCRIPTURE, fontSize: "clamp(18px,3vw,24px)", color: "#B8B2A6", maxWidth: 640, margin: "0 auto", lineHeight: 1.5, fontStyle: "italic" }}>
           A brotherhood for men who refuse to drift. We game, we train, we keep the faith. Together.
         </p>
@@ -63,7 +63,7 @@ export default function About() {
 
       {/* CTA */}
       <section style={{ borderTop: `1px solid ${LINE}`, padding: "54px 24px 64px", textAlign: "center", background: "#0E0E12" }}>
-        <div style={{ fontFamily: PIRATA, fontSize: "clamp(28px,5vw,40px)", color: IVORY, marginBottom: 8 }}>Take up the cross.</div>
+        <div style={{ fontFamily: METAL, fontSize: "clamp(28px,5vw,40px)", color: IVORY, marginBottom: 8 }}>Take up the cross.</div>
         <p style={{ fontFamily: MONO, fontSize: 10, color: MUTED, letterSpacing: "0.16em", marginBottom: 26 }}>NO MAN HOLDS THE LINE ALONE.</p>
         <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/#app" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.14em", color: "#0A0A0A", background: GOLD, padding: "13px 26px", borderRadius: 8, textDecoration: "none", textTransform: "uppercase", fontWeight: 700 }}>Get The App</Link>

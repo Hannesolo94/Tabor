@@ -9,7 +9,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import { track } from "@/lib/track";
 import { computeShipping, isUS, SHIPPING } from "@/lib/shipping";
 import type { RegionId } from "@/lib/region";
-import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
+import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 const COUNTRIES = ["South Africa", "United States", "United Kingdom", "Canada", "Australia", "Namibia", "Botswana", "Other"];
 
@@ -73,7 +73,7 @@ export default function CheckoutPage() {
       <div style={{ background: "#0A0A0A", minHeight: "70vh", padding: "70px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em", marginBottom: 14 }}>[ ORDER RECEIVED ]</div>
-          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(36px,7vw,56px)", color: "#E8E2D5", margin: "0 0 14px" }}>Forged.</h1>
+          <h1 style={{ fontFamily: METAL, fontSize: "clamp(36px,7vw,56px)", color: "#E8E2D5", margin: "0 0 14px" }}>Forged.</h1>
           <p style={{ fontFamily: BODY, fontSize: 15, color: "#C3BDB1", lineHeight: 1.6 }}>{done.message ?? "Your order has been received."}</p>
           <p style={{ fontFamily: MONO, fontSize: 11, color: "#8A847A", letterSpacing: "0.1em", marginTop: 16 }}>ORDER REF · {done.orderId.slice(0, 8).toUpperCase()}</p>
           <Link href="/shop" style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "14px 28px", textDecoration: "none", display: "inline-block", marginTop: 26 }}>Keep shopping</Link>
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
   return (
     <div style={{ background: "#0A0A0A", minHeight: "70vh", padding: "50px 24px 80px" }}>
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
-        <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(36px,7vw,56px)", color: "#E8E2D5", margin: "0 0 6px" }}>Checkout</h1>
+        <h1 style={{ fontFamily: METAL, fontSize: "clamp(36px,7vw,56px)", color: "#E8E2D5", margin: "0 0 6px" }}>Checkout</h1>
         <div style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.14em", marginBottom: 30 }}>{count} {count === 1 ? "ITEM" : "ITEMS"} IN YOUR BAG</div>
 
         {lines.length === 0 ? (

@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { DonateForm } from "./DonateForm";
-import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
+import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Support the Mission", description: "Keep TABOR free for every brother. Half to the charities the community chooses, half to keep the mission running. Fully transparent.", alternates: { canonical: "/give" } };
@@ -27,7 +27,7 @@ export default async function GivePage() {
       <section style={{ padding: "64px 24px 30px", textAlign: "center", borderBottom: "1px solid rgba(201,169,97,0.12)" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em", marginBottom: 12 }}>[ SUPPORT THE MISSION ]</div>
-          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(44px,9vw,84px)", color: "#E8E2D5", margin: 0, lineHeight: 0.95 }}>Fuel the Fire</h1>
+          <h1 style={{ fontFamily: METAL, fontSize: "clamp(44px,9vw,84px)", color: "#E8E2D5", margin: 0, lineHeight: 0.95 }}>Fuel the Fire</h1>
           <p style={{ fontFamily: BODY, fontSize: 16, color: "#9A948A", lineHeight: 1.6, margin: "16px auto 0", maxWidth: 560 }}>
             TABOR is free for every brother, for life. You keep it that way. Two ways to stand with us: <strong style={{ color: "#E8E2D5" }}>give below</strong>, or <strong style={{ color: "#E8E2D5" }}>wear the climb</strong> from our store. Both build the Kingdom.
           </p>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getPublishedPosts } from "@/lib/blog-db";
-import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
+import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "The Scroll", description: "Words for the brotherhood: scripture, training, and the fight to not drift.", alternates: { canonical: "/blog" } };
@@ -12,7 +12,7 @@ export default async function BlogIndex() {
       <section style={{ padding: "60px 24px 24px", borderBottom: "1px solid rgba(201,169,97,0.12)" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em", marginBottom: 10 }}>[ THE SCROLL ]</div>
-          <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(40px,8vw,80px)", color: "#E8E2D5", margin: 0, lineHeight: 0.95 }}>The Scroll</h1>
+          <h1 style={{ fontFamily: METAL, fontSize: "clamp(40px,8vw,80px)", color: "#E8E2D5", margin: 0, lineHeight: 0.95 }}>The Scroll</h1>
           <p style={{ fontFamily: BODY, fontSize: 15, color: "#9A948A", maxWidth: 580, margin: "14px 0 0", lineHeight: 1.6 }}>Words for the brotherhood. Scripture, discipline, and the daily fight to not drift.</p>
         </div>
       </section>

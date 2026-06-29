@@ -11,7 +11,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TaborSeal } from "@/components/TaborSeal";
-import { GOLD, MONO, PIRATA, CINZEL, BODY } from "@/lib/ui";
+import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 const PROMO_CODE = "FIRE10";
 const SEEN_KEY = "tabor_promo_seen"; // dismissed or converted
@@ -87,7 +87,7 @@ export function PromoPopup() {
           ) : (
             <>
               <div style={{ fontFamily: MONO, fontSize: 11, color: GOLD, letterSpacing: "0.24em", marginBottom: 12 }}>[ JOIN THE BROTHERHOOD ]</div>
-              <h2 style={{ fontFamily: PIRATA, fontSize: 40, color: "#E8E2D5", margin: "0 0 6px", lineHeight: 1 }}>10% off</h2>
+              <h2 style={{ fontFamily: METAL, fontSize: 40, color: "#E8E2D5", margin: "0 0 6px", lineHeight: 1 }}>10% off</h2>
               <p style={{ fontFamily: BODY, fontSize: 14, color: "#B8B2A6", lineHeight: 1.6, margin: "0 auto 20px", maxWidth: 320 }}>
                 Take 10% off your first order. Join the wall for drops, scripture, and the brotherhood.
               </p>

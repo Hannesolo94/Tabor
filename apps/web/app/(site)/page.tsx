@@ -93,7 +93,7 @@ export default async function Home() {
               <Link key={c.id} href={`/collections/${c.id}`} className="tabor-lift" style={{ textDecoration: "none", border: `1px solid ${c.accent}33`, background: "linear-gradient(160deg, rgba(34,34,42,0.72), rgba(15,15,20,0.6))", borderRadius: 18, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)", padding: "26px 22px", display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "grid", placeItems: "center", padding: "8px 0 16px" }}><TaborSeal id={"col-" + c.id} size={64} /></div>
                 <div style={{ fontFamily: MONO, fontSize: 9, color: c.accent, letterSpacing: "0.18em", textTransform: "uppercase" }}>{c.tag}</div>
-                <h3 style={{ fontFamily: PIRATA, fontSize: 30, color: "#E8E2D5", margin: "6px 0 8px" }}>{c.name}</h3>
+                <h3 style={{ fontFamily: METAL, fontSize: 30, color: "#E8E2D5", margin: "6px 0 8px" }}>{c.name}</h3>
                 <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", lineHeight: 1.55, margin: "0 0 16px", flex: 1 }}>{c.blurb}</p>
                 <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.12em", color: c.accent, textTransform: "uppercase" }}>Enter {c.name} ›</span>
               </Link>
