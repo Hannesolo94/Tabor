@@ -1,11 +1,14 @@
 // Editable brand content (stored in app_settings 'brand') + the brand mark as a standalone
 // SVG for export. Edit the brand in /admin/branding and every download regenerates from it.
+import { createClient } from "@supabase/supabase-js";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export interface Swatch { name: string; hex: string; role: string }
 export interface BrandFont { name: string; role: string; usage: string; google: string }
 export interface BrandStatements { tagline: string; mission: string; voice: string; lines: string[]; classes: string[]; ranks: string[] }
-export interface Brand { palette: Swatch[]; fonts: BrandFont[]; statements: BrandStatements }
+/** Uploaded logo art (public URLs). icon = square mark; wordmark = full horizontal logo. null = use the SVG seal. */
+export interface BrandLogos { icon: string | null; wordmark: string | null }
+export interface Brand { palette: Swatch[]; fonts: BrandFont[]; statements: BrandStatements; logos: BrandLogos }
 
 export const DEFAULT_BRAND: Brand = {
   palette: [
@@ -34,6 +37,7 @@ export const DEFAULT_BRAND: Brand = {
     classes: ["Sentinel (guardian)", "Scribe (student)", "Crusader (fighter)", "Pilgrim (seeker)"],
     ranks: ["Recruit", "Initiate", "Tempered", "Forged", "Crucible", "Ascended", "Supersonic Fit"],
   },
+  logos: { icon: null, wordmark: null },
 };
 
 export async function getBrand(): Promise<Brand> {
@@ -45,7 +49,21 @@ export async function getBrand(): Promise<Brand> {
     palette: Array.isArray(v.palette) && v.palette.length ? v.palette : DEFAULT_BRAND.palette,
     fonts: Array.isArray(v.fonts) && v.fonts.length ? v.fonts : DEFAULT_BRAND.fonts,
     statements: { ...DEFAULT_BRAND.statements, ...(v.statements ?? {}) },
+    logos: { ...DEFAULT_BRAND.logos, ...(v.logos ?? {}) },
   };
+}
+
+/** Lightweight, anon-client read of just the uploaded logo URLs — for the public site
+ *  (no auth/cookies needed; app_settings is public-readable). Never throws. */
+export async function getPublicBrandLogos(): Promise<BrandLogos> {
+  try {
+    const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+    const { data } = await sb.from("app_settings").select("value").eq("key", "brand").maybeSingle();
+    const logos = (data?.value as Partial<Brand> | undefined)?.logos;
+    return { icon: logos?.icon ?? null, wordmark: logos?.wordmark ?? null };
+  } catch {
+    return { icon: null, wordmark: null };
+  }
 }
 
 /** The TABOR seal as a standalone, font-free SVG (gold mark on transparent) — exportable as-is. */

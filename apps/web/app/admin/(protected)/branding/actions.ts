@@ -3,11 +3,37 @@
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import type { Brand } from "@/lib/brand";
+import type { Brand, BrandLogos } from "@/lib/brand";
 
 export async function saveBrand(brand: Brand): Promise<void> {
   const sb = await supabaseServer();
-  await sb.from("app_settings").upsert({ key: "brand", value: brand });
+  // Logos are owned by the LogoManager; never let a stale BrandStudio draft overwrite them.
+  const { data } = await sb.from("app_settings").select("value").eq("key", "brand").maybeSingle();
+  const logos = (data?.value as Partial<Brand> | undefined)?.logos ?? { icon: null, wordmark: null };
+  await sb.from("app_settings").upsert({ key: "brand", value: { ...brand, logos } });
+  revalidatePath("/admin/branding");
+}
+
+/** Mint a signed upload URL for a logo image, targeting the PUBLIC product-media bucket
+ *  (so the live site can read it without signing). Returns the eventual public URL too. */
+export async function createLogoUploadTicket(name: string, slot: "icon" | "wordmark"): Promise<{ path: string; token: string; publicUrl: string } | { error: string }> {
+  const admin = supabaseAdmin();
+  const ext = (name.includes(".") ? name.split(".").pop() : "png")!.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+  const path = `brand/${slot}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { data, error } = await admin.storage.from("product-media").createSignedUploadUrl(path);
+  if (error || !data) return { error: error?.message ?? "Could not start the upload." };
+  const { data: pub } = admin.storage.from("product-media").getPublicUrl(path);
+  return { path: data.path, token: data.token, publicUrl: pub.publicUrl };
+}
+
+/** Merge logo URLs into the brand settings, then refresh the whole public site + admin so
+ *  the new logo/icon shows everywhere immediately. Pass null in a slot to clear it. */
+export async function saveLogos(logos: BrandLogos): Promise<void> {
+  const sb = await supabaseServer();
+  const { data } = await sb.from("app_settings").select("value").eq("key", "brand").maybeSingle();
+  const current = (data?.value ?? {}) as Record<string, unknown>;
+  await sb.from("app_settings").upsert({ key: "brand", value: { ...current, logos } });
+  revalidatePath("/", "layout"); // every storefront page (header/footer/favicon)
   revalidatePath("/admin/branding");
 }
 

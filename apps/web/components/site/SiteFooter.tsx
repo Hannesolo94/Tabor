@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { TaborSeal } from "@/components/TaborSeal";
 import { CATEGORIES, PERSONAS } from "@/lib/catalog";
+import type { BrandLogos } from "@/lib/brand";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
 async function getStore(): Promise<Record<string, string>> {
@@ -25,7 +26,7 @@ const XI = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23 22h-6.8l-5-6.6L5.4 22H2.3l7.8-8.9L1.5 2h7l4.5 6 5.9-6zm-2.4 18h1.7L7.6 3.8H5.8L16.5 20z" /></svg>
 );
 
-export async function SiteFooter() {
+export async function SiteFooter({ logo }: { logo?: BrandLogos }) {
   const store = await getStore();
   const socials: { href: string; label: string; icon: React.ReactNode }[] = [];
   if (store.instagram) socials.push({ href: store.instagram, label: "Instagram", icon: IG });
@@ -40,8 +41,16 @@ export async function SiteFooter() {
       <div style={{ maxWidth: 1240, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 28 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <TaborSeal id="ft-seal" size={28} />
-            <span style={{ fontFamily: PIRATA, fontSize: 22, color: GOLD }}>Tabor</span>
+            {logo?.wordmark ? (
+              <img src={logo.wordmark} alt="Tabor" style={{ height: 34, width: "auto", display: "block" }} />
+            ) : (
+              <>
+                {logo?.icon
+                  ? <img src={logo.icon} alt="" style={{ width: 28, height: 28, objectFit: "contain", display: "block" }} />
+                  : <TaborSeal id="ft-seal" size={28} />}
+                <span style={{ fontFamily: PIRATA, fontSize: 22, color: GOLD }}>Tabor</span>
+              </>
+            )}
           </div>
           <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.14em", lineHeight: 1.8 }}>SONS OF FIRE<br />FORGED NOT BOUGHT</div>
           {socials.length > 0 && (
@@ -62,6 +71,7 @@ export async function SiteFooter() {
         </div>
         <div>
           <div style={head}>The Brotherhood</div>
+          <Link href="/about" style={col}>About Us</Link>
           <Link href="/shop" style={col}>Shop All</Link>
           <Link href="/blog" style={col}>The Scroll</Link>
           <Link href="/#app" style={col}>The App</Link>

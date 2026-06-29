@@ -3,6 +3,7 @@ import { getBrand, SEAL_SVG, SEAL_SVG_DARK } from "@/lib/brand";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { BrandStudio } from "./BrandStudio";
+import { LogoManager } from "./LogoManager";
 import { DesignFiles, type DesignFile } from "./DesignFiles";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
@@ -29,6 +30,7 @@ export default async function BrandingPage() {
         <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Branding</h1>
         <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "6px 0 0" }}>The living brand kit. Edit it as the brand evolves; every download regenerates from what is here.</p>
       </div>
+      <LogoManager logos={brand.logos} />
       <BrandStudio brand={brand} sealSvg={SEAL_SVG} sealDark={SEAL_SVG_DARK} />
       <DesignFiles files={withUrls} products={products ?? []} />
     </div>
