@@ -1,5 +1,7 @@
-// Unlisted font comparison for the hero headline. Pick the one that best matches the
-// metal logo while staying legible, then it gets wired into the real layout.
+// Unlisted font comparison for the hero headline. Fonts are loaded via next/font so they
+// self-host under our own origin (the site CSP blocks external Google Fonts). Pick the one
+// that best matches the metal logo while staying legible; then it gets wired into the hero.
+import { Metal_Mania, Eater, New_Rocker, Pirata_One, UnifrakturMaguntia, Grenze_Gotisch, MedievalSharp, Metamorphous } from "next/font/google";
 import { GOLD, MONO, BODY } from "@/lib/ui";
 
 export const metadata = {
@@ -7,19 +9,26 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-// Google Fonts, ordered most-metal/spiky -> most-legible.
-const FONTS: { name: string; family: string; metal: number; legible: number; note: string }[] = [
-  { name: "Metal Mania", family: "'Metal Mania', cursive", metal: 5, legible: 2, note: "Closest to the logo. Spiky band-logo look. Hardest to read." },
-  { name: "Eater", family: "'Eater', cursive", metal: 5, legible: 2, note: "Dripping horror-metal. Very on-theme, low legibility." },
-  { name: "New Rocker", family: "'New Rocker', cursive", metal: 4, legible: 3, note: "Metal-rock blackletter. Good balance of edge and readability." },
-  { name: "Pirata One (current)", family: "'Pirata One', cursive", metal: 3, legible: 4, note: "What the site uses now. Blackletter, clean, less aggressive." },
-  { name: "UnifrakturMaguntia", family: "'UnifrakturMaguntia', cursive", metal: 3, legible: 3, note: "Ornate medieval blackletter. Heavy, traditional." },
-  { name: "Grenze Gotisch", family: "'Grenze Gotisch', cursive", metal: 3, legible: 5, note: "Modern blackletter. Sharp but very readable. Strong middle ground." },
-  { name: "MedievalSharp", family: "'MedievalSharp', cursive", metal: 2, legible: 5, note: "Sharp medieval, highly legible. Less metal, more knightly." },
-  { name: "Metamorphous", family: "'Metamorphous', cursive", metal: 2, legible: 5, note: "Light medieval display. The most legible, least metal." },
-];
+const metalMania = Metal_Mania({ subsets: ["latin"], weight: "400", display: "swap" });
+const eater = Eater({ subsets: ["latin"], weight: "400", display: "swap" });
+const newRocker = New_Rocker({ subsets: ["latin"], weight: "400", display: "swap" });
+const pirata = Pirata_One({ subsets: ["latin"], weight: "400", display: "swap" });
+const unifraktur = UnifrakturMaguntia({ subsets: ["latin"], weight: "400", display: "swap" });
+const grenze = Grenze_Gotisch({ subsets: ["latin"], weight: ["400", "700", "900"], display: "swap" });
+const medieval = MedievalSharp({ subsets: ["latin"], weight: "400", display: "swap" });
+const metamorphous = Metamorphous({ subsets: ["latin"], weight: "400", display: "swap" });
 
-const IMPORT = "@import url('https://fonts.googleapis.com/css2?family=Metal+Mania&family=Eater&family=New+Rocker&family=Pirata+One&family=UnifrakturMaguntia&family=Grenze+Gotisch:wght@400;700;900&family=MedievalSharp&family=Metamorphous&display=swap');";
+// Ordered most-metal/spiky -> most-legible.
+const FONTS: { name: string; family: string; metal: number; legible: number; note: string }[] = [
+  { name: "Metal Mania", family: metalMania.style.fontFamily, metal: 5, legible: 2, note: "Closest to the logo. Spiky band-logo look. Hardest to read." },
+  { name: "Eater", family: eater.style.fontFamily, metal: 5, legible: 2, note: "Dripping horror-metal. Very on-theme, low legibility." },
+  { name: "New Rocker", family: newRocker.style.fontFamily, metal: 4, legible: 3, note: "Metal-rock blackletter. Good balance of edge and readability." },
+  { name: "Pirata One (current)", family: pirata.style.fontFamily, metal: 3, legible: 4, note: "What the site uses now. Blackletter, clean, less aggressive." },
+  { name: "UnifrakturMaguntia", family: unifraktur.style.fontFamily, metal: 3, legible: 3, note: "Ornate medieval blackletter. Heavy, traditional." },
+  { name: "Grenze Gotisch", family: grenze.style.fontFamily, metal: 3, legible: 5, note: "Modern blackletter. Sharp but very readable. Strong middle ground." },
+  { name: "MedievalSharp", family: medieval.style.fontFamily, metal: 2, legible: 5, note: "Sharp medieval, highly legible. Less metal, more knightly." },
+  { name: "Metamorphous", family: metamorphous.style.fontFamily, metal: 2, legible: 5, note: "Light medieval display. The most legible, least metal." },
+];
 
 function Rating({ label, score, color }: { label: string; score: number; color: string }) {
   return (
@@ -32,7 +41,6 @@ function Rating({ label, score, color }: { label: string; score: number; color: 
 export default function FontLab() {
   return (
     <div style={{ background: "#0A0A0A", minHeight: "100vh", padding: "48px 24px 90px" }}>
-      <style dangerouslySetInnerHTML={{ __html: IMPORT }} />
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
         <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, letterSpacing: "0.24em", marginBottom: 8 }}>[ FONT LAB · UNLISTED ]</div>
         <h1 style={{ fontFamily: BODY, fontWeight: 700, fontSize: 26, color: "#E8E2D5", margin: "0 0 6px" }}>Hero headline font options</h1>
