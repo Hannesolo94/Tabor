@@ -9,7 +9,7 @@ export async function saveBrand(brand: Brand): Promise<void> {
   const sb = await supabaseServer();
   // Logos are owned by the LogoManager; never let a stale BrandStudio draft overwrite them.
   const { data } = await sb.from("app_settings").select("value").eq("key", "brand").maybeSingle();
-  const logos = (data?.value as Partial<Brand> | undefined)?.logos ?? { icon: null, wordmark: null };
+  const logos = (data?.value as Partial<Brand> | undefined)?.logos ?? { icon: null, wordmark: null, wordmarkHeight: 36 };
   await sb.from("app_settings").upsert({ key: "brand", value: { ...brand, logos } });
   revalidatePath("/admin/branding");
 }

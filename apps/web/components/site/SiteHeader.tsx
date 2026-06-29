@@ -26,7 +26,7 @@ export function SiteHeader({ personas = PERSONAS, categories = CATEGORIES, colle
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "13px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Link href="/" onClick={close} style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           {logo?.wordmark ? (
-            <img src={logo.wordmark} alt="Tabor" style={{ height: 36, width: "auto", display: "block" }} />
+            <img src={logo.wordmark} alt="Tabor" style={{ height: logo.wordmarkHeight || 36, width: "auto", display: "block" }} />
           ) : (
             <>
               {logo?.icon

@@ -42,7 +42,7 @@ export async function SiteFooter({ logo }: { logo?: BrandLogos }) {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             {logo?.wordmark ? (
-              <img src={logo.wordmark} alt="Tabor" style={{ height: 34, width: "auto", display: "block" }} />
+              <img src={logo.wordmark} alt="Tabor" style={{ height: logo.wordmarkHeight || 34, width: "auto", display: "block" }} />
             ) : (
               <>
                 {logo?.icon

@@ -6,8 +6,12 @@ import { supabaseServer } from "@/lib/supabase/server";
 export interface Swatch { name: string; hex: string; role: string }
 export interface BrandFont { name: string; role: string; usage: string; google: string }
 export interface BrandStatements { tagline: string; mission: string; voice: string; lines: string[]; classes: string[]; ranks: string[] }
-/** Uploaded logo art (public URLs). icon = square mark; wordmark = full horizontal logo. null = use the SVG seal. */
-export interface BrandLogos { icon: string | null; wordmark: string | null }
+/** Uploaded logo art (public URLs). icon = square mark; wordmark = full horizontal logo. null = use the SVG seal.
+ *  wordmarkHeight = rendered height in px of the full logo in the site header/footer. */
+export interface BrandLogos { icon: string | null; wordmark: string | null; wordmarkHeight: number }
+
+/** Default rendered height (px) for the full logo in the header/footer. */
+export const DEFAULT_WORDMARK_HEIGHT = 36;
 export interface Brand { palette: Swatch[]; fonts: BrandFont[]; statements: BrandStatements; logos: BrandLogos }
 
 export const DEFAULT_BRAND: Brand = {
@@ -37,7 +41,7 @@ export const DEFAULT_BRAND: Brand = {
     classes: ["Sentinel (guardian)", "Scribe (student)", "Crusader (fighter)", "Pilgrim (seeker)"],
     ranks: ["Recruit", "Initiate", "Tempered", "Forged", "Crucible", "Ascended", "Supersonic Fit"],
   },
-  logos: { icon: null, wordmark: null },
+  logos: { icon: null, wordmark: null, wordmarkHeight: DEFAULT_WORDMARK_HEIGHT },
 };
 
 export async function getBrand(): Promise<Brand> {
@@ -60,9 +64,9 @@ export async function getPublicBrandLogos(): Promise<BrandLogos> {
     const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
     const { data } = await sb.from("app_settings").select("value").eq("key", "brand").maybeSingle();
     const logos = (data?.value as Partial<Brand> | undefined)?.logos;
-    return { icon: logos?.icon ?? null, wordmark: logos?.wordmark ?? null };
+    return { icon: logos?.icon ?? null, wordmark: logos?.wordmark ?? null, wordmarkHeight: logos?.wordmarkHeight ?? DEFAULT_WORDMARK_HEIGHT };
   } catch {
-    return { icon: null, wordmark: null };
+    return { icon: null, wordmark: null, wordmarkHeight: DEFAULT_WORDMARK_HEIGHT };
   }
 }
 
