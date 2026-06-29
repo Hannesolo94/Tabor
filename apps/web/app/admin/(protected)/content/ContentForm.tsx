@@ -15,6 +15,7 @@ const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2
 export function ContentForm({ hero }: { hero: HeroContent }) {
   const [bgUrl, setBgUrl] = useState(hero.bg_url);
   const [bgType, setBgType] = useState(hero.bg_type);
+  const [logoUrl, setLogoUrl] = useState(hero.logo_url);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -36,8 +37,50 @@ export function ContentForm({ hero }: { hero: HeroContent }) {
     e.target.value = "";
   }
 
+  async function onLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const sb = supabaseBrowser();
+    if (!sb) { setErr("Storage not configured."); return; }
+    if (!file.type.startsWith("image/")) { setErr("Logo must be an image (PNG, SVG, WEBP)."); return; }
+    setBusy(true);
+    setErr(null);
+    const ext = (file.name.split(".").pop() ?? "png").toLowerCase();
+    const path = `hero-logo/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await sb.storage.from("product-media").upload(path, file, { contentType: file.type });
+    if (error) { setErr(error.message); setBusy(false); return; }
+    const { data } = sb.storage.from("product-media").getPublicUrl(path);
+    setLogoUrl(data.publicUrl);
+    setBusy(false);
+    e.target.value = "";
+  }
+
   return (
     <form action={saveHero} style={{ display: "grid", gap: 16 }}>
+      {/* hero logo — renders above the eyebrow */}
+      <div style={{ border: "1px solid rgba(255,255,255,0.05)", background: "rgba(15,15,20,0.4)", borderRadius: 12, padding: "16px 16px" }}>
+        <label style={lbl}>Hero logo (optional, shown above the eyebrow)</label>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <label style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", borderRadius: 12, padding: "10px 14px", cursor: "pointer" }}>
+            {busy ? "Uploading..." : logoUrl ? "Replace logo" : "Upload logo"}
+            <input type="file" accept="image/*" onChange={onLogoUpload} disabled={busy} style={{ display: "none" }} />
+          </label>
+          {logoUrl && <span style={{ fontFamily: MONO, fontSize: 9, color: "#7BBF7B" }}>● logo set</span>}
+          {logoUrl && <button type="button" onClick={() => setLogoUrl("")} style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: "#C03A3A", background: "transparent", border: "1px solid rgba(192,58,58,0.35)", borderRadius: 10, padding: "8px 12px", cursor: "pointer" }}>Remove</button>}
+        </div>
+        <input type="hidden" name="logo_url" value={logoUrl} />
+        <div style={{ marginTop: 12, maxWidth: 160 }}>
+          <label style={lbl}>Logo height (px)</label>
+          <input name="logo_height" type="number" min={40} max={260} defaultValue={hero.logo_height} style={inp} />
+        </div>
+        {logoUrl && (
+          <div style={{ marginTop: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "16px 20px", background: "#0A0A0A", border: "1px solid rgba(201,169,97,0.2)", borderRadius: 12 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl} alt="Hero logo preview" style={{ height: Math.min(hero.logo_height || 96, 120), width: "auto", objectFit: "contain", display: "block" }} />
+          </div>
+        )}
+      </div>
+
       <div><label style={lbl}>Eyebrow (small label above headline)</label><input name="eyebrow" defaultValue={hero.eyebrow} style={inp} /></div>
       <div><label style={lbl}>Headline</label><input name="headline" defaultValue={hero.headline} style={inp} /></div>
       <div><label style={lbl}>Subcopy</label><textarea name="subcopy" defaultValue={hero.subcopy} rows={3} style={{ ...inp, resize: "vertical" }} /></div>

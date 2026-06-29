@@ -45,6 +45,10 @@ export default async function Home() {
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 50% 40%, rgba(201,169,97,0.12), transparent 70%)" }} />
         {hero.bg_type === "none" && <div style={{ position: "absolute", inset: 0, opacity: 0.04, display: "grid", placeItems: "center" }}><TaborSeal id="hero-bg" size={640} /></div>}
         <div style={{ position: "relative" }}>
+          {hero.logo_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={hero.logo_url} alt="" style={{ height: hero.logo_height || 96, width: "auto", maxWidth: "90%", objectFit: "contain", margin: "0 auto 22px", display: "block" }} />
+          )}
           {hero.eyebrow && <div style={{ fontFamily: MONO, fontSize: 12, color: GOLD, letterSpacing: "0.3em", marginBottom: 18 }}>[ {hero.eyebrow.toUpperCase()} ]</div>}
           <h1 style={{ fontFamily: PIRATA, fontSize: "clamp(58px, 12vw, 150px)", color: "#E8E2D5", margin: 0, lineHeight: 0.88 }}>{hero.headline}</h1>
           {hero.subcopy && (

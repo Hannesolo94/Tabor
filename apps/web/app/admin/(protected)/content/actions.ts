@@ -6,6 +6,8 @@ import { logAudit } from "@/lib/audit";
 
 export async function saveHero(formData: FormData): Promise<void> {
   const value = {
+    logo_url: String(formData.get("logo_url") ?? "").trim(),
+    logo_height: Number(formData.get("logo_height")) || 96,
     eyebrow: String(formData.get("eyebrow") ?? ""),
     headline: String(formData.get("headline") ?? ""),
     subcopy: String(formData.get("subcopy") ?? ""),

@@ -2,6 +2,8 @@
 import { createClient } from "@supabase/supabase-js";
 
 export interface HeroContent {
+  logo_url: string;
+  logo_height: number;
   eyebrow: string;
   headline: string;
   subcopy: string;
@@ -14,6 +16,8 @@ export interface HeroContent {
 }
 
 const HERO_DEFAULT: HeroContent = {
+  logo_url: "",
+  logo_height: 96,
   eyebrow: "Sacred-Tactical Gear",
   headline: "Wear the Climb",
   subcopy: "Heavyweight, muted, premium. Apparel and gear forged for Christian men who train, game, and refuse to drift. Four collections, one brotherhood.",
