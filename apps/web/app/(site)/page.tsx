@@ -7,11 +7,12 @@ import { Waitlist } from "@/components/home/Waitlist";
 import { CATEGORIES, PERSONAS } from "@/lib/catalog";
 import { getFeatured } from "@/lib/products-db";
 import { getHero } from "@/lib/content-db";
+import { getPublicBrandLogos } from "@/lib/brand";
 import { getHomeReviews } from "@/lib/reviews-db";
 import { Stars } from "@/components/reviews/Stars";
 import { AppButtons } from "@/components/site/AppButtons";
 import { getRegion } from "@/lib/region";
-import { GOLD, GOLD_LIGHT, MONO, PIRATA, METAL, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
+import { GOLD, GOLD_LIGHT, MONO, METAL, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fon
 
 export default async function Home() {
   const region = await getRegion();
-  const [featured, hero, reviews] = await Promise.all([getFeatured(region), getHero(), getHomeReviews(6)]);
+  const [featured, hero, reviews, logos] = await Promise.all([getFeatured(region), getHero(), getHomeReviews(6), getPublicBrandLogos()]);
   return (
     <div style={{ background: "#0A0A0A" }}>
       {/* hero (editable in admin -> Content) */}
@@ -137,8 +138,20 @@ export default async function Home() {
           </div>
           <div style={{ display: "grid", placeItems: "center" }}>
             <div style={{ width: 220, border: `1px solid ${GOLD}33`, background: "radial-gradient(ellipse 90% 70% at 50% 0%, #16140e, #0A0A0A 72%)", borderRadius: 20, boxShadow: "0 20px 50px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 50px -16px rgba(201,169,97,0.22)", padding: "40px 24px", textAlign: "center" }}>
-              <div style={{ display: "grid", placeItems: "center" }}><TaborSeal id="app-seal" size={110} /></div>
-              <div style={{ fontFamily: PIRATA, fontSize: 34, color: GOLD, marginTop: 12 }}>Tabor</div>
+              {logos.wordmark ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logos.wordmark} alt="TABOR" style={{ width: "100%", maxHeight: 150, objectFit: "contain", display: "block", margin: "0 auto" }} />
+              ) : (
+                <>
+                  <div style={{ display: "grid", placeItems: "center" }}>
+                    {logos.icon
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={logos.icon} alt="" style={{ width: 110, height: 110, objectFit: "contain", display: "block" }} />
+                      : <TaborSeal id="app-seal" size={110} />}
+                  </div>
+                  <div style={{ fontFamily: METAL, fontSize: 34, color: GOLD, marginTop: 12 }}>Tabor</div>
+                </>
+              )}
               <div style={{ fontFamily: MONO, fontSize: 8, color: "#9A948A", letterSpacing: "0.2em", marginTop: 6 }}>SONS OF FIRE</div>
               <div style={{ fontFamily: MONO, fontSize: 9, color: GOLD, letterSpacing: "0.14em", marginTop: 18, border: `1px solid ${GOLD}44`, borderRadius: 10, padding: "8px" }}>FREE FOR LIFE</div>
             </div>
