@@ -27,12 +27,41 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
 ];
 
+// The private gated page at /w/<slug> is a self-contained static document served
+// from a private bucket: no scripts, no third-party anything. It gets its own,
+// tighter policy plus hard no-index headers. Declared here rather than in the
+// route handlers so it also covers 401s, 404s and errors on that prefix.
+const cvCsp = [
+  "default-src 'none'",
+  "style-src 'self' 'unsafe-inline'", // the document carries its own <style> block
+  "img-src 'self' data:",
+  "media-src 'self'",
+  "font-src 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'", // the gateway injects <base> so relative asset paths resolve
+].join("; ");
+
+const privatePageHeaders = [
+  { key: "Content-Security-Policy", value: cvCsp },
+  { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "no-referrer" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+];
+
 const nextConfig = {
   reactStrictMode: true,
   // @tabor/shared ships as TypeScript source; let Next transpile it.
   transpilePackages: ["@tabor/shared"],
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/w/:path*", headers: privatePageHeaders },
+      // everything except the private page prefix
+      { source: "/((?!w/).*)", headers: securityHeaders },
+    ];
   },
 };
 

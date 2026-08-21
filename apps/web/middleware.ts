@@ -65,6 +65,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // run on storefront + admin, skip static assets and api
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|api/).*)"],
+  // run on storefront + admin, skip static assets, api, and the private gated
+  // page (/w/* does its own auth and has no use for the region cookie)
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|api/|w/).*)"],
 };
