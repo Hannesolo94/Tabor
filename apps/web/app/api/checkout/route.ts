@@ -49,7 +49,9 @@ export async function POST(req: Request) {
     const p = await getProductBySku(it.sku, ctx);
     if (!p || !p.inStock) return NextResponse.json({ error: `"${it.sku}" is no longer available.` }, { status: 409 });
     const qty = Math.max(1, Math.min(99, Number(it.qty ?? 1) || 1));
-    const price = p.price; // server price, destination-correct
+    // Size-aware: a 30x40 blanket is a different product to a 60x80, so the
+    // size the buyer chose decides the price, recomputed here from the DB.
+    const price = (it.size && p.sizePrices?.[it.size]) || p.price; // destination-correct
     subtotal += price * qty;
     lines.push({ sku: p.sku, name: p.name, size: it.size ?? null, qty, price });
   }

@@ -64,7 +64,7 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
               {persona?.name} · {persona?.tag}
             </Link>
             <h1 style={{ fontFamily: METAL, fontSize: "clamp(38px,7vw,64px)", color: "#E8E2D5", margin: "8px 0 6px", lineHeight: 0.95 }}>{p.name}</h1>
-            <div style={{ fontFamily: MONO, fontSize: 16, color: GOLD, marginBottom: 6 }}>{p.currencySymbol}{p.price}</div>
+            {!p.sizePrices && <div style={{ fontFamily: MONO, fontSize: 16, color: GOLD, marginBottom: 6 }}>{p.currencySymbol}{p.price}</div>}
             {summary.count > 0 && (
               <a href="#reviews" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 8 }}>
                 <Stars rating={summary.avg} />

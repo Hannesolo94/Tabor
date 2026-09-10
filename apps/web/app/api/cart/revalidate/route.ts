@@ -40,6 +40,7 @@ export async function POST(req: Request) {
       price: p.price,
       symbol: p.currencySymbol,
       currency: p.currencyCode,
+      sizePrices: p.sizePrices ?? null,
       inStock: p.inStock,
     });
   }

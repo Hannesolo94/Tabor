@@ -77,14 +77,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ skus }),
         });
         if (!res.ok) return;
-        const data = (await res.json()) as { items?: { sku: string; name: string; price: number; symbol: string }[] };
+        const data = (await res.json()) as { items?: { sku: string; name: string; price: number; symbol: string; sizePrices?: Record<string, number> | null }[] };
         const live = new Map((data.items ?? []).map((i) => [i.sku, i]));
         setLines((prev) =>
           prev
             .filter((l) => live.has(l.sku))              // gone from the catalogue
             .map((l) => {
               const cur = live.get(l.sku)!;
-              return { ...l, name: cur.name, price: cur.price, symbol: cur.symbol };
+              // Keep the line on its own size's price, not the base price.
+              const priced = (l.size && cur.sizePrices?.[l.size]) || cur.price;
+              return { ...l, name: cur.name, price: priced, symbol: cur.symbol };
             }),
         );
       } catch {

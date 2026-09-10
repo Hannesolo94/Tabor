@@ -11,14 +11,25 @@ export function AddToCart({ p }: { p: Product }) {
   const { add } = useCart();
   const hasSizes = !!p.sizes && p.sizes.length > 0 && p.sizes[0] !== "One size";
   const [size, setSize] = useState<string | undefined>(p.sizes?.[0]);
+  // Sizes can be genuinely different products (a 30x40 blanket is not a 60x80),
+  // so the price shown and the price added must follow the selection.
+  const unitPrice = (size && p.sizePrices?.[size]) || p.price;
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
   const onAdd = () => {
-    add({ sku: p.sku, name: p.name, price: p.price, size, symbol: p.currencySymbol }, qty);
+    add({ sku: p.sku, name: p.name, price: unitPrice, size, symbol: p.currencySymbol }, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
   };
+
+  // When sizes carry different prices the PDP's server-rendered price line
+  // cannot be right for the selected size, so it hides and this owns it.
+  const priceLine = p.sizePrices ? (
+    <div style={{ fontFamily: MONO, fontSize: 16, color: GOLD, marginBottom: 14 }}>
+      {p.currencySymbol}{unitPrice.toFixed(unitPrice % 1 ? 2 : 0)}
+    </div>
+  ) : null;
 
   if (!p.inStock) {
     return (
@@ -30,6 +41,7 @@ export function AddToCart({ p }: { p: Product }) {
 
   return (
     <div>
+      {priceLine}
       {hasSizes && (
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontFamily: MONO, fontSize: 10, color: "#7A746A", letterSpacing: "0.18em", marginBottom: 8 }}>SIZE</div>
@@ -48,7 +60,7 @@ export function AddToCart({ p }: { p: Product }) {
           <button onClick={() => setQty((q) => q + 1)} style={{ background: "none", border: "none", color: GOLD, width: 38, height: 46, cursor: "pointer", fontSize: 16 }}>+</button>
         </div>
         <button onClick={onAdd} style={{ flex: 1, minWidth: 200, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "15px 24px", cursor: "pointer" }}>
-          {added ? "Added to bag ✓" : `Add to Bag · ${p.currencySymbol}${p.price * qty}`}
+          {added ? "Added to bag ✓" : `Add to Bag · ${p.currencySymbol}${(unitPrice * qty).toFixed(unitPrice % 1 ? 2 : 0)}`}
         </button>
       </div>
     </div>

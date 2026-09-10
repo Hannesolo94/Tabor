@@ -125,6 +125,9 @@ export interface Product {
   ink: string; // mark color
   mark: "word" | "seal";
   sizes?: string[]; // apparel/headwear variants
+  /** Price per size, when sizes are genuinely different products (a 30x40
+   *  blanket is not a 60x80). Absent means one price for every size. */
+  sizePrices?: Record<string, number>;
   featured?: boolean;
   inStock: boolean; // derived from inventory/track_inventory
   imageUrl?: string | null; // real product image (falls back to generated art)

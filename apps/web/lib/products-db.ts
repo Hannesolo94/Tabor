@@ -30,10 +30,32 @@ interface Row {
   image_url: string | null;
   inventory: number | null;
   track_inventory: boolean | null;
+  printful_variants: { size?: string; price?: number }[] | null;
 }
 
 function map(r: Row, ctx: PriceContext): Product {
   const price = priceFor(r.sku, r.base_price, ctx);
+
+  // Per-size pricing. printful_variants already carries a price per variant; it
+  // only matters when the sizes are genuinely different products. If every size
+  // costs the same we leave it undefined so nothing downstream has to care.
+  let sizePrices: Record<string, number> | undefined;
+  const vs = r.printful_variants ?? [];
+  const distinct = new Set(vs.map((v) => Number(v.price)).filter((n) => n > 0));
+  if (vs.length > 1 && distinct.size > 1) {
+    const baseUsd = Number(r.base_price ?? 0);
+    // A manual override (e.g. a hand-set ZAR price) is for the base size, so
+    // scale the ladder by the same ratio rather than throwing the sizes away.
+    const scale = baseUsd > 0 ? price / baseUsd : 1;
+    sizePrices = {};
+    for (const v of vs) {
+      const usd = Number(v.price);
+      if (!v.size || !(usd > 0)) continue;
+      sizePrices[v.size] = ctx.currency === "USD"
+        ? Number((usd * scale).toFixed(ctx.decimals))
+        : Number((usd * scale).toFixed(ctx.decimals));
+    }
+  }
   return {
     sku: r.sku,
     name: r.name,
@@ -53,12 +75,13 @@ function map(r: Row, ctx: PriceContext): Product {
     featured: !!r.featured,
     imageUrl: r.image_url,
     // not buyable if out of stock OR misconfigured to a zero/negative price
+    sizePrices,
     inStock: (!r.track_inventory || (r.inventory ?? 0) > 0) && price > 0,
   };
 }
 
 const COLS =
-  "sku,name,base_price,collection,category,tagline,note,blurb,description,tone,ink,mark,sizes,featured,image_url,inventory,track_inventory";
+  "sku,name,base_price,printful_variants,collection,category,tagline,note,blurb,description,tone,ink,mark,sizes,featured,image_url,inventory,track_inventory";
 
 export async function getProducts(ctx: PriceContext, filter?: { persona?: string; category?: string; q?: string }): Promise<Product[]> {
   let query = client().from("products").select(COLS).eq("status", "live").order("sort", { ascending: true }).order("sku", { ascending: true });
