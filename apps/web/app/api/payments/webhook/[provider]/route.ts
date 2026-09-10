@@ -57,7 +57,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ provide
     // Never downgrade an order that already succeeded.
     await sb.from("orders").update({ status: "payment_failed" }).eq("id", result.orderId).eq("status", "pending_payment");
   } else if (result.outcome === "refunded") {
-    await sb.from("orders").update({ status: "refunded" }).eq("id", result.orderId).in("status", ["paid", "processing"]);
+    await sb.from("orders").update({ status: "refunded" }).eq("id", result.orderId).in("status", ["paid", "processing", "refund_pending"]);
   } else if (result.outcome === "refund_failed") {
     // Leave the order alone; the money never moved. The event row is the record.
   }

@@ -6,6 +6,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { updateOrderStatus, saveOrderMeta } from "../actions";
 import { symbolFor } from "@/lib/currency";
+import { RefundButton } from "../RefundButton";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +33,8 @@ function PayRow({ k, v, bold, accent }: { k: string; v: string; bold?: boolean; 
   return <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}><span style={{ fontFamily: BODY, fontSize: 13, color: bold ? "#E8E2D5" : "#9A948A", fontWeight: bold ? 700 : 400 }}>{k}</span><span style={{ fontFamily: MONO, fontSize: 13, color: accent ? GOLD : bold ? "#E8E2D5" : "#C3BDB1", fontWeight: bold ? 700 : 400 }}>{v}</span></div>;
 }
 
-export default async function OrderDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ err?: string; refund?: string }> }) {
+  const sp = await searchParams;
   const { id } = await params;
   const sb = await supabaseServer();
   const { data: o } = await sb.from("orders").select("*").eq("id", id).maybeSingle();
@@ -96,6 +98,42 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
               <PayRow k={paid ? "Paid" : "Amount due"} v={`${sym}${n(o.total).toFixed(2)}`} bold accent />
             </div>
             {o.payment_provider && <div style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", marginTop: 8 }}>via {o.payment_provider}{o.payment_ref ? ` · ${o.payment_ref}` : ""}</div>}
+            {/* Settlement differs from the agreed total for international orders,
+                and the refund goes back in the settled currency, so show it. */}
+            {o.settlement_currency && o.settlement_currency !== o.currency && o.settlement_amount != null && (
+              <div style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", marginTop: 4 }}>
+                charged as {String(o.settlement_currency)} {n(o.settlement_amount).toFixed(2)}
+              </div>
+            )}
+
+            {sp.err && (
+              <div style={{ fontFamily: MONO, fontSize: 10, color: "#F87171", marginTop: 10, lineHeight: 1.5 }}>
+                {sp.err === "not-owner" ? "REFUNDS ARE OWNER-ONLY. SIGN IN AS THE OWNER." : sp.err.toUpperCase()}
+              </div>
+            )}
+            {sp.refund === "requested" && (
+              <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, marginTop: 10, lineHeight: 1.5 }}>
+                REFUND REQUESTED. YOCO CONFIRMS ASYNCHRONOUSLY; THIS ORDER SETTLES TO REFUNDED WHEN THE WEBHOOK LANDS.
+              </div>
+            )}
+            {o.status === "refund_pending" && (
+              <div style={{ fontFamily: MONO, fontSize: 10, color: GOLD, marginTop: 10 }}>● REFUND IN FLIGHT</div>
+            )}
+
+            <RefundButton
+              orderId={String(o.id)}
+              amount={n(o.settlement_amount ?? o.total)}
+              currency={String(o.settlement_currency ?? o.currency ?? "ZAR")}
+              symbol={symbolFor(String(o.settlement_currency ?? o.currency))}
+              disabledReason={
+                o.status === "refunded" ? "already refunded"
+                : o.status === "refund_pending" ? "refund already in flight"
+                : o.status !== "paid" ? "order is not paid"
+                : o.payment_provider !== "yoco" ? `no gateway refund for ${o.payment_provider ?? "manual"}`
+                : !o.gateway_checkout_id ? "no gateway checkout id"
+                : null
+              }
+            />
           </Card>
 
           <Card title="Timeline">
