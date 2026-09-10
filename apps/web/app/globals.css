@@ -232,3 +232,27 @@ a:active {
 .deploy-spin { animation: tabor-spin 0.85s linear infinite; }
 @keyframes tabor-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 .deploy-pulse { animation: tabor-pulse 1.6s ease-in-out infinite; }
+
+/* Branded scrollbar for in-panel lists (currency picker, long dropdowns).
+   The native bar is a light grey slab that reads as a foreign object on a black
+   and gold surface. */
+.tabor-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 97, 0.34) transparent;
+}
+.tabor-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.tabor-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tabor-scroll::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 97, 0.28);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.tabor-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 169, 97, 0.48);
+  background-clip: content-box;
+}
