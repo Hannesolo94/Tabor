@@ -42,36 +42,56 @@ export async function refundOrder(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
-  // Money leaving the business is an owner action, like the API keys.
-  const { isCallerOwner } = await import("@/lib/admin-guard");
-  if (!(await isCallerOwner())) redirect(`/admin/orders/${id}?err=not-owner`);
+  // Every redirect happens at the END. That lets the work sit inside a
+  // try/catch without swallowing redirect's control-flow throw, and means a
+  // money action can never leave the operator on a server-error page with no
+  // idea whether the refund went through.
+  let query = "?refund=requested";
+  try {
+    const { isCallerOwner } = await import("@/lib/admin-guard");
+    if (!(await isCallerOwner())) {
+      query = "?err=not-owner";
+    } else {
+      const sb = await supabaseServer();
+      const { data: o } = await sb
+        .from("orders")
+        .select("id,status,payment_provider,gateway_checkout_id,settlement_amount,settlement_currency,total,currency")
+        .eq("id", id)
+        .maybeSingle();
 
-  const sb = await supabaseServer();
-  const { data: o } = await sb
-    .from("orders")
-    .select("id,status,payment_provider,gateway_checkout_id,settlement_amount,settlement_currency,total,currency")
-    .eq("id", id)
-    .maybeSingle();
-  if (!o) redirect("/admin/orders?err=not-found");
-  if (o.status !== "paid") redirect(`/admin/orders/${id}?err=${encodeURIComponent("only a paid order can be refunded")}`);
-  if (o.payment_provider !== "yoco") redirect(`/admin/orders/${id}?err=${encodeURIComponent("no gateway refund for " + (o.payment_provider ?? "manual"))}`);
-  if (!o.gateway_checkout_id) redirect(`/admin/orders/${id}?err=${encodeURIComponent("no gateway checkout id on this order")}`);
+      const reason =
+        !o ? "order not found"
+        : o.status !== "paid" ? `only a paid order can be refunded (this one is ${o.status})`
+        : o.payment_provider !== "yoco" ? `no gateway refund for ${o.payment_provider ?? "manual"}`
+        : !o.gateway_checkout_id ? "no gateway checkout id on this order"
+        : null;
 
-  const { refundYocoCheckout } = await import("@/lib/payments/yoco");
-  // Idempotency key ties the refund to the order, so a double submit cannot
-  // issue two refunds.
-  const res = await refundYocoCheckout(String(o.gateway_checkout_id), undefined, `refund-${id}`);
-  if (!res.ok) {
-    await logAudit("order.refund.failed", "order", id, { error: res.error });
-    redirect(`/admin/orders/${id}?err=${encodeURIComponent(res.error ?? "refund failed")}`);
+      if (reason) {
+        query = `?err=${encodeURIComponent(reason)}`;
+      } else {
+        const { refundYocoCheckout } = await import("@/lib/payments/yoco");
+        // Idempotency key ties the refund to the order, so a double submit
+        // cannot issue two refunds.
+        const res = await refundYocoCheckout(String(o!.gateway_checkout_id), undefined, `refund-${id}`);
+        if (!res.ok) {
+          await logAudit("order.refund.failed", "order", id, { error: res.error });
+          query = `?err=${encodeURIComponent(res.error ?? "refund failed")}`;
+        } else {
+          await sb.from("orders").update({ status: "refund_pending" }).eq("id", id);
+          await logAudit("order.refund", "order", id, {
+            amount: o!.settlement_amount ?? o!.total,
+            currency: o!.settlement_currency ?? o!.currency,
+          });
+        }
+      }
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "refund failed unexpectedly";
+    await logAudit("order.refund.error", "order", id, { error: msg });
+    query = `?err=${encodeURIComponent(msg)}`;
   }
 
-  await sb.from("orders").update({ status: "refund_pending" }).eq("id", id);
-  await logAudit("order.refund", "order", id, {
-    amount: o.settlement_amount ?? o.total,
-    currency: o.settlement_currency ?? o.currency,
-  });
   revalidatePath(`/admin/orders/${id}`);
   revalidatePath("/admin/orders");
-  redirect(`/admin/orders/${id}?refund=requested`);
+  redirect(`/admin/orders/${id}${query}`);
 }

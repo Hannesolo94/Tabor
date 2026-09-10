@@ -168,15 +168,32 @@ export async function refundYocoCheckout(checkoutId: string, amountZar?: number,
   if (!c) return { ok: false, error: "Yoco credentials are not set." };
   const headers: Record<string, string> = { Authorization: `Bearer ${c.secret}`, "Content-Type": "application/json" };
   if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
-  const res = await fetch(`${API}/checkouts/${encodeURIComponent(checkoutId)}/refund`, {
-    method: "POST",
-    headers,
-    // Omit amount for a full refund; cents for a partial one.
-    body: JSON.stringify(amountZar != null ? { amount: Math.round(amountZar * 100) } : {}),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API}/checkouts/${encodeURIComponent(checkoutId)}/refund`, {
+      method: "POST",
+      headers,
+      // Omit amount for a full refund; cents for a partial one.
+      body: JSON.stringify(amountZar != null ? { amount: Math.round(amountZar * 100) } : {}),
+    });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "could not reach Yoco" };
+  }
   if (res.status === 202 || res.ok) return { ok: true };
-  const j = (await res.json().catch(() => null)) as { message?: string } | null;
-  return { ok: false, error: j?.message ?? `Yoco returned ${res.status}` };
+
+  // Yoco puts the reason in `description`, not `message`. Reading the wrong
+  // field turned "The specified transaction could not be found" into the
+  // useless "Yoco returned 400".
+  const j = (await res.json().catch(() => null)) as { description?: string; message?: string } | null;
+  let error = j?.description ?? j?.message ?? `Yoco returned ${res.status}`;
+
+  // The most likely cause by far, and invisible otherwise: the checkout was
+  // created under one key and is being refunded under the other.
+  if (/could not be found/i.test(error)) {
+    const mode = c.secret.startsWith("sk_live_") ? "live" : "test";
+    error += ` (refunding with the ${mode} key; a checkout created with the other key is invisible to it)`;
+  }
+  return { ok: false, error };
 }
 
 /** One-off: register the webhook and return the secret (shown only once). */
