@@ -16,7 +16,6 @@ interface Row {
   sku: string;
   name: string;
   base_price: number | null;
-  price_za: number | null;
   collection: string | null;
   category: string | null;
   tagline: string | null;
@@ -59,7 +58,7 @@ function map(r: Row, ctx: PriceContext): Product {
 }
 
 const COLS =
-  "sku,name,base_price,price_za,collection,category,tagline,note,blurb,description,tone,ink,mark,sizes,featured,image_url,inventory,track_inventory";
+  "sku,name,base_price,collection,category,tagline,note,blurb,description,tone,ink,mark,sizes,featured,image_url,inventory,track_inventory";
 
 export async function getProducts(ctx: PriceContext, filter?: { persona?: string; category?: string; q?: string }): Promise<Product[]> {
   let query = client().from("products").select(COLS).eq("status", "live").order("sort", { ascending: true }).order("sku", { ascending: true });

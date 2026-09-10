@@ -45,11 +45,40 @@ export interface Dashboard {
 }
 
 const DAY = 86400000;
-// Cross-currency dashboard aggregates are normalized to USD. ZAR orders are
-// converted at this approximate rate (region cards still show native currency).
-// TODO: make configurable via app_settings / a live FX feed.
-const ZAR_USD = 0.054;
-const toUsd = (total: number, currency?: string | null) => (currency === "ZAR" ? total * ZAR_USD : total);
+
+// Cross-currency aggregates are normalised to USD. Two things this used to get
+// wrong, both of which produced quietly false revenue:
+//   1. a hardcoded ZAR_USD = 0.054 (R18.52/$) drifted to ~13% off the real rate
+//   2. anything that was not ZAR was treated as ALREADY USD, so a EUR37.98 order
+//      was counted as $37.98 rather than $44
+// Orders now carry fx_rate_to_usd, frozen at purchase, so historical revenue
+// cannot move when today's rate does. Only orders predating that column fall
+// back to a live rate.
+type FxMap = Record<string, number>; // currency -> units per 1 USD
+
+async function liveRates(sb: ReturnType<typeof supabaseAdmin>): Promise<FxMap> {
+  try {
+    const { data } = await sb.from("fx_rates").select("currency, rate_per_usd");
+    const out: FxMap = { USD: 1 };
+    for (const r of (data ?? []) as { currency: string; rate_per_usd: number }[]) out[r.currency] = Number(r.rate_per_usd);
+    return out;
+  } catch {
+    return { USD: 1 };
+  }
+}
+
+interface MoneyRow { total?: unknown; currency?: string | null; fx_rate_to_usd?: unknown }
+
+/** Convert one order's amount to USD, preferring the rate frozen on the order. */
+function orderUsd(amount: number, row: MoneyRow, fx: FxMap): number {
+  const cur = (row.currency ?? "USD").toUpperCase();
+  if (cur === "USD") return amount;
+  const frozen = Number(row.fx_rate_to_usd);
+  if (Number.isFinite(frozen) && frozen > 0) return amount * frozen;
+  const rate = fx[cur];
+  if (Number.isFinite(rate) && rate > 0) return amount / rate;
+  return amount; // unknown currency: better to count it than to drop it
+}
 function dayKey(d: Date) {
   return d.toISOString().slice(0, 10);
 }
@@ -74,6 +103,8 @@ interface OrderItem { sku?: string; qty?: number; quantity?: number; price?: num
 
 export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string; to?: string }): Promise<Dashboard> {
   const sb = supabaseAdmin();
+  // Fallback rates for orders placed before fx_rate_to_usd existed.
+  const fx = await liveRates(sb);
   const { from, to, days } = rangeBounds(rangeKey, custom);
   const fromIso = from.toISOString();
   // include the whole `to` day
@@ -81,8 +112,8 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
 
   const [statsRes, ordersRes, allOrdersRes, productsRes] = await Promise.all([
     sb.rpc("dashboard_event_stats", { p_from: fromIso, p_to: toIso }), // aggregated in Postgres
-    sb.from("orders").select("total, items, user_id, created_at, status, region, currency").gte("created_at", fromIso).lt("created_at", toIso),
-    sb.from("orders").select("total, user_id, email, currency").limit(10000), // safety cap for all-time LTV
+    sb.from("orders").select("total, items, user_id, created_at, status, region, currency, fx_rate_to_usd").gte("created_at", fromIso).lt("created_at", toIso),
+    sb.from("orders").select("total, user_id, email, currency, fx_rate_to_usd").limit(10000), // safety cap for all-time LTV
 
     sb.from("products").select("sku, name, category, cost, inventory, track_inventory"),
   ]);
@@ -110,7 +141,7 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   for (const o of orders) {
     const day = dayKey(new Date(o.created_at));
     const cur = (o as { currency?: string }).currency;
-    const totalUsd = toUsd(Number(o.total) || 0, cur); // normalized for cross-currency aggregates
+    const totalUsd = orderUsd(Number(o.total) || 0, o as MoneyRow, fx); // normalised via the order's own frozen rate
     revenue += totalUsd;
     const reg = (o as { region?: string }).region || "INTL";
     const ra = regionAgg.get(reg) ?? { revenue: 0, orders: 0 };
@@ -120,7 +151,7 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
     const items = (Array.isArray(o.items) ? o.items : []) as OrderItem[];
     for (const it of items) {
       const qty = Number(it.qty ?? it.quantity ?? 1) || 1;
-      const price = toUsd(Number(it.price ?? 0) || 0, cur); // line prices are in the order's currency
+      const price = orderUsd(Number(it.price ?? 0) || 0, o as MoneyRow, fx); // line prices are in the order's currency
       const p = it.sku ? prodMap.get(it.sku) : undefined;
       cogs += (Number(p?.cost) || 0) * qty;
       if (it.sku) {
@@ -154,7 +185,7 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
     // key by account, else by email so distinct guests are distinct customers (not one "guest")
     const k = o.user_id || (o as { email?: string }).email || "guest";
     const c = byCustomer.get(k) ?? { spend: 0, orders: 0 };
-    c.spend += toUsd(Number(o.total) || 0, (o as { currency?: string }).currency); c.orders += 1; byCustomer.set(k, c);
+    c.spend += orderUsd(Number(o.total) || 0, o as MoneyRow, fx); c.orders += 1; byCustomer.set(k, c);
   }
   const customers = [...byCustomer.values()];
   const ltv = customers.length ? customers.reduce((a, c) => a + c.spend, 0) / customers.length : 0;
@@ -170,11 +201,11 @@ export async function getDashboard(rangeKey: RangeKey, custom?: { from?: string;
   // previous equal-length window -> period-over-period deltas (Shopify-style)
   const prevFromIso = new Date(from.getTime() - days * DAY).toISOString();
   const [prevOrdersRes, prevStatsRes] = await Promise.all([
-    sb.from("orders").select("total, status, currency").gte("created_at", prevFromIso).lt("created_at", fromIso),
+    sb.from("orders").select("total, status, currency, fx_rate_to_usd").gte("created_at", prevFromIso).lt("created_at", fromIso),
     sb.rpc("dashboard_event_stats", { p_from: prevFromIso, p_to: fromIso }),
   ]);
   const prevOrders = (prevOrdersRes.data ?? []).filter((o) => o.status !== "cancelled");
-  const prevRevenue = prevOrders.reduce((a, o) => a + toUsd(Number(o.total) || 0, (o as { currency?: string }).currency), 0);
+  const prevRevenue = prevOrders.reduce((a, o) => a + orderUsd(Number(o.total) || 0, o as MoneyRow, fx), 0);
   const prevOrderCount = prevOrders.length;
   const prevSessions = ((prevStatsRes.data ?? {}) as { sessions?: number }).sessions ?? 0;
   const prevConversion = prevSessions ? (prevOrderCount / prevSessions) * 100 : 0;

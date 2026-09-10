@@ -84,3 +84,30 @@ export function roundPrice(amount: number, rule: RoundRule): number {
 export function formatPrice(amount: number, symbol: string, decimals: number): string {
   return `${symbol}${amount.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 }
+
+/** Static symbol map mirroring the `currencies` table, for code paths that
+ *  cannot await a DB read (client components, formatters, admin tables).
+ *  The table stays the source of truth for pricing; this is for DISPLAY only. */
+export const SYMBOLS: Record<string, string> = {
+  USD: "$", ZAR: "R", EUR: "€", GBP: "£", CAD: "C$", AUD: "A$", NZD: "NZ$",
+  CHF: "CHF ", SGD: "S$", HKD: "HK$", SEK: "kr ", NOK: "kr ", DKK: "kr ",
+  PLN: "zł ", CZK: "Kč ", ILS: "₪", MYR: "RM", THB: "฿", PHP: "₱", MXN: "Mex$",
+  JPY: "¥", HUF: "Ft ", TWD: "NT$", BRL: "R$", CNY: "¥", RUB: "₽",
+};
+
+/** Zero-decimal currencies: showing "¥4,800.00" marks you out as broken. */
+export const ZERO_DECIMAL = new Set(["JPY", "HUF", "TWD"]);
+
+/** Symbol for a currency code. Falls back to the code itself, which is honest,
+ *  rather than a dollar sign, which is wrong. */
+export function symbolFor(code?: string | null): string {
+  if (!code) return "";
+  return SYMBOLS[code.toUpperCase()] ?? `${code.toUpperCase()} `;
+}
+
+/** Display an amount in any currency we support. */
+export function money(amount: number | null | undefined, code?: string | null): string {
+  const n = Number(amount ?? 0);
+  const d = code && ZERO_DECIMAL.has(code.toUpperCase()) ? 0 : 2;
+  return `${symbolFor(code)}${n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d })}`;
+}

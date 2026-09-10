@@ -2,6 +2,7 @@
 // checkout is live; the framework is ready now.
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
+import { symbolFor } from "@/lib/currency";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export default async function AdminOrders() {
           <tbody>
             {rows.map((o) => {
               const items = Array.isArray(o.items) ? o.items : [];
-              const sym = o.currency === "ZAR" ? "R" : "$";
+              const sym = symbolFor(o.currency);
               return (
                 <tr key={o.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                   <td style={td}><Link href={`/admin/orders/${o.id}`} style={{ color: "#E8E2D5", textDecoration: "none", fontFamily: MONO, fontSize: 12.5, fontWeight: 600 }}>{o.printful_order_id ? `#${o.printful_order_id}` : `#${o.id.slice(0, 8)}`}</Link></td>

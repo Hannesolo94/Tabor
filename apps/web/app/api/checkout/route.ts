@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProductBySku } from "@/lib/products-db";
 import { fulfilmentRegion } from "@/lib/region";
-import { currencyForVisitorCountry, getPriceContext } from "@/lib/pricing";
+import { currencyForVisitorCountry, getPriceContext, usdToContext } from "@/lib/pricing";
 import { settlementFor } from "@/lib/settlement";
 import { computeShipping } from "@/lib/shipping";
 import { startPayment } from "@/lib/payments";
@@ -69,14 +69,19 @@ export async function POST(req: Request) {
     if (d.starts_at && new Date(d.starts_at).getTime() > nowMs) return reject("That discount code is not active yet.");
     if (d.ends_at && new Date(d.ends_at).getTime() < nowMs) return reject("That discount code has expired.");
     if (d.usage_limit && Number(d.used_count) >= Number(d.usage_limit)) return reject("That discount code has reached its limit.");
-    if (d.min_subtotal && subtotal < Number(d.min_subtotal)) return reject(`This code needs a minimum subtotal of ${cur.symbol}${Number(d.min_subtotal).toFixed(2)}.`);
+    // Fixed discount amounts and minimums are AUTHORED IN USD, like base_price.
+    // Applied raw they were nonsense in every other currency: a "$10 off" code
+    // took R10 (about 60c) off a rand order, and a "$50 minimum" was satisfied
+    // by a R499 subtotal (about $31).
+    const minSubtotal = d.min_subtotal ? usdToContext(Number(d.min_subtotal), ctx) : 0;
+    if (minSubtotal && subtotal < minSubtotal) return reject(`This code needs a minimum subtotal of ${cur.symbol}${minSubtotal.toFixed(2)}.`);
     if (d.once_per_email) {
       const { count } = await admin.from("orders").select("id", { count: "exact", head: true }).eq("discount_code", d.code).eq("email", email).neq("status", "cancelled");
       if ((count ?? 0) > 0) return reject("You have already used this code.");
     }
     discountAmount = d.value_type === "fixed"
-      ? Math.min(subtotal, Math.max(0, Number(d.amount) || 0))
-      : Math.round(subtotal * (Number(d.percent) / 100) * 100) / 100;
+      ? Math.min(subtotal, Math.max(0, usdToContext(Number(d.amount) || 0, ctx)))
+      : Math.round(subtotal * (Number(d.percent) / 100) * 100) / 100; // percentages are currency-agnostic
     discountCode = d.code;
   }
 

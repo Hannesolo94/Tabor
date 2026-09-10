@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
+import { money } from "@/lib/currency";
 import { ClearCart } from "./ClearCart";
 
 export const dynamic = "force-dynamic";
@@ -88,8 +89,7 @@ export default async function OrderDonePage({ searchParams }: { searchParams: Pr
 
   const state = STATES[order.status as string] ?? STATES.pending_payment;
   const lines = (order.items ?? []) as Line[];
-  const sym = String(order.currency) === "ZAR" ? "R" : String(order.currency) === "USD" ? "$" : "";
-  const money = (n: number) => `${sym}${Number(n).toFixed(2)}${sym ? "" : " " + order.currency}`;
+  const fmt = (n: number) => money(n, String(order.currency));
   // Yoco settles in rand, so an international buyer's card shows a different
   // number to the one they agreed to. Say so rather than let it surprise them.
   const settledDifferently =
@@ -124,21 +124,21 @@ export default async function OrderDonePage({ searchParams }: { searchParams: Pr
                 {l.size && l.size !== "One size" ? `SIZE ${String(l.size).toUpperCase()} · ` : ""}QTY {l.qty}
               </div>
             </div>
-            <div style={{ fontFamily: MONO, fontSize: 13, color: GOLD }}>{money(l.price * l.qty)}</div>
+            <div style={{ fontFamily: MONO, fontSize: 13, color: GOLD }}>{fmt(l.price * l.qty)}</div>
           </div>
         ))}
 
-        <Row label="SUBTOTAL" value={money(Number(order.subtotal ?? 0))} />
-        {Number(order.discount_amount) > 0 && <Row label={`DISCOUNT${order.discount_code ? ` · ${order.discount_code}` : ""}`} value={`- ${money(Number(order.discount_amount))}`} />}
-        <Row label="SHIPPING" value={Number(order.shipping_amount) === 0 ? "FREE" : money(Number(order.shipping_amount))} />
+        <Row label="SUBTOTAL" value={fmt(Number(order.subtotal ?? 0))} />
+        {Number(order.discount_amount) > 0 && <Row label={`DISCOUNT${order.discount_code ? ` · ${order.discount_code}` : ""}`} value={`- ${fmt(Number(order.discount_amount))}`} />}
+        <Row label="SHIPPING" value={Number(order.shipping_amount) === 0 ? "FREE" : fmt(Number(order.shipping_amount))} />
 
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${GOLD}29`, fontFamily: MONO, fontSize: 16, color: "#E8E2D5" }}>
-          <span>TOTAL</span><span style={{ color: GOLD }}>{money(Number(order.total))}</span>
+          <span>TOTAL</span><span style={{ color: GOLD }}>{fmt(Number(order.total))}</span>
         </div>
 
         {settledDifferently && (
           <div style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.05em", marginTop: 10, lineHeight: 1.6 }}>
-            CHARGED AS {order.settlement_currency} {Number(order.settlement_amount).toFixed(2)} · YOUR BANK MAY ADD A FOREIGN TRANSACTION FEE
+            CHARGED AS {money(Number(order.settlement_amount), String(order.settlement_currency))} · YOUR BANK MAY ADD A FOREIGN TRANSACTION FEE
           </div>
         )}
       </div>

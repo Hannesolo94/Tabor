@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { updateOrderStatus, saveOrderMeta } from "../actions";
+import { symbolFor } from "@/lib/currency";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
     custOrders = count ?? 0;
   }
   const items = (Array.isArray(o.items) ? o.items : []) as { sku?: string; name?: string; qty?: number; quantity?: number; price?: number; variant?: string }[];
-  const sym = o.currency === "ZAR" ? "R" : "$";
+  const sym = symbolFor(o.currency);
   const n = (v: unknown) => Number(v || 0);
   const paid = ["paid", "fulfilled", "shipped"].includes(o.status);
   const fulfilled = ["fulfilled", "shipped"].includes(o.status);

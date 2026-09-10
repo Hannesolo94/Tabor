@@ -20,7 +20,9 @@ export const GREEN = "#7BBF7B";
 export const RED = "#C03A3A";
 export const GOLD_LIGHT = "#E8D08C";
 
-export const fmtPrice = (n: number) => `$${n}`;
-
-/** Format an amount with the right currency symbol. */
-export const formatMoney = (amount: number, code?: string | null) => `${code === "ZAR" ? "R" : "$"}${amount}`;
+/** Format an amount with the right currency symbol.
+ *  Was `code === "ZAR" ? "R" : "$"`, which printed a dollar sign on every euro,
+ *  pound and yen order the moment the store went multi-currency. Delegates to
+ *  the shared map so there is exactly one place that knows what a symbol is.
+ *  (fmtPrice, hardcoded to "$", was unused and has been removed.) */
+export { money as formatMoney, symbolFor } from "./currency";

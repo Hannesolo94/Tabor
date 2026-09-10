@@ -49,8 +49,13 @@ async function runTool(name: string, input: Record<string, unknown>): Promise<un
   const sb = supabaseAdmin();
   if (name === "search_products") {
     const q = String(input.query ?? "");
-    const { data } = await sb.from("products").select("sku,name,base_price,price_za,status,inventory,track_inventory,collection,category").or(`name.ilike.%${q}%,sku.ilike.%${q}%`).limit(15);
-    return (data ?? []).map((p) => ({ name: p.name, sku: p.sku, usd: p.base_price, zar: p.price_za, status: p.status, persona: p.collection, type: p.category, stock: p.track_inventory ? p.inventory : "untracked" }));
+    const { data } = await sb.from("products").select("sku,name,base_price,status,inventory,track_inventory,collection,category").or(`name.ilike.%${q}%,sku.ilike.%${q}%`).limit(15);
+    // ZAR lives in product_prices now; products.price_za is a dead column that
+    // still reads 0 everywhere, so reporting it told the assistant every SA
+    // price was zero.
+    const { data: zar } = await sb.from("product_prices").select("sku, price").eq("currency", "ZAR");
+    const zarBySku = new Map((zar ?? []).map((r) => [r.sku as string, Number(r.price)]));
+    return (data ?? []).map((p) => ({ name: p.name, sku: p.sku, usd: p.base_price, zar: zarBySku.get(p.sku as string) ?? "derived from USD", status: p.status, persona: p.collection, type: p.category, stock: p.track_inventory ? p.inventory : "untracked" }));
   }
   if (name === "get_metrics") {
     const d = await getDashboard((["today", "7d", "30d", "90d"].includes(String(input.range)) ? input.range : "30d") as RangeKey);
