@@ -53,7 +53,6 @@ export async function saveProduct(_prev: SaveState, formData: FormData): Promise
     category: String(formData.get("category") ?? "apparel"),
     base_price: Number(formData.get("base_price") ?? 0) || 0,
     cost: Number(formData.get("cost") ?? 0) || 0,
-    price_za: Number(formData.get("price_za") ?? 0) || 0,
     description: String(formData.get("description") ?? ""),
     blurb: String(formData.get("blurb") ?? ""),
     note: String(formData.get("note") ?? ""),
@@ -72,6 +71,15 @@ export async function saveProduct(_prev: SaveState, formData: FormData): Promise
 
   const { error } = await sb.from("products").upsert(row, { onConflict: "sku" });
   if (error) return { error: error.message };
+
+  // ZAR is a manual override in product_prices. 0 (or blank) means "no override",
+  // so South Africa falls back to the FX-converted price like everywhere else.
+  const zar = Number(formData.get("price_zar") ?? 0) || 0;
+  if (zar > 0) {
+    await sb.from("product_prices").upsert({ sku, currency: "ZAR", price: zar, updated_at: new Date().toISOString() }, { onConflict: "sku,currency" });
+  } else {
+    await sb.from("product_prices").delete().eq("sku", sku).eq("currency", "ZAR");
+  }
 
   revalidatePath("/admin/products");
   redirect("/admin/products");

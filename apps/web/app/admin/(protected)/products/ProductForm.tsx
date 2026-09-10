@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { saveProduct, type SaveState } from "./actions";
 import { CATEGORIES, PERSONAS, type Product } from "@/lib/catalog";
 import { GOLD, MONO, CINZEL, BODY } from "@/lib/ui";
+import { PriceFields, type ZarFx } from "./PriceFields";
 
 const initial: SaveState = {};
 
@@ -26,7 +27,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return <div><label style={lbl}>{label}</label>{children}</div>;
 }
 
-export function ProductForm({ product, isNew }: { product?: Partial<Product> & { status?: string; inventory?: number; trackInventory?: boolean; sort?: number; cost?: number; priceZa?: number }; isNew?: boolean }) {
+export function ProductForm({ product, isNew, zarFx }: { product?: Partial<Product> & { status?: string; inventory?: number; trackInventory?: boolean; sort?: number; cost?: number; priceZa?: number }; isNew?: boolean; zarFx?: ZarFx | null }) {
   const [state, action, pending] = useActionState(saveProduct, initial);
   const p = product ?? {};
 
@@ -42,11 +43,7 @@ export function ProductForm({ product, isNew }: { product?: Partial<Product> & {
           </Card>
 
           <Card title="Pricing">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-              <Field label="Price (USD)"><input name="base_price" type="number" step="1" min="0" defaultValue={p.price ?? 0} style={inp} /></Field>
-              <Field label="Cost (margin)"><input name="cost" type="number" step="0.01" min="0" defaultValue={p.cost ?? 0} style={inp} /></Field>
-              <Field label="SA price (ZAR, 0 = intl)"><input name="price_za" type="number" step="1" min="0" defaultValue={p.priceZa ?? 0} style={inp} /></Field>
-            </div>
+            <PriceFields baseUsd={Number(p.price ?? 0)} cost={Number(p.cost ?? 0)} zar={Number(p.priceZa ?? 0)} fx={zarFx ?? null} />
           </Card>
 
           <Card title="Inventory">

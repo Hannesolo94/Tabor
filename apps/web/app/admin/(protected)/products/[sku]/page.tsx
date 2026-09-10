@@ -4,6 +4,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { ProductForm } from "../ProductForm";
 import { MediaManager, type MediaItem } from "../MediaManager";
 import { deleteProduct } from "../actions";
+import { getZarFx } from "../zar-fx";
 import { GOLD, MONO, CINZEL } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,12 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
   const sb = await supabaseServer();
   const { data } = await sb.from("products").select("*").eq("sku", sku).maybeSingle();
   if (!data) notFound();
+
+  // ZAR override now lives in product_prices; products.price_za is legacy.
+  const [{ data: zarRow }, zarFx] = await Promise.all([
+    sb.from("product_prices").select("price").eq("sku", sku).eq("currency", "ZAR").maybeSingle(),
+    getZarFx(),
+  ]);
 
   const { data: mediaRows } = await sb.from("product_media").select("id,type,url,visible,source").eq("sku", sku).order("sort", { ascending: true });
   const media = (mediaRows ?? []) as MediaItem[];
@@ -24,7 +31,7 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
     category: data.category,
     price: Number(data.base_price ?? 0),
     cost: Number(data.cost ?? 0),
-    priceZa: Number(data.price_za ?? 0),
+    priceZa: Number(zarRow?.price ?? 0),
     blurb: data.blurb ?? "",
     description: data.description ?? "",
     note: data.note ?? "",
@@ -53,7 +60,7 @@ export default async function EditProduct({ params }: { params: Promise<{ sku: s
         <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.1em", padding: "4px 9px", borderRadius: 8, color: data.status === "live" ? "#5FB07A" : "#9A948A", border: `1px solid ${data.status === "live" ? "rgba(95,176,122,0.4)" : "rgba(255,255,255,0.12)"}`, background: data.status === "live" ? "rgba(95,176,122,0.08)" : "transparent" }}>{(data.status ?? "draft") === "live" ? "ACTIVE" : "DRAFT"}</span>
       </div>
 
-      <ProductForm product={product} />
+      <ProductForm product={product} zarFx={zarFx} />
 
       <div style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 16, color: "#E8E2D5", margin: "30px 0 14px" }}>Media</div>
       <MediaManager sku={data.sku} printfulId={data.printful_id} media={media} />
