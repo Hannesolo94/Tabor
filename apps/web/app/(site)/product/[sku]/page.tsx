@@ -8,7 +8,7 @@ import { AddToCart } from "@/components/product/AddToCart";
 import { categoryById, personaById } from "@/lib/catalog";
 import { getProductBySku, getSuggestions } from "@/lib/products-db";
 import { getMedia } from "@/lib/media-db";
-import { getRegion } from "@/lib/region";
+import { getPriceContext, getVisitorPriceContext } from "@/lib/pricing";
 import { getProductReviews, getReviewSummary } from "@/lib/reviews-db";
 import { ProductReviews } from "@/components/reviews/ProductReviews";
 import { Stars } from "@/components/reviews/Stars";
@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  const p = await getProductBySku(sku, "INTL");
+  const p = await getProductBySku(sku, await getPriceContext("USD"));
   if (!p) return { title: "TABOR" };
   const desc = p.blurb || p.description?.slice(0, 155) || "TABOR sacred-tactical gear.";
   return {
@@ -31,13 +31,13 @@ export async function generateMetadata({ params }: { params: Promise<{ sku: stri
 
 export default async function ProductPage({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  const region = await getRegion();
-  const p = await getProductBySku(sku, region);
+  const ctx = await getVisitorPriceContext();
+  const p = await getProductBySku(sku, ctx);
   if (!p) notFound();
   const persona = personaById(p.persona);
   const cat = categoryById(p.category);
   const [also, media, reviews, summary] = await Promise.all([
-    getSuggestions(p, region, 4),
+    getSuggestions(p, ctx, 4),
     getMedia(p.sku),
     getProductReviews(p.sku),
     getReviewSummary(p.sku),

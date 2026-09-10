@@ -4,8 +4,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProductBySku } from "@/lib/products-db";
-import { regionForCountry } from "@/lib/region";
-import { REGIONS } from "@/lib/region";
+import { fulfilmentRegion } from "@/lib/region";
+import { currencyForVisitorCountry, getPriceContext } from "@/lib/pricing";
 import { computeShipping } from "@/lib/shipping";
 import { startPayment } from "@/lib/payments";
 import { sendEmail, emailShell } from "@/lib/email";
@@ -32,19 +32,23 @@ export async function POST(req: Request) {
     if (!String(shipping[f] ?? "").trim()) return NextResponse.json({ error: `Shipping ${f} is required.` }, { status: 400 });
   }
 
-  // LOCK the price region to the shipping destination, not the browser cookie, so
-  // the cheaper ZA price book cannot be claimed on an international order.
-  const region = regionForCountry(String(shipping.country ?? ""));
-  const cur = REGIONS[region];
+  // LOCK both currency and fulfilment to the SHIPPING DESTINATION, never the
+  // browser cookie, so a cheaper local price cannot be claimed on an order that
+  // ships somewhere else. The country field is an ISO-2 code.
+  const country = String(shipping.country ?? "").trim().toUpperCase();
+  const region = fulfilmentRegion(country);
+  const currency = await currencyForVisitorCountry(country);
+  const ctx = await getPriceContext(currency);
+  const cur = { code: ctx.currency, symbol: ctx.symbol };
 
-  // recompute every line from the DB for this region
+  // recompute every line from the DB in the destination's currency
   const lines: { sku: string; name: string; size: string | null; qty: number; price: number }[] = [];
   let subtotal = 0;
   for (const it of items) {
-    const p = await getProductBySku(it.sku, region);
+    const p = await getProductBySku(it.sku, ctx);
     if (!p || !p.inStock) return NextResponse.json({ error: `"${it.sku}" is no longer available.` }, { status: 409 });
     const qty = Math.max(1, Math.min(99, Number(it.qty ?? 1) || 1));
-    const price = p.price; // server price, region-correct
+    const price = p.price; // server price, destination-correct
     subtotal += price * qty;
     lines.push({ sku: p.sku, name: p.name, size: it.size ?? null, qty, price });
   }
@@ -75,8 +79,8 @@ export async function POST(req: Request) {
     discountCode = d.code;
   }
 
-  // flat-rate shipping (USD $11.99 worldwide / free US over $100; ZAR R150 / free over R1800)
-  const shippingAmount = computeShipping(region, String(shipping.country ?? ""), subtotal);
+  // flat-rate shipping, expressed in the order's own currency
+  const shippingAmount = computeShipping(region, country, subtotal, ctx);
   const total = Math.max(0, subtotal - discountAmount + shippingAmount);
 
   // create order (pending payment)
@@ -84,6 +88,8 @@ export async function POST(req: Request) {
     email,
     region,
     currency: cur.code,
+    // freeze the rate so historical reporting never shifts when FX moves
+    fx_rate_to_usd: ctx.rate > 0 ? 1 / ctx.rate : null,
     status: "pending_payment",
     items: lines,
     subtotal,

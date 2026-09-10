@@ -11,7 +11,7 @@ import { getPublicBrandLogos } from "@/lib/brand";
 import { getHomeReviews } from "@/lib/reviews-db";
 import { Stars } from "@/components/reviews/Stars";
 import { AppButtons } from "@/components/site/AppButtons";
-import { getRegion } from "@/lib/region";
+import { getVisitorPriceContext } from "@/lib/pricing";
 import { GOLD, GOLD_LIGHT, MONO, METAL, CINZEL, BODY, SCRIPTURE } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -30,8 +30,8 @@ const btnGold: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 700, font
 const btnGhost: React.CSSProperties = { fontFamily: CINZEL, fontWeight: 600, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: GOLD_LIGHT, background: "rgba(201,169,97,0.06)", border: `1px solid ${GOLD}59`, borderRadius: 14, padding: "16px 34px", textDecoration: "none" };
 
 export default async function Home() {
-  const region = await getRegion();
-  const [featured, hero, reviews, logos] = await Promise.all([getFeatured(region), getHero(), getHomeReviews(6), getPublicBrandLogos()]);
+  const ctx = await getVisitorPriceContext();
+  const [featured, hero, reviews, logos] = await Promise.all([getFeatured(ctx), getHero(), getHomeReviews(6), getPublicBrandLogos()]);
   return (
     <div style={{ background: "#0A0A0A" }}>
       {/* hero (editable in admin -> Content) */}

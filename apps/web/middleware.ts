@@ -4,18 +4,25 @@
 //  2) Gate /admin: refresh the Supabase session and bounce anon users to login.
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { REGION_COOKIE, regionForCountry } from "@/lib/region";
+import { currencyForCountry } from "@/lib/currency";
 import { canAccessPath } from "@/lib/access";
+
+const CURRENCY_COOKIE = "tabor_currency";
+// 30 days, not 180: it's a display preference, it should re-derive from geo
+// reasonably often, and it is the only thing we persist about where you are.
+const CURRENCY_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 const PUBLIC_ADMIN_PATHS = ["/admin/login", "/admin/setup", "/admin/auth"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  // 1) region cookie (set once if missing)
-  if (!request.cookies.get(REGION_COOKIE)) {
+  // 1) currency cookie (set once if missing). Vercel resolves the IP to a country
+  //    at the edge; we never see or store the IP itself, and the cookie holds a
+  //    3-letter currency code and nothing else.
+  if (!request.cookies.get(CURRENCY_COOKIE)) {
     const country = request.headers.get("x-vercel-ip-country");
-    response.cookies.set(REGION_COOKIE, regionForCountry(country), { path: "/", maxAge: 60 * 60 * 24 * 180 });
+    response.cookies.set(CURRENCY_COOKIE, currencyForCountry(country), { path: "/", maxAge: CURRENCY_COOKIE_MAX_AGE });
   }
 
   // 2) admin gate (only do the auth round-trip on /admin)
@@ -32,8 +39,8 @@ export async function middleware(request: NextRequest) {
           setAll(toSet) {
             toSet.forEach(({ name, value }) => request.cookies.set(name, value));
             response = NextResponse.next({ request });
-            if (!request.cookies.get(REGION_COOKIE)) {
-              response.cookies.set(REGION_COOKIE, regionForCountry(request.headers.get("x-vercel-ip-country")), { path: "/", maxAge: 60 * 60 * 24 * 180 });
+            if (!request.cookies.get(CURRENCY_COOKIE)) {
+              response.cookies.set(CURRENCY_COOKIE, currencyForCountry(request.headers.get("x-vercel-ip-country")), { path: "/", maxAge: CURRENCY_COOKIE_MAX_AGE });
             }
             toSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
           },

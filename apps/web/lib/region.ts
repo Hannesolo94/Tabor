@@ -1,32 +1,25 @@
-// Region + currency. Two regions for now: ZA (South Africa / Africa, cheaper
-// local pricing in ZAR) and INTL (everyone else, USD). The visitor's region sets
-// the DISPLAYED price/currency; the shipping address LOCKS the real price at
-// checkout (so the lower SA price can't be exploited from abroad).
-import { cookies } from "next/headers";
-
+// FULFILMENT region: who makes and ships the order, and therefore what it costs
+// us. This is NOT the buyer's currency. Currency lives in pricing.ts and comes
+// from the visitor's country; a Namibian pays ZAR but ships from SA, an
+// Australian pays AUD but ships from Printful.
+//
+// ZA fulfilment is the Common Monetary Area, where an SA print partner can
+// deliver at sane cost. Everywhere else routes to Printful.
 export type RegionId = "ZA" | "INTL";
 
-export const REGIONS: Record<RegionId, { code: string; symbol: string; label: string }> = {
-  ZA: { code: "ZAR", symbol: "R", label: "South Africa" },
-  INTL: { code: "USD", symbol: "$", label: "International" },
-};
-
+/** Legacy cookie from the two-region era. Read for back-compat, no longer set. */
 export const REGION_COOKIE = "tabor_region";
 
-// African ISO-2 country codes get the local (ZA) price book.
-const AFRICA = new Set([
-  "ZA", "NA", "BW", "ZW", "MZ", "LS", "SZ", "ZM", "MW", "AO", "KE", "TZ", "UG", "RW", "NG", "GH",
-  "ET", "CD", "CG", "CM", "CI", "SN", "ML", "BF", "BJ", "TG", "NE", "GA", "GQ", "MG", "MU", "EG",
-  "MA", "DZ", "TN", "LY", "SD", "SS", "SO", "BI", "DJ", "ER", "GM", "GN", "GW", "LR", "SL", "TD",
-  "CF", "MR", "CV", "KM", "SC", "ST",
-]);
+const ZA_FULFILMENT = new Set(["ZA", "NA", "LS", "SZ"]);
 
-export function regionForCountry(cc: string | null | undefined): RegionId {
-  return cc && AFRICA.has(cc.toUpperCase()) ? "ZA" : "INTL";
+/** Which supplier/shipping model serves this destination. */
+export function fulfilmentRegion(cc: string | null | undefined): RegionId {
+  return cc && ZA_FULFILMENT.has(cc.toUpperCase()) ? "ZA" : "INTL";
 }
 
-/** Region from the cookie (set by middleware from geo, or by the switcher). */
-export async function getRegion(): Promise<RegionId> {
-  const c = await cookies();
-  return c.get(REGION_COOKIE)?.value === "ZA" ? "ZA" : "INTL";
-}
+/**
+ * Back-compat alias. NOTE: this now expects an ISO-2 country CODE, not a name.
+ * The old checkout passed "South Africa" here against a set of codes, which
+ * silently sent every SA order to international pricing.
+ */
+export const regionForCountry = fulfilmentRegion;

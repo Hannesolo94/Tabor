@@ -2,22 +2,22 @@
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getCollectionBySlug } from "@/lib/collections-db";
-import { getRegion } from "@/lib/region";
+import { getPriceContext, getVisitorPriceContext } from "@/lib/pricing";
 import { GOLD, MONO, METAL, BODY } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const res = await getCollectionBySlug(slug, "INTL");
+  const res = await getCollectionBySlug(slug, await getPriceContext("USD"));
   if (!res) return { title: "TABOR" };
   return { title: res.collection.title, description: res.collection.description ?? `${res.collection.title} — TABOR.`, alternates: { canonical: `/collection/${slug}` } };
 }
 
 export default async function CollectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const region = await getRegion();
-  const res = await getCollectionBySlug(slug, region);
+  const ctx = await getVisitorPriceContext();
+  const res = await getCollectionBySlug(slug, ctx);
   if (!res) notFound();
   const { collection, products } = res;
 
