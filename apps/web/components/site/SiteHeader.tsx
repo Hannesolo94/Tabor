@@ -6,14 +6,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { TaborSeal } from "@/components/TaborSeal";
-import { RegionSwitcher } from "./RegionSwitcher";
+import { CurrencySwitcher } from "./CurrencySwitcher";
 import { CATEGORIES, PERSONAS, type Persona, type Category } from "@/lib/catalog";
 import type { BrandLogos } from "@/lib/brand";
 import { GOLD, MONO, PIRATA } from "@/lib/ui";
 
 type Menu = null | "collections" | "gear";
 
-export function SiteHeader({ personas = PERSONAS, categories = CATEGORIES, collections = [], logo }: { personas?: Persona[]; categories?: Category[]; collections?: { slug: string; title: string }[]; logo?: BrandLogos }) {
+export function SiteHeader({ personas = PERSONAS, categories = CATEGORIES, collections = [], logo, currencies = [], currency = "USD" }: { personas?: Persona[]; categories?: Category[]; collections?: { slug: string; title: string }[]; logo?: BrandLogos; currencies?: { code: string; symbol: string }[]; currency?: string }) {
   const { count, setOpen } = useCart();
   const [menu, setMenu] = useState<Menu>(null);
   const [mobile, setMobile] = useState(false);
@@ -47,7 +47,7 @@ export function SiteHeader({ personas = PERSONAS, categories = CATEGORIES, colle
           <form action="/shop" method="get" style={{ display: "flex" }}>
             <input name="q" placeholder="Search..." aria-label="Search products" style={{ fontFamily: MONO, fontSize: 11, color: "#E8E2D5", background: "rgba(21,21,26,0.7)", border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "8px 12px", width: 120 }} />
           </form>
-          <RegionSwitcher />
+          <CurrencySwitcher currencies={currencies} current={currency} />
           <button onClick={() => setOpen(true)} style={{ ...linkStyle, color: GOLD, border: `1px solid ${GOLD}59`, background: "rgba(201,169,97,0.06)", borderRadius: 12, padding: "9px 16px" }}>
             Bag{count ? ` · ${count}` : ""}
           </button>

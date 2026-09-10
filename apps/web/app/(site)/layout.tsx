@@ -13,15 +13,20 @@ import { getAnnouncements } from "@/lib/announcements-db";
 import { getPixels } from "@/lib/pixels-db";
 import { getVisiblePersonas, getVisibleCollections, getVisibleCategories } from "@/lib/collections-db";
 import { getPublicBrandLogos } from "@/lib/brand";
+import { getCurrencies, getCurrency } from "@/lib/pricing";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [announcements, pixels, personas, collections, categories, logos] = await Promise.all([getAnnouncements(), getPixels(), getVisiblePersonas(), getVisibleCollections(), getVisibleCategories(), getPublicBrandLogos()]);
+  const [announcements, pixels, personas, collections, categories, logos, currencies, currency] = await Promise.all([
+    getAnnouncements(), getPixels(), getVisiblePersonas(), getVisibleCollections(), getVisibleCategories(), getPublicBrandLogos(),
+    getCurrencies(), getCurrency(),
+  ]);
+  const enabled = currencies.filter((c) => c.enabled).map((c) => ({ code: c.code, symbol: c.symbol }));
   return (
     <CartProvider>
       <Pixels ids={pixels} />
       <a href="#main" className="skip-link">Skip to content</a>
       <AnnouncementBar items={announcements} />
-      <SiteHeader personas={personas} categories={categories} collections={collections.map((c) => ({ slug: c.slug, title: c.title }))} logo={logos} />
+      <SiteHeader personas={personas} categories={categories} collections={collections.map((c) => ({ slug: c.slug, title: c.title }))} logo={logos} currencies={enabled} currency={currency} />
       <main id="main">{children}</main>
       <SiteFooter logo={logos} />
       <CartDrawer />
