@@ -6,12 +6,14 @@ import { useEffect, useRef } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 
 export function ClearCart({ active }: { active: boolean }) {
-  const { clear } = useCart();
+  const { clear, hydrated } = useCart();
   const done = useRef(false);
   useEffect(() => {
-    if (!active || done.current) return;
+    // Wait for hydration. Clearing first just gets overwritten, because React
+    // runs this child effect before the provider's own read-from-storage.
+    if (!hydrated || !active || done.current) return;
     done.current = true;
     clear();
-  }, [active, clear]);
+  }, [hydrated, active, clear]);
   return null;
 }
