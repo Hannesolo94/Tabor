@@ -4,6 +4,7 @@
 // for secrets). Core infra keys are NOT editable here — they stay in the
 // deployment env for security.
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { isCallerOwner } from "@/lib/admin-guard";
 import { slugify } from "@/lib/slug";
@@ -40,9 +41,11 @@ export async function savePixels(formData: FormData): Promise<void> {
 }
 
 export async function saveIntegration(formData: FormData): Promise<void> {
-  if (!(await isCallerOwner())) return; // API keys are owner-only
+  // Was a silent `return`: if the owner check failed the form appeared to save
+  // and nothing happened, with no way to tell. Say so instead.
+  if (!(await isCallerOwner())) redirect("/admin/settings?err=not-owner");
   const provider = String(formData.get("provider") ?? "");
-  if (!provider) return;
+  if (!provider) redirect("/admin/settings?err=no-provider");
   const patch: Record<string, unknown> = {
     enabled: formData.get("enabled") === "on",
     updated_at: new Date().toISOString(),
@@ -52,17 +55,23 @@ export async function saveIntegration(formData: FormData): Promise<void> {
   if (secret && secret !== "********") patch.secret = secret;
 
   const sb = await supabaseServer();
-  await sb.from("integrations").update(patch).eq("provider", provider);
+  const { data, error } = await sb.from("integrations").update(patch).eq("provider", provider).select("provider");
+  if (error) redirect(`/admin/settings?err=${encodeURIComponent(error.message.slice(0, 80))}`);
+  // An update that matches no row is not an error in PostgREST, so check.
+  if (!data?.length) redirect("/admin/settings?err=no-such-integration");
   revalidatePath("/admin/settings");
+  redirect("/admin/settings?saved=1");
 }
 
 export async function addIntegration(formData: FormData): Promise<void> {
-  if (!(await isCallerOwner())) return; // API keys are owner-only
+  if (!(await isCallerOwner())) redirect("/admin/settings?err=not-owner");
   const label = String(formData.get("label") ?? "").trim();
   const secret = String(formData.get("secret") ?? "").trim();
-  if (!label) return;
+  if (!label) redirect("/admin/settings?err=name-required");
   const provider = slugify(label);
   const sb = await supabaseServer();
-  await sb.from("integrations").upsert({ provider, label, secret: secret || null, enabled: !!secret, updated_at: new Date().toISOString() });
+  const { error } = await sb.from("integrations").upsert({ provider, label, secret: secret || null, enabled: !!secret, updated_at: new Date().toISOString() });
+  if (error) redirect(`/admin/settings?err=${encodeURIComponent(error.message.slice(0, 80))}`);
   revalidatePath("/admin/settings");
+  redirect("/admin/settings?saved=1");
 }

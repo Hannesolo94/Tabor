@@ -13,7 +13,8 @@ const lbl: React.CSSProperties = { fontFamily: MONO, fontSize: 9, color: "#8A847
 const inp: React.CSSProperties = { fontFamily: BODY, fontSize: 13, color: "#E8E2D5", background: "rgba(15,15,20,0.6)", border: "1px solid rgba(201,169,97,0.2)", borderRadius: 10, padding: "10px 12px", width: "100%" };
 const saveBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1408", fontWeight: 700, background: "linear-gradient(180deg, #f0d89a, #c9a961)", boxShadow: "0 6px 18px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.4)", border: "none", borderRadius: 12, padding: "11px 20px", cursor: "pointer" };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ err?: string; saved?: string }> }) {
+  const sp = await searchParams;
   await requireAdmin();
   const sb = await supabaseServer();
   const [storeRes, intRes, pxRes] = await Promise.all([
@@ -39,6 +40,19 @@ export default async function SettingsPage() {
         <h1 style={{ fontFamily: CINZEL, fontWeight: 700, fontSize: 30, color: "#E8E2D5", margin: 0 }}>Settings</h1>
         <p style={{ fontFamily: BODY, fontSize: 13, color: "#9A948A", margin: "6px 0 0" }}>Store details, third-party integrations, marketing pixels, and infrastructure status.</p>
       </div>
+
+      {/* Saving used to fail silently when the owner check did not pass, so a
+          result banner is the difference between "it saved" and "nothing happened". */}
+      {sp.err && (
+        <div style={{ fontFamily: MONO, fontSize: 12, color: "#F87171", border: "1px solid rgba(248,113,113,0.35)", background: "rgba(248,113,113,0.08)", borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
+          Could not save: {sp.err === "not-owner" ? "you are not signed in as the owner. Sign out and sign in as the owner account." : sp.err === "no-such-integration" ? "that integration row does not exist." : sp.err}
+        </div>
+      )}
+      {sp.saved && (
+        <div style={{ fontFamily: MONO, fontSize: 12, color: "#4ADE80", border: "1px solid rgba(74,222,128,0.35)", background: "rgba(74,222,128,0.08)", borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
+          Saved.
+        </div>
+      )}
 
       <div style={{ display: "grid", gap: 16 }}>
         {/* store settings */}
