@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProductBySku } from "@/lib/products-db";
 import { fulfilmentRegion } from "@/lib/region";
 import { currencyForVisitorCountry, getPriceContext } from "@/lib/pricing";
+import { settlementFor } from "@/lib/settlement";
 import { computeShipping } from "@/lib/shipping";
 import { startPayment } from "@/lib/payments";
 import { sendEmail, emailShell } from "@/lib/email";
@@ -83,6 +84,13 @@ export async function POST(req: Request) {
   const shippingAmount = computeShipping(region, country, subtotal, ctx);
   const total = Math.max(0, subtotal - discountAmount + shippingAmount);
 
+  // What the gateway will actually move. Yoco settles ZAR only, so an
+  // international total is converted ONCE here, from the figure the buyer
+  // agreed to. No second rounding and no second buffer: the buffer is already
+  // inside the displayed price, and charging R499 against a EUR26.99 agreement is
+  // exactly the "you charged me more" complaint we are avoiding.
+  const settle = await settlementFor(total, ctx);
+
   // create order (pending payment)
   const { data: order, error } = await admin.from("orders").insert({
     email,
@@ -90,6 +98,9 @@ export async function POST(req: Request) {
     currency: cur.code,
     // freeze the rate so historical reporting never shifts when FX moves
     fx_rate_to_usd: ctx.rate > 0 ? 1 / ctx.rate : null,
+    settlement_currency: settle.currency,
+    settlement_amount: settle.amount,
+    settlement_rate: settle.rate,
     status: "pending_payment",
     items: lines,
     subtotal,
@@ -104,8 +115,8 @@ export async function POST(req: Request) {
   if (error || !order) return NextResponse.json({ error: "Could not create your order. Please try again." }, { status: 500 });
 
   // start payment via the configured provider
-  const pay = await startPayment({ id: order.id, total, currency: cur.code, email, region });
-  await admin.from("orders").update({ payment_provider: pay.provider, payment_ref: pay.ref ?? null }).eq("id", order.id);
+  const pay = await startPayment({ id: order.id, total, currency: cur.code, email, region, settlementAmount: settle.amount, settlementCurrency: settle.currency });
+  await admin.from("orders").update({ payment_provider: pay.provider, payment_ref: pay.ref ?? null, gateway_checkout_id: pay.checkoutId ?? null }).eq("id", order.id);
   if (discountCode) await admin.rpc("bump_discount_use", { p_code: discountCode }); // atomic increment (no lost-update race)
 
   // order confirmation email (branded, best-effort — never blocks the order)
@@ -121,5 +132,11 @@ export async function POST(req: Request) {
     await sendEmail(email, "TABOR: order received", html);
   } catch { /* email is non-critical */ }
 
-  return NextResponse.json({ orderId: order.id, total, currency: cur.code, symbol: cur.symbol, redirectUrl: pay.redirectUrl, status: pay.status, message: pay.message });
+  return NextResponse.json({
+    orderId: order.id,
+    total, currency: cur.code, symbol: cur.symbol,
+    // Surfaced so the confirmation can say plainly what the card will be billed.
+    settlementAmount: settle.amount, settlementCurrency: settle.currency,
+    redirectUrl: pay.redirectUrl, status: pay.status, message: pay.message,
+  });
 }

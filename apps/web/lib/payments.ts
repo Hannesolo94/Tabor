@@ -8,21 +8,41 @@ import { yocoProvider } from "./payments/yoco";
 
 export interface PaymentOrder {
   id: string;
-  total: number;
-  currency: string;
+  total: number;          // what the buyer agreed to, in THEIR currency
+  currency: string;       // the currency they browsed and agreed in
   email: string;
-  region: string; // "ZA" | "INTL"
+  region: string;         // "ZA" | "INTL"
+  /** What the gateway will actually move. Yoco settles ZAR only, so for an
+   *  international buyer this is the rand equivalent of `total`. */
+  settlementAmount?: number;
+  settlementCurrency?: string;
 }
 
 export interface PaymentResult {
   redirectUrl: string | null;            // hosted checkout to send the buyer to (null = no redirect)
   provider: string;                      // recorded on the order
   ref?: string;                          // provider-side reference
+  checkoutId?: string;                   // gateway's own checkout/session id
   status: "redirect" | "pending_manual";
   message?: string;
 }
 
-export interface WebhookResult { orderId: string; paid: boolean; ref?: string }
+/** Explicit outcome rather than a boolean. A refund event also carries
+ *  status "succeeded", so inferring "paid" from the status field marks refunded
+ *  orders as paid. The event TYPE is the only safe signal. */
+export type PaymentOutcome = "paid" | "failed" | "refunded" | "refund_failed" | "ignored";
+
+export interface WebhookResult {
+  orderId: string;
+  outcome: PaymentOutcome;
+  ref?: string;                          // gateway payment id
+  eventId?: string;                      // webhook-id header: the dedupe key
+  bodyEventId?: string;                  // event id inside the body, for the audit trail
+  eventType?: string;
+  settlementAmount?: number;             // what was actually captured
+  settlementCurrency?: string;
+  raw?: Record<string, unknown>;
+}
 
 export interface PaymentProvider {
   id: string;
