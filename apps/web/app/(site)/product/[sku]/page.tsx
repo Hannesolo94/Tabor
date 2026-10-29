@@ -26,6 +26,34 @@ export async function generateMetadata({ params }: { params: Promise<{ sku: stri
     description: desc,
     alternates: { canonical: `/product/${p.sku}` },
     openGraph: { title: `${p.name} · TABOR`, description: desc, type: "website", images: p.imageUrl ? [{ url: p.imageUrl }] : undefined },
+    twitter: { card: "summary_large_image", title: `${p.name} · TABOR`, description: desc, images: p.imageUrl ? [p.imageUrl] : undefined },
+  };
+}
+
+// schema.org Product, so Google Shopping, Meta and AI shopping agents read the name, price, stock, brand and
+// rating straight from the page (Oct 29 2026)
+function productJsonLd(p: NonNullable<Awaited<ReturnType<typeof getProductBySku>>>, summary: { count: number; avg: number }, images: string[]) {
+  const url = `https://tabor.quest/product/${p.sku}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: p.name,
+    sku: p.sku,
+    url,
+    image: images.length ? images : undefined,
+    description: (p.description || p.blurb || "").slice(0, 5000),
+    brand: { "@type": "Brand", name: "TABOR" },
+    category: p.category,
+    offers: {
+      "@type": "Offer",
+      url,
+      price: p.price,
+      priceCurrency: p.currencyCode,
+      availability: p.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@type": "Organization", name: "TABOR" },
+    },
+    ...(summary.count ? { aggregateRating: { "@type": "AggregateRating", ratingValue: Number(summary.avg.toFixed(2)), reviewCount: summary.count } } : {}),
   };
 }
 
@@ -43,8 +71,10 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
     getReviewSummary(p.sku),
   ]);
 
+  const ldImages = [p.imageUrl, ...media.filter((m) => m.type === "image").map((m) => m.url)].filter((u): u is string => !!u).slice(0, 6);
   return (
     <div style={{ background: "#0A0A0A" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(p, summary, ldImages)).replace(/</g, "\\u003c") }} />
       {/* breadcrumb */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 24px 0", fontFamily: MONO, fontSize: 10, color: "#7A746A", letterSpacing: "0.1em" }}>
         <Link href="/shop" style={{ color: "#7A746A", textDecoration: "none" }}>SHOP</Link>
