@@ -94,7 +94,9 @@ for (const R of RANGE) {
     printful_id: String(pid), printful_variants: variants, status: "draft", source: "printful",
     sizes: twin.sizes, image_url: image, tone: base.tone, ink: base.ink, mark: base.mark,
     tagline: base.tagline, blurb: `${base.name}. ${R.label}.`, description: base.description,
-    note: `${R.label}, cloned from ${R.from} (same blank, variants, price). Design from the BurgerBot hub.`,
+    // note is the customer-facing product line on the store cards (Oct 29: internal build notes showed on the shop)
+    note: { "long-sleeve": "Long sleeve, back print, Gildan 2400 black.", sweater: "Crewneck sweatshirt, back print.", hoodie: "Pullover hoodie, back print, Lane Seven LS14001 black.",
+            flag: "All-over flag, design on black.", blanket: "Woven throw blanket, design on black.", sticker: "Black kiss-cut vinyl sticker." }[R.type],
   };
   const ins = await rest("products", { method: "POST", body: JSON.stringify(row) });
   if (!ins.ok) { console.log(sku, "INSERT FAILED", ins.status, JSON.stringify(ins.body).slice(0, 300)); continue; }

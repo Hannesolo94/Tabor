@@ -76,7 +76,7 @@ const row = {
   printful_id: String(productId), printful_variants: variants, status: "draft", source: "printful",
   sizes: variants.map((v) => v.size), image_url: mockUrl, tone: "#15151A", ink: "#C9A961", mark: "seal",
   tagline: D.tagline, blurb: D.blurb, description: D.description,
-  note: `Back DTF print, Gildan 5000 black. Print file 3600x4800 (300 DPI), top-aligned for the upper back. Design ${D.td} from the BurgerBot hub.`,
+  note: "Back print tee, Gildan 5000 black.",   // customer-facing product line on the store cards (Oct 29)
 };
 const ins = await rest("products", { method: "POST", body: JSON.stringify(row) });
 if (!ins.ok) { console.log("PRODUCT INSERT FAILED", ins.status, JSON.stringify(ins.body).slice(0, 400)); process.exit(1); }
