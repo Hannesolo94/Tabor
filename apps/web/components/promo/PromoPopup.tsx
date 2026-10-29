@@ -2,7 +2,7 @@
 
 // First-order discount popup. Captures an email (to the waitlist table, tagged
 // source 'promo-10') and reveals a discount code. The code's ENFORCEMENT (taking
-// 10% off at payment) is wired later with the Peach checkout + a discount_codes
+// 10% off at payment) is wired through the Yoco checkout + a discount_codes
 // table; for now we capture the signup and show the code.
 //
 // Behaviour: shows once per visitor after a short delay, never on /checkout,

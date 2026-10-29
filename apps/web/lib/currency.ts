@@ -2,7 +2,7 @@
 // a price a human would actually put on a shelf.
 //
 // Rule: we only display a currency we can charge in. Anything not mapped here
-// falls back to USD, which PayPal settles everywhere we sell.
+// falls back to USD; Yoco takes the card and settles it in ZAR (settlement.ts).
 
 /** ISO-3166-1 alpha-2, every country Printful will ship to plus the rest. */
 export const COUNTRIES: string[] =

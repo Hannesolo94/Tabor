@@ -2,8 +2,6 @@
 // startPayment() which dispatches to whichever provider is configured FOR THAT
 // ORDER'S REGION. Switching gateways = set env config + add keys; checkout and
 // order code never change. Manual is the safe default until a gateway is live.
-import { peachProvider } from "./payments/peach";
-import { paypalProvider } from "./payments/paypal";
 import { yocoProvider } from "./payments/yoco";
 
 export interface PaymentOrder {
@@ -66,23 +64,18 @@ const manualProvider: PaymentProvider = { id: "manual", async start(order) { ret
 
 const PROVIDERS: Record<string, PaymentProvider> = {
   manual: manualProvider,
-  peach: peachProvider,
-  paypal: paypalProvider,
   yoco: yocoProvider,
 };
 
 /**
- * Region-aware provider selection. Set per-region env to route, e.g.:
- *   PAYMENT_PROVIDER_ZA=yoch      (or peach)
- *   PAYMENT_PROVIDER_INTL=paypal  (or peach)
- * Or a single PAYMENT_PROVIDER for both. Defaults to manual.
+ * Yoco is the one card gateway for every region (Hannes, Oct 29 2026): it takes local and
+ * international cards and settles in ZAR (see settlement.ts). PAYMENT_PROVIDER(_ZA/_INTL) can
+ * still say "manual" to pause card payments; any other value, or an old paypal/peach/paystack
+ * setting, resolves to Yoco. With nothing set, it stays on the safe manual default.
  */
 export function providerForRegion(region: string): PaymentProvider {
-  const za = process.env.PAYMENT_PROVIDER_ZA;
-  const intl = process.env.PAYMENT_PROVIDER_INTL;
-  const both = process.env.PAYMENT_PROVIDER;
-  const id = (region === "ZA" ? za : intl) || both || "manual";
-  return PROVIDERS[id] ?? manualProvider;
+  const id = (region === "ZA" ? process.env.PAYMENT_PROVIDER_ZA : process.env.PAYMENT_PROVIDER_INTL) || process.env.PAYMENT_PROVIDER || "manual";
+  return id === "manual" ? manualProvider : yocoProvider;
 }
 
 export function providerById(id: string): PaymentProvider | undefined {
