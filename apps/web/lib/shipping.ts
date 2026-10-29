@@ -2,7 +2,7 @@
 //
 // Rates are AUTHORED in two currencies only:
 //   INTL: USD $11.99 worldwide, free for US orders over $100
-//   ZA:   ZAR R150 flat, free over R1800
+//   ZA:   ZAR R199 flat, free over R1800 (Oct 29 2026: R150 was under what Printful charges to ship to SA)
 // For any other display currency the USD figures are converted with the same FX
 // rate and rounding rule as products, so shipping never appears in a different
 // currency to the basket.
@@ -11,7 +11,7 @@ import { usdToContext, type PriceContext } from "./pricing";
 
 export const SHIPPING = {
   INTL: { flat: 11.99, freeOver: 100, freeOnlyUS: true },
-  ZA: { flat: 150, freeOver: 1800, freeOnlyUS: false },
+  ZA: { flat: 199, freeOver: 1800, freeOnlyUS: false },
 } as const;
 
 /** ISO-2 now; names kept so an older cached client payload still matches. */
