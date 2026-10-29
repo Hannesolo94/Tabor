@@ -3,13 +3,13 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
-import { publishToSocial, deleteSocialPost } from "@/lib/zernio";
+import { publishPostCore, schedulePostCore, cancelScheduleCore, type PostTargets } from "@/lib/content-publish";
 import { anthropicConfig } from "@/lib/anthropic-config";
 import { createUploadTicket } from "@/lib/storage-upload";
 import { slugify } from "@/lib/slug";
 import { logAudit } from "@/lib/audit";
 
-export interface PostTargets { app: boolean; email: boolean; blog: boolean; instagram: boolean; tiktok: boolean }
+export type { PostTargets } from "@/lib/content-publish";
 export interface MediaCard { kind: string; url: string; poster_url: string | null }
 
 /** Signed upload URL so the browser uploads media DIRECTLY to the public content-media bucket. */
@@ -117,31 +117,9 @@ export async function requestChanges(formData: FormData): Promise<void> {
 /** Publish to the chosen destinations (blog + app feed here; email send is its own action). */
 export async function publishPost(id: string): Promise<void> {
   const sb = await supabaseServer();
-  const { data: post } = await sb.from("posts").select("status, published_at, app_published_at, targets, body, type, social_post_id").eq("id", id).maybeSingle();
-  if (!post) return;
-  const targets = (post.targets ?? {}) as PostTargets;
-  const patch: Record<string, unknown> = { status: "published", scheduled_for: null, updated_at: new Date().toISOString() };
-  if (!post.published_at) patch.published_at = new Date().toISOString();
-  if (targets.app && !post.app_published_at) patch.app_published_at = new Date().toISOString();
-
-  // publishing a scheduled post NOW: pull the queued Zernio post so it does not double-fire
-  if (post.status === "scheduled" && post.social_post_id) {
-    await deleteSocialPost(String(post.social_post_id));
-    patch.social_post_id = null;
-    patch.social_status = null;
-  }
-
-  // cross-post to Instagram / TikTok via Zernio (only the platforms ticked)
-  if (targets.instagram || targets.tiktok) {
-    const { data: media } = await sb.from("post_media").select("kind, url, sort").eq("post_id", id).order("sort", { ascending: true });
-    const platforms = [targets.instagram ? "instagram" : null, targets.tiktok ? "tiktok" : null].filter(Boolean) as string[];
-    const r = await publishToSocial({ content: String(post.body ?? ""), media: (media ?? []).map((m) => ({ kind: m.kind, url: m.url })), platforms, isReel: post.type === "reel" });
-    patch.social_status = r.status || null;
-    if (r.postId) patch.social_post_id = r.postId;
-  }
-
-  await sb.from("posts").update(patch).eq("id", id);
-  await logAudit("post.publish", "post", id, { targets });
+  const r = await publishPostCore(sb, id);
+  if (!r.ok) return;
+  await logAudit("post.publish", "post", id, { targets: r.targets });
   revalidatePath("/admin/blog");
   revalidatePath(`/admin/blog/${id}`);
   revalidatePath("/blog");
@@ -151,29 +129,10 @@ export async function publishPost(id: string): Promise<void> {
  *  right now with scheduledFor: Zernio fires it at the time. App/blog go live via
  *  RLS + the promotion sweep. Re-scheduling replaces any previously queued Zernio post. */
 export async function schedulePost(id: string, whenIso: string, timezone: string): Promise<{ ok: boolean; error?: string }> {
-  const when = new Date(whenIso);
-  if (isNaN(when.getTime())) return { ok: false, error: "Pick a valid date and time." };
-  if (when.getTime() < Date.now() + 60_000) return { ok: false, error: "Pick a time in the future." };
-
   const sb = await supabaseServer();
-  const { data: post } = await sb.from("posts").select("status, targets, body, type, social_post_id").eq("id", id).maybeSingle();
-  if (!post) return { ok: false, error: "Post not found." };
-  const targets = (post.targets ?? {}) as PostTargets;
-  const patch: Record<string, unknown> = { status: "scheduled", scheduled_for: when.toISOString(), schedule_tz: timezone || "UTC", updated_at: new Date().toISOString() };
-
-  if (targets.instagram || targets.tiktok) {
-    // re-scheduling: pull the previously queued Zernio post first so it does not double-fire
-    if (post.status === "scheduled" && post.social_post_id) await deleteSocialPost(String(post.social_post_id));
-    const { data: media } = await sb.from("post_media").select("kind, url, sort").eq("post_id", id).order("sort", { ascending: true });
-    const platforms = [targets.instagram ? "instagram" : null, targets.tiktok ? "tiktok" : null].filter(Boolean) as string[];
-    const r = await publishToSocial({ content: String(post.body ?? ""), media: (media ?? []).map((m) => ({ kind: m.kind, url: m.url })), platforms, isReel: post.type === "reel", scheduledFor: when.toISOString(), timezone: timezone || "UTC" });
-    if (!r.ok) return { ok: false, error: r.status };
-    patch.social_status = r.status || null;
-    patch.social_post_id = r.postId ?? null;
-  }
-
-  await sb.from("posts").update(patch).eq("id", id);
-  await logAudit("post.schedule", "post", id, { scheduled_for: when.toISOString(), timezone, targets });
+  const r = await schedulePostCore(sb, id, whenIso, timezone);
+  if (!r.ok) return { ok: false, error: r.error };
+  await logAudit("post.schedule", "post", id, { scheduled_for: new Date(whenIso).toISOString(), timezone, targets: r.targets });
   revalidatePath("/admin/blog");
   revalidatePath(`/admin/blog/${id}`);
   return { ok: true };
@@ -184,10 +143,8 @@ export async function cancelSchedule(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const sb = await supabaseServer();
-  const { data: post } = await sb.from("posts").select("status, social_post_id").eq("id", id).maybeSingle();
-  if (!post || post.status !== "scheduled") return;
-  if (post.social_post_id) await deleteSocialPost(String(post.social_post_id));
-  await sb.from("posts").update({ status: "draft", scheduled_for: null, social_post_id: null, social_status: null, updated_at: new Date().toISOString() }).eq("id", id);
+  const r = await cancelScheduleCore(sb, id);
+  if (!r.ok) return;
   await logAudit("post.unschedule", "post", id);
   revalidatePath("/admin/blog");
   revalidatePath(`/admin/blog/${id}`);
