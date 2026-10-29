@@ -32,15 +32,26 @@ function ids(): { visitor_id: string; session_id: string } {
   }
 }
 
+/** utm_* tags on the landing URL (bio links, post links), so organic social visits are attributed
+ *  even when Instagram/TikTok in-app browsers strip the referrer. */
+function utm(): Record<string, string> | undefined {
+  try {
+    const q = new URLSearchParams(location.search), out: Record<string, string> = {};
+    for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_content"]) { const v = q.get(k); if (v) out[k] = v.slice(0, 80); }
+    return Object.keys(out).length ? out : undefined;
+  } catch { return undefined; }
+}
+
 export function track(type: string, data: { path?: string; sku?: string; value?: number; meta?: object } = {}) {
   try {
+    const tags = type === "pageview" ? utm() : undefined;
     const body = JSON.stringify({
       type,
       path: data.path ?? (typeof location !== "undefined" ? location.pathname : ""),
       referrer: typeof document !== "undefined" ? document.referrer : "",
       sku: data.sku,
       value: data.value,
-      meta: data.meta,
+      meta: tags ? { ...(data.meta ?? {}), ...tags } : data.meta,
       ...ids(),
     });
     if (typeof navigator !== "undefined" && navigator.sendBeacon) {

@@ -3,8 +3,8 @@
 // Auth: Authorization: Bearer <key>, the key from the integrations row 'agent' (or the
 // AGENT_API_KEY env). Fail closed: no key configured means every call is refused.
 import { NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { agentAuthorized } from "@/lib/agent-auth";
 import { createUploadTicket } from "@/lib/storage-upload";
 import { getSocialStatus } from "@/lib/zernio";
 import { publishPostCore, schedulePostCore, cancelScheduleCore, type PostTargets } from "@/lib/content-publish";
@@ -13,15 +13,7 @@ export const dynamic = "force-dynamic";
 
 const TYPES = ["static", "carousel", "video", "reel", "gif", "mixed"];
 
-async function authorized(req: Request): Promise<boolean> {
-  const got = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
-  if (!got) return false;
-  const { data } = await supabaseAdmin().from("integrations").select("secret, enabled").eq("provider", "agent").maybeSingle();
-  const want = (data?.enabled && data?.secret) || process.env.AGENT_API_KEY;
-  if (!want) return false;
-  const a = Buffer.from(String(got)), b = Buffer.from(String(want));
-  return a.length === b.length && timingSafeEqual(a, b);
-}
+const authorized = agentAuthorized;
 
 async function audit(action: string, id: string | null, detail: Record<string, unknown> = {}) {
   try { await supabaseAdmin().from("audit_log").insert({ actor: "agent", action, entity: "post", entity_id: id, detail }); } catch { /* best effort */ }

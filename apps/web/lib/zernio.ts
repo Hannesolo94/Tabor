@@ -63,6 +63,17 @@ export async function publishToSocial(opts: { content: string; media: SocialMedi
   }
 }
 
+/** Read-only Zernio GET (analytics). Returns the parsed body plus the HTTP status so callers can show
+ *  "needs the analytics add-on" (402/403) instead of a blank panel. */
+export async function zernioGet(route: string): Promise<{ status: number; body: Record<string, unknown> | null }> {
+  const key = await zernioKey();
+  if (!key) return { status: 0, body: { error: "Zernio key not set." } };
+  try {
+    const res = await fetch(`${BASE}${route}`, { headers: { Authorization: `Bearer ${key}` }, cache: "no-store" });
+    return { status: res.status, body: await res.json().catch(() => null) };
+  } catch { return { status: 0, body: { error: "could not reach Zernio" } }; }
+}
+
 /** Best-effort delete of a Zernio post (used when a scheduled post is cancelled or re-scheduled). */
 export async function deleteSocialPost(zernioPostId: string): Promise<boolean> {
   const key = await zernioKey();
