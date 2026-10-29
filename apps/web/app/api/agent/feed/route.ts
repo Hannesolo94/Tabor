@@ -22,8 +22,10 @@ export async function GET(req: Request) {
     sb.from("analytics_events").select("type, path, referrer, meta, sku, value, visitor_id, session_id, created_at")
       .in("type", ["pageview", "add_to_cart", "begin_checkout", "purchase"]).gt("created_at", since.toISOString())
       .order("created_at", { ascending: true }).limit(2000),
+    // new orders since, plus last week's orders that are paid now (so the hub sees the moment one turns paid)
     sb.from("orders").select("id, status, total, currency, items, discount_code, tags, email, created_at")
-      .gt("created_at", since.toISOString()).order("created_at", { ascending: true }).limit(200),
+      .or(`created_at.gt.${since.toISOString()},and(status.in.(paid,processing,fulfilled,shipped),created_at.gt.${new Date(Date.now() - 7 * 864e5).toISOString()})`)
+      .order("created_at", { ascending: true }).limit(300),
     sb.from("products").select("sku, name, image_url"),
   ]);
   const prod = new Map((products.data ?? []).map((p) => [String(p.sku), p]));
@@ -40,7 +42,7 @@ export async function GET(req: Request) {
     const sku = String(e.sku ?? (isProduct ? String(e.path).split("/")[2] : "") ?? "");
     const p = prod.get(sku);
     events.push({
-      kind: isProduct ? "view" : e.type === "add_to_cart" ? "cart" : e.type === "begin_checkout" ? "checkout" : "purchase",
+      kind: isProduct ? "view" : e.type === "add_to_cart" ? "cart" : e.type === "begin_checkout" ? "checkout" : "to_payment",   // the site fires purchase on the way to the gateway, before payment
       at: e.created_at, sku, product: p?.name ?? (sku || null), image: p?.image_url ?? null,
       value: e.value, visitor: tag(v), channel: firstChannel.get(v) ?? ch,
     });
