@@ -30,7 +30,7 @@ if (!D) { console.log("usage: node scripts/pod-design-tee.mjs <" + Object.keys(D
 const ART = `D:/BurgerBot/tabor/designs/${D.td}/r2-art.png`;
 const DESIGN_PATH = `${SKU}-r2-3600x4800.png`;
 const SIZES = [[11546, "S"], [11547, "M"], [11548, "L"], [11549, "XL"], [11550, "2XL"], [12644, "3XL"], [12645, "4XL"], [12646, "5XL"]];
-const PRICE = 33;
+const PRICE = 35;   // Oct 29 pricing pass: one price per product, tees $35
 
 const existing = await rest(`products?sku=eq.${SKU}&select=sku,status,printful_id`);
 if (existing.body?.length) { console.log("Already exists:", JSON.stringify(existing.body[0]), "- stopping so nothing is duplicated."); process.exit(0); }
