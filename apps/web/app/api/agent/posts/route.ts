@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { agentAuthorized } from "@/lib/agent-auth";
 import { createUploadTicket } from "@/lib/storage-upload";
 import { getSocialStatus } from "@/lib/zernio";
+import { promoteDuePosts } from "@/lib/content-schedule";
 import { publishPostCore, schedulePostCore, cancelScheduleCore, type PostTargets } from "@/lib/content-publish";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,7 @@ export async function GET(req: Request) {
   const u = new URL(req.url);
   const limit = Math.min(100, Math.max(1, Number(u.searchParams.get("limit") ?? 40) || 40));
   const sb = supabaseAdmin();
+  await promoteDuePosts().catch(() => 0);   // Nov 7 2026: flip due scheduled posts to published on every read (the daily cron alone left them on 'scheduled' for up to a day)
   let q = sb.from("posts").select("id, slug, title, excerpt, body, type, status, targets, brief, feedback, scheduled_for, schedule_tz, published_at, social_status, social_post_id, created_at, updated_at, post_media(kind, url, poster_url, sort)").order("updated_at", { ascending: false }).limit(limit);
   const status = u.searchParams.get("status");
   if (status) q = q.eq("status", status);
