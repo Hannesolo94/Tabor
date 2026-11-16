@@ -53,6 +53,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ provide
     // must still win. Only a terminal state (paid, refunded, cancelled) blocks it.
     await sb.from("orders").update(patch).eq("id", result.orderId)
       .in("status", ["pending_payment", "processing", "payment_failed"]);
+
+    // Nov 16: optionally put the order into Printful as a DRAFT (nothing is charged or printed until Hannes
+    // confirms it from the hub). OFF by default (app_settings "printful_autodraft"). Never fails the webhook.
+    try {
+      const { autodraftEnabled, createPrintfulDraft } = await import("@/lib/printful-orders");
+      if (await autodraftEnabled()) await createPrintfulDraft(result.orderId);
+    } catch { /* the hub's ORDERS tab still shows "Place in Printful" */ }
   } else if (result.outcome === "failed") {
     // Never downgrade an order that already succeeded.
     await sb.from("orders").update({ status: "payment_failed" }).eq("id", result.orderId).eq("status", "pending_payment");
