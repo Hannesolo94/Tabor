@@ -8,6 +8,7 @@
 // POST { action: "printful-draft", id }    put a paid order into Printful as a DRAFT (nothing charged or printed)
 // POST { action: "printful-confirm", id }  confirm that draft: Printful charges its billing method and prints
 // POST { action: "autodraft", enabled }    the automatic draft on payment (OFF by default)
+// POST { action: "money-cleared", id, cleared }  Hannes says the payout is in (money first: see moneyState)
 // The hub only sends POSTs from Hannes's own devices. Agent key.
 //
 // Deliberately thin on personal data: the buyer's FIRST NAME and country only. No email, address, phone or card.
@@ -61,6 +62,24 @@ function base(o: Row) {
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
+// MONEY FIRST (Hannes, Nov 16 15:38): a paid order waits until the buyer's money has reached his bank, then he pushes it
+// to Printful. Yoco pays out every 2 days. Yoco's Payouts API needs a separate Yoco API key (business/payouts:read) that
+// Tabor doesn't have, and its docs don't tie a payout to a checkout, so "likely in" is paid + 2 business days, labelled
+// as such. Hannes can tick "Money cleared" (tag money:cleared) to move an order on early.
+const PAYOUT_BUSINESS_DAYS = 2;
+const CLEARED_TAG = "money:cleared";
+function addBusinessDays(fromMs: number, n: number): number {
+  const d = new Date(fromMs);
+  let left = n;
+  while (left > 0) { d.setUTCDate(d.getUTCDate() + 1); const wd = d.getUTCDay(); if (wd !== 0 && wd !== 6) left--; }
+  return d.getTime();
+}
+function moneyState(paidAtMs: number, tags: string[], now = Date.now()) {
+  const eta = addBusinessDays(paidAtMs, PAYOUT_BUSINESS_DAYS);
+  const cleared = tags.includes(CLEARED_TAG);
+  return { payoutLikelyBy: new Date(eta).toISOString(), cleared, clearedBy: cleared ? "you" : now >= eta ? "estimate" : null, ready: cleared || now >= eta };
+}
+
 export async function GET(req: Request) {
   if (!(await agentAuthorized(req))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const u = new URL(req.url);
@@ -94,6 +113,10 @@ export async function GET(req: Request) {
 
   // Printful look-ups, newest first, bounded so one tab open can't hammer Printful
   const recent = [...rows].reverse();
+  const paidIds = rows.filter((o) => PAID.includes(String(o.status)) || o.status === "refund_pending").map((o) => o.id);
+  const { data: evs } = paidIds.length ? await sb.from("payment_events").select("order_id, received_at").eq("type", "payment.succeeded").in("order_id", paidIds) : { data: [] };
+  const paidAtBy = new Map<string, number>();
+  for (const e of evs ?? []) { const t = Date.parse(String(e.received_at)); const k = String(e.order_id); if (!paidAtBy.has(k) || t < paidAtBy.get(k)!) paidAtBy.set(k, t); }
   const pfIds = recent.filter((o) => o.printful_order_id).slice(0, 60);
   const toEstimate = recent.filter((o) => PAID.includes(String(o.status)) && !o.printful_order_id).slice(0, 25);
   const [pfOrders, estimates, auto] = await Promise.all([
@@ -116,6 +139,13 @@ export async function GET(req: Request) {
     if (o.status === "refund_pending") stage = "refund pending";
     if (o.status === "fulfilled") stage = "fulfilled";
     if (o.status === "shipped" || pfo?.status === "fulfilled") stage = "shipped";
+    // after paid: waiting for payout -> push to Printful -> at Printful
+    const tags = Array.isArray(o.tags) ? (o.tags as string[]) : [];
+    const paidAtMs = paidAtBy.get(o.id) ?? Date.parse(o.created_at);   // the webhook's arrival; the order time if that event is missing
+    const atPrintful = !!pfo && pfo.status !== "draft";
+    const ms = b.outcome === "paid" ? moneyState(paidAtMs, tags, now) : null;
+    if (stage === "paid" && ms) stage = atPrintful ? "at printful" : ms.ready ? "push to printful" : "waiting for payout";
+    const daysWaiting = b.outcome === "paid" && !atPrintful && !["fulfilled", "shipped"].includes(String(o.status)) ? Math.floor((now - paidAtMs) / 864e5) : null;
 
     // money (paid orders only): what Yoco captured in rand, its fee (est.), what Printful costs, what is left
     let money = null as null | Record<string, unknown>;
@@ -140,8 +170,10 @@ export async function GET(req: Request) {
     if (stage === "declined" && !retriedPaid && ageMs < 7 * 864e5) needs.push({ what: "Declined at Yoco. Check the order in admin and reach out to the buyer, or give them a moment to retry with another card." });
     if (stage === "cancelled" && !retriedPaid && ageMs < 7 * 864e5) needs.push({ what: "Left at the payment page. Follow up from admin, or let the checkout reminder email do it if it's on." });
     if (stage === "abandoned" && !retriedPaid && ageMs < 7 * 864e5) needs.push({ what: "Abandoned before paying. Follow up from admin, or let the checkout reminder email do it if it's on." });
-    if (b.outcome === "paid" && !o.printful_order_id && !["fulfilled", "shipped"].includes(String(o.status))) needs.push({ what: "Place in Printful: this paid order has not been sent for printing.", act: "printful-draft" });
-    if (pfo?.status === "draft") needs.push({ what: "Printful draft waiting. Confirm at Printful to print and ship it (Printful charges its billing method then).", act: "printful-confirm" });
+    // money first: nothing to do while the payout is on its way; once it's in, push to Printful
+    if (stage === "push to printful" && !o.printful_order_id) needs.push({ what: `Money is in${ms?.cleared ? "" : " (likely: 2 business days since payment)"}. Push it to Printful: make the draft, then confirm it.`, act: "printful-draft" });
+    if (stage === "push to printful" && pfo?.status === "draft") needs.push({ what: `Money is in${ms?.cleared ? "" : " (likely: 2 business days since payment)"}. Confirm the Printful draft to print and ship (Printful charges its billing method then).`, act: "printful-confirm" });
+    if (daysWaiting != null && daysWaiting > 5) needs.push({ what: `Paid ${daysWaiting} days ago and still not at Printful. Check the payout and push it.` });
     if (pfo && ["failed", "onhold", "canceled", "partial"].includes(pfo.status) && b.outcome === "paid") needs.push({ what: `Printful says this order is ${pfo.status === "onhold" ? "on hold" : pfo.status}. Open it in Printful and sort it out.` });
     if (o.printful_order_id && !pfo) needs.push({ what: "Could not read the Printful order. Check it in Printful." });
     if (pfo?.status === "pending" && pfo.updated && now - pfo.updated * 1000 > 3 * 864e5) needs.push({ what: "At Printful for 3+ days and not printing yet. Check it in Printful." });
@@ -150,6 +182,7 @@ export async function GET(req: Request) {
     if (o.status === "refund_pending" && ageMs > 864e5) needs.push({ what: "Refund requested, Yoco hasn't confirmed it yet. Check it in the Yoco portal." });
 
     return { ...b, number: numberOf.get(o.id) ?? null, stage, retriedPaid, admin,
+      paidAt: b.outcome === "paid" ? new Date(paidAtMs).toISOString() : null, payout: ms, daysWaiting,
       printful: o.printful_order_id ? { id: String(o.printful_order_id), status: pfo?.status ?? null, shipments: pfo?.shipments ?? 0 } : null,
       money, needs };
   });
@@ -166,7 +199,25 @@ export async function POST(req: Request) {
   const id = String(b.id ?? "");
   const sb = supabaseAdmin();
   if (b.action === "printful-draft") return NextResponse.json(await createPrintfulDraft(id));
-  if (b.action === "printful-confirm") return NextResponse.json(await confirmPrintfulDraft(id));
+  if (b.action === "printful-confirm") {
+    // money first, enforced here too: no Printful charge before the payout is (likely) in or Hannes ticked it cleared
+    const { data: o } = await sb.from("orders").select("id, created_at, tags").eq("id", id).maybeSingle();
+    if (!o) return NextResponse.json({ ok: false, error: "order not found" });
+    const { data: ev } = await sb.from("payment_events").select("received_at").eq("type", "payment.succeeded").eq("order_id", id).order("received_at").limit(1).maybeSingle();
+    const ms = moneyState(Date.parse(String(ev?.received_at ?? o.created_at)), Array.isArray(o.tags) ? (o.tags as string[]) : []);
+    if (!ms.ready) return NextResponse.json({ ok: false, error: "Money first: the payout is likely in by " + new Date(ms.payoutLikelyBy).toLocaleDateString("en-ZA") + ". Tick Money cleared if it's already in." });
+    return NextResponse.json(await confirmPrintfulDraft(id));
+  }
+  if (b.action === "money-cleared") {
+    const { data: o } = await sb.from("orders").select("id, status, tags").eq("id", id).maybeSingle();
+    if (!o) return NextResponse.json({ ok: false, error: "order not found" });
+    if (!PAID.includes(String(o.status))) return NextResponse.json({ ok: false, error: `only a paid order (this one is ${o.status})` });
+    const tags = (Array.isArray(o.tags) ? (o.tags as string[]) : []).filter((t) => t !== CLEARED_TAG);
+    if (b.cleared !== false) tags.push(CLEARED_TAG);
+    await sb.from("orders").update({ tags }).eq("id", id);
+    await sb.from("audit_log").insert({ actor: "agent", action: "order.money_cleared", entity: "order", entity_id: id, detail: { cleared: b.cleared !== false, via: "burgerbot-hub" } });
+    return NextResponse.json({ ok: true, cleared: b.cleared !== false });
+  }
   if (b.action === "autodraft") {
     const enabled = b.enabled === true;
     await sb.from("app_settings").upsert({ key: "printful_autodraft", value: { enabled }, updated_at: new Date().toISOString() });
