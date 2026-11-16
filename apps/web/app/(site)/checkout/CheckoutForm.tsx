@@ -9,6 +9,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import { track } from "@/lib/track";
 import { isUS } from "@/lib/shipping";
 import { countryName } from "@/lib/currency";
+import { fulfilmentRegion } from "@/lib/region";
 import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 export interface ShippingTerms { flat: number; freeOver: number; freeOnlyUS: boolean }
@@ -17,7 +18,7 @@ export default function CheckoutForm({ terms, countries, defaultCountry, notice 
   terms: ShippingTerms;
   countries: string[];
   defaultCountry: string;
-  notice?: string;   // set when Yoco sent the buyer back declined or cancelled
+  notice?: { kind: "failed" | "cancelled"; text: string };   // set when Yoco sent the buyer back declined or cancelled
 }) {
   const { lines, total, count, clear } = useCart();
   const sym = lines[0]?.symbol ?? "$";
@@ -31,7 +32,7 @@ export default function CheckoutForm({ terms, countries, defaultCountry, notice 
   const toFree = freeEligible && shippingAmt > 0 ? terms.freeOver - sub : 0;
   const [discount, setDiscount] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(notice ?? "");
+  const [error, setError] = useState("");
   const [done, setDone] = useState<{ orderId: string; message?: string } | null>(null);
 
   useEffect(() => { if (lines.length > 0) track("begin_checkout", { value: total }); /* eslint-disable-next-line */ }, []);
@@ -92,6 +93,12 @@ export default function CheckoutForm({ terms, countries, defaultCountry, notice 
         <h1 style={{ fontFamily: METAL, fontSize: "clamp(36px,7vw,56px)", color: "#E8E2D5", margin: "0 0 6px" }}>Checkout</h1>
         <div style={{ fontFamily: MONO, fontSize: 10, color: "#8A847A", letterSpacing: "0.14em", marginBottom: 30 }}>{count} {count === 1 ? "ITEM" : "ITEMS"} IN YOUR BAG</div>
 
+        {notice && (
+          <div role="alert" style={{ margin: "18px 0 26px", padding: "14px 16px", borderRadius: 12, border: `1px solid ${notice.kind === "failed" ? "#C03A3A" : "#8A847A"}`, background: notice.kind === "failed" ? "rgba(192,58,58,0.10)" : "rgba(138,132,122,0.10)" }}>
+            <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.2em", color: notice.kind === "failed" ? "#E88A8A" : "#C3BDB1", marginBottom: 6 }}>{notice.kind === "failed" ? "[ PAYMENT DECLINED ]" : "[ PAYMENT CANCELLED ]"}</div>
+            <div style={{ fontFamily: BODY, fontSize: 14.5, color: "#E8E2D5", lineHeight: 1.55 }}>{notice.text}</div>
+          </div>
+        )}
         {lines.length === 0 ? (
           <div>
             <p style={{ fontFamily: BODY, fontSize: 15, color: "#9A948A" }}>Your bag is empty.</p>
@@ -154,6 +161,15 @@ export default function CheckoutForm({ terms, countries, defaultCountry, notice 
                 : <div style={{ fontFamily: MONO, fontSize: 9, color: "#8A847A", letterSpacing: "0.08em", marginTop: 8 }}>DISCOUNT APPLIED ON THE NEXT STEP</div>}
 
               {error && <p style={{ fontFamily: MONO, fontSize: 11, color: "#C03A3A", letterSpacing: "0.04em", marginTop: 14 }}>{error}</p>}
+
+              {(fulfilmentRegion(form.country) !== "ZA" || sym !== "R") && (
+                // Yoco charges in rand only. A foreign card often trips the bank's block on international charges (Nov 16:
+                // our first US buyer was declined twice), so say so before they pay, not after.
+                <div style={{ marginTop: 16, padding: "11px 13px", borderRadius: 10, border: `1px solid ${GOLD}33`, background: "rgba(201,169,97,0.06)", fontFamily: BODY, fontSize: 13, color: "#C3BDB1", lineHeight: 1.55 }}>
+                  <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.16em", color: GOLD }}>HEADS UP · </span>
+                  We&apos;re based in South Africa, so your card is charged in rand (ZAR). Some banks block international charges by default. If your card is declined, approve international or online purchases in your bank app and try again.
+                </div>
+              )}
 
               <button type="submit" disabled={busy} style={{ width: "100%", marginTop: 18, fontFamily: CINZEL, fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#1a1408", background: "linear-gradient(180deg, #f0d89a, #c9a961)", border: "none", borderRadius: 14, boxShadow: "0 8px 24px -6px rgba(201,169,97,0.5), inset 0 1px 0 rgba(255,255,255,0.45)", padding: "16px", cursor: busy ? "wait" : "pointer", opacity: busy ? 0.6 : 1 }}>
                 {busy ? "Placing order…" : `Place order · ${sym}${grandTotal.toFixed(2)}`}

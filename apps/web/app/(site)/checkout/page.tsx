@@ -17,8 +17,8 @@ import CheckoutForm from "./CheckoutForm";
 export const dynamic = "force-dynamic";
 
 const NOTICE = {
-  failed: "[ PAYMENT DECLINED ] Your card was not charged. Your bag is saved: try again, or use another card.",
-  cancelled: "[ PAYMENT CANCELLED ] Nothing was charged. Your bag is saved whenever you are ready.",
+  failed: "Your bank declined the payment. This usually happens with international cards: approve the charge in your bank app, then try again. Your cart is saved.",
+  cancelled: "Nothing was charged. Your cart is saved whenever you are ready.",
 };
 
 export default async function CheckoutPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -33,5 +33,5 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   const defaultCountry = ctx.currency === "ZAR" ? "ZA" : "US";
   const terms = shippingTerms(fulfilmentRegion(defaultCountry), ctx);
   const countries = [...COUNTRIES].sort((a, b) => countryName(a).localeCompare(countryName(b)));
-  return <CheckoutForm terms={terms} countries={countries} defaultCountry={defaultCountry} notice={kind ? NOTICE[kind] : undefined} />;
+  return <CheckoutForm terms={terms} countries={countries} defaultCountry={defaultCountry} notice={kind ? { kind, text: NOTICE[kind] } : undefined} />;
 }
