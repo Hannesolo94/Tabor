@@ -52,8 +52,10 @@ export const yocoProvider: PaymentProvider = {
       amount: cents,
       currency: "ZAR",
       successUrl: `${siteUrl()}/checkout/done?order=${order.id}`,
-      cancelUrl: `${siteUrl()}/checkout?cancelled=1`,
-      failureUrl: `${siteUrl()}/checkout?failed=1`,
+      // The order id rides along so the checkout page can mark the order
+      // (lib/checkout-return.ts): before Nov 16 a decline left no trace at all.
+      cancelUrl: `${siteUrl()}/checkout?cancelled=1&order=${order.id}`,
+      failureUrl: `${siteUrl()}/checkout?failed=1&order=${order.id}`,
       externalId: order.id,
       // The webhook has no checkout id, so this is the ONLY way back to the order.
       metadata: { orderId: order.id, email: order.email, displayCurrency: order.currency },

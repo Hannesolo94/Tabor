@@ -44,7 +44,7 @@ export default async function AdminOrders() {
                   <td style={td}><Link href={`/admin/orders/${o.id}`} style={{ color: "#E8E2D5", textDecoration: "none", fontFamily: MONO, fontSize: 12.5, fontWeight: 600 }}>{o.printful_order_id ? `#${o.printful_order_id}` : `#${o.id.slice(0, 8)}`}</Link></td>
                   <td style={{ ...td, fontFamily: MONO, fontSize: 11, color: "#9A948A" }}>{new Date(o.created_at).toLocaleDateString()}</td>
                   <td style={td}>{o.email ?? "guest"}</td>
-                  <td style={td}><span style={pill(paid(o.status), "")}>{paid(o.status) ? "PAID" : o.status === "refunded" ? "REFUNDED" : "PENDING"}</span></td>
+                  <td style={td}><span style={pill(paid(o.status), "")}>{paid(o.status) ? "PAID" : o.status === "refunded" ? "REFUNDED" : o.status === "payment_failed" ? "DECLINED" : "PENDING"}</span></td>
                   <td style={td}><span style={pill(fulfilled(o.status), "")}>{fulfilled(o.status) ? "FULFILLED" : "UNFULFILLED"}</span></td>
                   <td style={{ ...td, textAlign: "right", fontFamily: MONO, fontSize: 12 }}>{items.length}</td>
                   <td style={{ ...td, textAlign: "right", fontFamily: MONO, fontSize: 13, color: GOLD }}>{sym}{Number(o.total ?? 0).toFixed(2)}</td>

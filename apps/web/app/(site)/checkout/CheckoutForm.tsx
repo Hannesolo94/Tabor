@@ -13,10 +13,11 @@ import { GOLD, MONO, METAL, CINZEL, BODY } from "@/lib/ui";
 
 export interface ShippingTerms { flat: number; freeOver: number; freeOnlyUS: boolean }
 
-export default function CheckoutForm({ terms, countries, defaultCountry }: {
+export default function CheckoutForm({ terms, countries, defaultCountry, notice }: {
   terms: ShippingTerms;
   countries: string[];
   defaultCountry: string;
+  notice?: string;   // set when Yoco sent the buyer back declined or cancelled
 }) {
   const { lines, total, count, clear } = useCart();
   const sym = lines[0]?.symbol ?? "$";
@@ -30,7 +31,7 @@ export default function CheckoutForm({ terms, countries, defaultCountry }: {
   const toFree = freeEligible && shippingAmt > 0 ? terms.freeOver - sub : 0;
   const [discount, setDiscount] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(notice ?? "");
   const [done, setDone] = useState<{ orderId: string; message?: string } | null>(null);
 
   useEffect(() => { if (lines.length > 0) track("begin_checkout", { value: total }); /* eslint-disable-next-line */ }, []);
